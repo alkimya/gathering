@@ -6,6 +6,7 @@ __pycache__/
 .Python
 env/
 venv/
+.venv/
 ENV/
 env.bak/
 venv.bak/
@@ -16,6 +17,7 @@ htmlcov/
 *.egg-info/
 dist/
 build/
+.gitignore
 
 # IDE
 .vscode/
