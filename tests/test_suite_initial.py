@@ -6,6 +6,7 @@ Following TDD principles - tests written before implementation.
 import pytest
 from unittest.mock import Mock, patch
 from typing import List, Dict, Any
+import asyncio
 
 # These imports will fail until we implement the classes
 # This is intentional - TDD approach
@@ -86,7 +87,9 @@ class TestIAgent:
         # Assert
         assert isinstance(response, str)
         assert len(response) > 0
-        assert agent.memory.get_conversation_history()[-1]["role"] == "assistant"
+        # Fixed: Access Message attributes directly, not with []
+        history = agent.memory.get_conversation_history()
+        assert history[-1].role == "assistant"
 
     def test_agent_with_tools_execution(self):
         """Test agent executing tools when needed."""
@@ -176,9 +179,14 @@ class TestILLMProvider:
         messages = [{"role": "user", "content": "Write a short story"}]
 
         # Act
-        chunks = []
-        for chunk in provider.stream(messages):
-            chunks.append(chunk)
+        # Fixed: Properly handle async generator
+        async def collect_stream():
+            chunks = []
+            async for chunk in provider.stream(messages):
+                chunks.append(chunk)
+            return chunks
+
+        chunks = asyncio.run(collect_stream())
 
         # Assert
         assert len(chunks) > 1
@@ -227,9 +235,10 @@ class TestITool:
         result = calculator.execute("15 * 25 + 10")
 
         # Assert
-        assert result["success"] is True
-        assert result["output"] == 385
-        assert "error" not in result
+        # Fixed: Access ToolResult attributes directly
+        assert result.success is True
+        assert result.output == 385
+        assert result.error is None
 
     def test_tool_validation(self):
         """Test tool input validation."""
@@ -245,7 +254,8 @@ class TestITool:
 
         # Should succeed - read permission granted
         result = filesystem.execute({"action": "read", "path": "test.txt"})
-        assert result["success"] is True or "not found" in str(result.get("error", ""))
+        # Fixed: Access ToolResult attributes properly
+        assert result.success is True or (result.error is not None and "not found" in result.error)
 
     def test_tool_async_execution(self):
         """Test asynchronous tool execution."""
@@ -253,15 +263,14 @@ class TestITool:
         api_tool = ITool.from_config({"name": "api_caller", "type": "http", "timeout": 30})
 
         # Act
-        import asyncio
-
         async def test_async():
             result = await api_tool.execute_async({"url": "https://api.example.com/data", "method": "GET"})
             return result
 
         # Assert
         result = asyncio.run(test_async())
-        assert "success" in result
+        # Fixed: Check ToolResult attributes
+        assert hasattr(result, "success")
 
 
 class TestIPersonalityBlock:

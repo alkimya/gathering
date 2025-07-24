@@ -134,7 +134,9 @@ class MockLLMProvider(ILLMProvider):
 
     def get_max_tokens(self) -> int:
         model_limits = {"gpt-4": 8000, "claude-3": 100000, "llama2": 4000}
-        return model_limits.get(self.model, 4000)
+        # Fixed: Use str key instead of Any | None
+        model_name = str(self.model) if self.model else "default"
+        return model_limits.get(model_name, 4000)
 
 
 class CalculatorTool(ITool):
@@ -434,10 +436,10 @@ class BasicConversation(IConversation):
         with open(path, "w") as f:
             json.dump(self.get_history(), f, default=str)
 
-    @classmethod
-    def load(cls, path: str) -> "IConversation":
-        # Simplified for testing
+    # Fixed: Made this an instance method, not a class method
+    def load(self, path: str) -> None:
+        """Load conversation from file into current instance."""
         with open(path, "r") as f:
             data = json.load(f)
-        # Would need to reconstruct agents from data
-        return cls([])
+        # Clear current messages and replace with loaded data
+        self.messages = data

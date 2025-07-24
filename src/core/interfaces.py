@@ -333,7 +333,7 @@ class IConversation(ABC):
         pass
 
     @abstractmethod
-    def load(cls, path: str) -> "IConversation":
+    def load(self, path: str) -> None:
         """Load conversation from file."""
         pass
 
