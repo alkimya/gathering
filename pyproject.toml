@@ -2,7 +2,7 @@
 name = "gathering"
 version = "0.1.0"
 description = "A collaborative multi-agent AI framework"
-authors = ["Your Name <your.email@example.com>"]
+authors = ["Loc Cosnier <loc.cosnier@pm.me>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
