@@ -20,7 +20,7 @@ line-length = 100
 target-version = ['py311']
 
 [tool.mypy]
-python_version = "3.11"
+python_version = "0.1.0"
 warn_return_any = true
 warn_unused_configs = true
 
