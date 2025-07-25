@@ -1,4 +1,4 @@
-# GatheRing 🤝
+# GatheRing ䷬
 
 A collaborative multi-agent AI framework built with Python, LangChain, and LangGraph.
 
