@@ -9,7 +9,7 @@ from typing import List, Dict, Any
 import asyncio
 
 # Import the implementations, not just interfaces
-from src.core.implementations import (
+from gathering.core.implementations import (
     BasicAgent as IAgent,  # Use implementation as interface for testing
     MockLLMProvider as ILLMProvider,
     CalculatorTool,
@@ -18,8 +18,8 @@ from src.core.implementations import (
     BasicMemory as IMemory,
     BasicConversation as IConversation,
 )
-from src.core.interfaces import ITool, ICompetency, Message, ToolResult  # Keep abstract for factory testing
-from src.core.exceptions import AgentError, LLMProviderError, ToolExecutionError, ConfigurationError
+from gathering.core.interfaces import ITool, ICompetency, Message, ToolResult  # Keep abstract for factory testing
+from gathering.core.exceptions import AgentError, LLMProviderError, ToolExecutionError, ConfigurationError
 
 
 class TestIAgent:

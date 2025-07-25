@@ -7,7 +7,7 @@ import tempfile
 import shutil
 from pathlib import Path
 
-from src.core.implementations import (
+from gathering.core.implementations import (
     BasicAgent,
     BasicMemory,
     MockLLMProvider,
