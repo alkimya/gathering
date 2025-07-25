@@ -9,7 +9,7 @@ from typing import List, Dict, Any, Optional, Union, AsyncGenerator
 from datetime import datetime
 import re
 
-from src.core.interfaces import (
+from core.interfaces import (
     IAgent,
     ILLMProvider,
     ITool,
@@ -21,7 +21,7 @@ from src.core.interfaces import (
     ToolResult,
     ToolPermission,
 )
-from src.core.exceptions import (
+from core.exceptions import (
     ConfigurationError,
     LLMProviderError,
     ToolExecutionError,

@@ -3,7 +3,7 @@ Core module for GatheRing framework.
 Contains all base interfaces and implementations.
 """
 
-from src.core.interfaces import (
+from core.interfaces import (
     IAgent,
     ILLMProvider,
     ITool,
@@ -18,7 +18,7 @@ from src.core.interfaces import (
     ToolPermission,
 )
 
-from src.core.exceptions import (
+from core.exceptions import (
     GatheringError,
     ConfigurationError,
     AgentError,
@@ -33,7 +33,7 @@ from src.core.exceptions import (
     ValidationError,
 )
 
-from src.core.implementations import (
+from core.implementations import (
     BasicAgent,
     BasicMemory,
     MockLLMProvider,
