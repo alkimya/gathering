@@ -11,7 +11,7 @@ from pathlib import Path
 # Add src to path for development
 sys.path.insert(0, str(Path(__file__).parent))
 
-from core.implementations import BasicAgent, BasicConversation, BasicPersonalityBlock, CalculatorTool
+from src.core.implementations import BasicAgent, BasicConversation, BasicPersonalityBlock, CalculatorTool
 
 
 def print_header(text):

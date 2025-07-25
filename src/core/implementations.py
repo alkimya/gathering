@@ -9,7 +9,7 @@ from typing import List, Dict, Any, Optional, Union, AsyncGenerator
 from datetime import datetime
 import re
 
-from core.interfaces import (
+from src.core.interfaces import (
     IAgent,
     ILLMProvider,
     ITool,
@@ -21,7 +21,7 @@ from core.interfaces import (
     ToolResult,
     ToolPermission,
 )
-from core.exceptions import (
+from src.core.exceptions import (
     ConfigurationError,
     LLMProviderError,
     ToolExecutionError,
@@ -152,7 +152,7 @@ class CalculatorTool(ITool):
                 # Simple expression evaluation
                 expression = input_data
                 # Security: only allow basic math operations
-                allowed_chars = "0123456789+-*/()., "
+                allowed_chars = "0123456789+-*/()., %"
                 if not all(c in allowed_chars for c in expression):
                     raise ValueError("Invalid characters in expression")
 
@@ -248,6 +248,33 @@ class FileSystemTool(ITool):
         }
 
 
+# Dummy tool for testing unknown types
+class DummyTool(ITool):
+    """Dummy tool for testing."""
+
+    @classmethod
+    def from_config(cls, config: Dict[str, Any]) -> "ITool":
+        return cls(config["name"], config.get("type", "dummy"), config)
+
+    def execute(self, input_data: Any) -> ToolResult:
+        return ToolResult(success=True, output="Dummy tool executed")
+
+    async def execute_async(self, input_data: Any) -> ToolResult:
+        return self.execute(input_data)
+
+    def validate_input(self, input_data: Any) -> bool:
+        return True
+
+    def is_available(self) -> bool:
+        return True
+
+    def get_description(self) -> str:
+        return "A dummy tool for testing"
+
+    def get_parameters_schema(self) -> Dict[str, Any]:
+        return {"type": "object", "properties": {}}
+
+
 class BasicPersonalityBlock(IPersonalityBlock):
     """Basic personality block implementation."""
 
@@ -284,6 +311,21 @@ class BasicPersonalityBlock(IPersonalityBlock):
         return response
 
 
+# Tool factory function
+def create_tool_from_string(tool_name: str) -> Optional[ITool]:
+    """Create a tool from a string name."""
+    tool_map = {
+        "calculator": lambda: CalculatorTool.from_config({"name": "calculator"}),
+        "filesystem": lambda: FileSystemTool.from_config({"name": "filesystem", "permissions": ["read", "write"]}),
+        "web_search": lambda: DummyTool.from_config({"name": "web_search", "type": "web_search"}),
+        "database": lambda: DummyTool.from_config({"name": "database", "type": "database"}),
+    }
+
+    if tool_name in tool_map:
+        return tool_map[tool_name]()
+    return None
+
+
 class BasicAgent(IAgent):
     """Basic agent implementation."""
 
@@ -292,6 +334,8 @@ class BasicAgent(IAgent):
         # Validate required fields
         if not config.get("name"):
             raise ConfigurationError("Agent name is required", field="name")
+        if config.get("name") == "":
+            raise ConfigurationError("Agent name cannot be empty", field="name")
         if not config.get("llm_provider"):
             raise ConfigurationError("LLM provider is required", field="llm_provider")
 
@@ -306,7 +350,27 @@ class BasicAgent(IAgent):
                 f"Invalid LLM provider: {config['llm_provider']}", field="llm_provider", value=config["llm_provider"]
             )
 
-        return cls(config)
+        # Create instance
+        instance = cls(config)
+
+        # Initialize tools from config
+        tool_names = config.get("tools", [])
+        for tool_name in tool_names:
+            tool = create_tool_from_string(tool_name)
+            if tool:
+                instance.add_tool(tool)
+
+        # Initialize personality blocks from config
+        personality_names = config.get("personality_blocks", [])
+        for block_name in personality_names:
+            block = BasicPersonalityBlock.from_config({"type": "trait", "name": block_name, "intensity": 0.7})
+            instance.add_personality_block(block)
+
+        # Initialize competencies from config (simplified for now)
+        competency_names = config.get("competencies", [])
+        # We'll just store the names for now as we don't have ICompetency implementation
+
+        return instance
 
     def _create_memory(self, config: Dict[str, Any]) -> IMemory:
         return BasicMemory()
