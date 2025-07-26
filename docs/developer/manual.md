@@ -18,29 +18,29 @@ This guide covers the technical aspects of developing with and extending the Gat
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                    Web Interface                         │
-│              (Flask → Django/React/Vue)                  │
+│                    Web Interface                        │
+│              (Flask → Django/React/Vue)                 │
 ├─────────────────────────────────────────────────────────┤
-│                    API Layer                             │
-│              (RESTful + WebSocket)                       │
+│                    API Layer                            │
+│              (RESTful + WebSocket)                      │
 ├─────────────────────────────────────────────────────────┤
-│                 Core Framework                           │
-│  ┌─────────────┐  ┌──────────────┐  ┌────────────────┐ │
-│  │Agent Manager│  │Tool Registry │  │  Conversation  │ │
-│  │             │  │              │  │    Manager     │ │
-│  └─────────────┘  └──────────────┘  └────────────────┘ │
+│                 Core Framework                          │
+│  ┌─────────────┐  ┌──────────────┐  ┌────────────────┐  │
+│  │Agent Manager│  │Tool Registry │  │  Conversation  │  │
+│  │             │  │              │  │    Manager     │  │
+│  └─────────────┘  └──────────────┘  └────────────────┘  │
 ├─────────────────────────────────────────────────────────┤
-│                  Agent Layer                             │
-│  ┌─────────────┐  ┌──────────────┐  ┌────────────────┐ │
-│  │ Personality │  │ Competencies │  │     Tools      │ │
-│  │   Blocks    │  │              │  │   Interface    │ │
-│  └─────────────┘  └──────────────┘  └────────────────┘ │
+│                  Agent Layer                            │
+│  ┌─────────────┐  ┌──────────────┐  ┌────────────────┐  │
+│  │ Personality │  │ Competencies │  │     Tools      │  │
+│  │   Blocks    │  │              │  │   Interface    │  │
+│  └─────────────┘  └──────────────┘  └────────────────┘  │
 ├─────────────────────────────────────────────────────────┤
-│                   LLM Layer                              │
-│  ┌─────────────┐  ┌──────────────┐  ┌────────────────┐ │
-│  │   OpenAI    │  │  Anthropic   │  │ Ollama (Local) │ │
-│  │   Mistral   │  │   Others     │  │                │ │
-│  └─────────────┘  └──────────────┘  └────────────────┘ │
+│                   LLM Layer                             │
+│  ┌─────────────┐  ┌──────────────┐  ┌────────────────┐  │
+│  │   OpenAI    │  │  Anthropic   │  │ Ollama (Local) │  │
+│  │   Mistral   │  │   Others     │  │                │  │
+│  └─────────────┘  └──────────────┘  └────────────────┘  │
 └─────────────────────────────────────────────────────────┘
 ```
 
@@ -48,7 +48,7 @@ This guide covers the technical aspects of developing with and extending the Gat
 
 ```
 GatheRing/
-├── src/
+├── gathering/
 │   ├── core/           # Core interfaces and base implementations
 │   ├── agents/         # Agent implementations
 │   ├── llm/            # LLM provider implementations
@@ -176,8 +176,8 @@ def from_config(cls, config: Dict[str, Any]) -> "IAgent":
 1. **Implement the interface:**
 
 ```python
-# src/llm/custom_provider.py
-from src.core.interfaces import ILLMProvider
+# gathering/llm/custom_provider.py
+from gathering.core.interfaces import ILLMProvider
 from typing import List, Dict, Any, AsyncGenerator
 
 class CustomLLMProvider(ILLMProvider):
@@ -218,7 +218,7 @@ class CustomLLMProvider(ILLMProvider):
 2. **Register the provider:**
 
 ```python
-# src/llm/registry.py
+# gathering/llm/registry.py
 PROVIDERS = {
     "openai": OpenAIProvider,
     "anthropic": AnthropicProvider,
@@ -242,8 +242,8 @@ def test_custom_provider_completion():
 1. **Implement ITool interface:**
 
 ```python
-# src/tools/web_search_tool.py
-from src.core.interfaces import ITool, ToolResult
+# gathering/tools/web_search_tool.py
+from gathering.core.interfaces import ITool, ToolResult
 import httpx
 
 class WebSearchTool(ITool):
@@ -309,7 +309,7 @@ class WebSearchTool(ITool):
 2. **Add to tool factory:**
 
 ```python
-# src/core/implementations.py
+# gathering/core/implementations.py
 def create_tool_from_string(tool_name: str) -> Optional[ITool]:
     tool_map = {
         "calculator": lambda: CalculatorTool.from_config({"name": "calculator"}),
@@ -322,7 +322,7 @@ def create_tool_from_string(tool_name: str) -> Optional[ITool]:
 ### Creating a New Personality Block
 
 ```python
-# src/agents/personalities/professional.py
+# gathering/agents/personalities/professional.py
 class ProfessionalPersonality(IPersonalityBlock):
     
     def get_prompt_modifiers(self) -> str:
@@ -445,7 +445,7 @@ Mock external services:
 ```python
 from unittest.mock import patch, Mock
 
-@patch('src.llm.openai_provider.OpenAI')
+@patch('gathering.llm.openai_provider.OpenAI')
 def test_openai_provider(mock_openai):
     mock_client = Mock()
     mock_openai.return_value = mock_client
@@ -504,19 +504,19 @@ def test_agent_response_time(benchmark):
 
    ```bash
    # Format code
-   black src tests
+   black gathering tests
    
    # Lint
-   flake8 src tests
+   flake8 gathering tests
    
    # Type check
-   mypy src
+   mypy gathering
    
    # Run all tests
    pytest
    
    # Check coverage
-   pytest --cov=src --cov-report=html
+   pytest --cov=gathering --cov-report=html
    ```
 
 5. **Commit with conventional commits:**
@@ -587,8 +587,8 @@ def test_agent_response_time(benchmark):
    from langchain import LLMChain
    
    # Local
-   from src.core import IAgent
-   from src.tools import CalculatorTool
+   from gathering.core import IAgent
+   from gathering.tools import CalculatorTool
    ```
 
 ### Pull Request Guidelines

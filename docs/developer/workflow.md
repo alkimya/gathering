@@ -60,7 +60,7 @@ pip install pytest-watch
 ptw tests/unit/test_current_feature.py
 
 # Check coverage for specific module
-pytest tests/unit/test_agents.py --cov=src.agents --cov-report=term-missing
+pytest tests/unit/test_agents.py --cov=gathering.agents --cov-report=term-missing
 
 # Run only marked tests
 pytest -m "not slow"  # Skip slow tests
@@ -71,11 +71,11 @@ pytest -m unit        # Only unit tests
 
 ```bash
 # Format code
-black src tests
+black gathering tests
 
 # Lint code
-flake8 src tests
-mypy src
+flake8 gathering tests
+mypy gathering
 
 # Run all tests with coverage
 pytest
@@ -140,7 +140,7 @@ Feature: Agent Conversation
 import pytest
 from pytest_bdd import scenarios, given, when, then
 
-from src.core import BasicAgent
+from gathering.core import BasicAgent
 
 scenarios('../features/agent_conversation.feature')
 
@@ -202,7 +202,7 @@ def test_agent_memory(configured_agent):
 ### 4. Mocking External Services
 
 ```python
-@patch('src.llm.openai_provider.OpenAI')
+@patch('gathering.llm.openai_provider.OpenAI')
 def test_agent_without_api_calls(mock_openai):
     """Mock external services for unit tests."""
     mock_openai.return_value.complete.return_value = {...}
@@ -296,7 +296,7 @@ jobs:
           pip install -r requirements.txt
       - name: Run tests
         run: |
-          pytest --cov=src --cov-report=xml
+          pytest --cov=gathering --cov-report=xml
       - name: Upload coverage
         uses: codecov/codecov-action@v3
 ```

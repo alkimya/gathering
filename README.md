@@ -35,14 +35,18 @@ python -m gathering.server
 
 ## Documentation
 
+- [Blueprint](docs/developer/blueprint.md)
 - [Installation Guide](docs/user/installation.md)
-- [User Manual](docs/user/manual.md)
+- [User Manual](docs/user/guide.md)
 - [API Reference](docs/api/reference.md)
-- [Development Guide](docs/technical/development.md)
+- [Development Guide](docs/developer/manual.md)
+- [Workflow](docs/developer/workflow.md)
+- [Next steps](docs/developer/next_steps.md)
 
 ## License
 
-[To be determined - focusing on open source]
+This project is licensed under the MIT License - see the [LICENSE](LICENSE)
+file for details.
 
 ## Contributing
 

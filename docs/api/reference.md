@@ -7,7 +7,7 @@
 The main interface for AI agents in the GatheRing framework.
 
 ```python
-from src.core import IAgent
+from gathering.core import IAgent
 
 agent = IAgent.from_config({
     "name": "Assistant",
@@ -74,7 +74,7 @@ Get history of tool usage.
 Interface for Language Model providers.
 
 ```python
-from src.core import ILLMProvider
+from gathering.core import ILLMProvider
 
 provider = ILLMProvider.create("openai", {
     "api_key": "your-api-key",
@@ -114,7 +114,7 @@ Stream completion from the LLM.
 Interface for external tools.
 
 ```python
-from src.core import CalculatorTool
+from gathering.core import CalculatorTool
 
 calculator = CalculatorTool.from_config({
     "name": "calculator",
@@ -171,7 +171,7 @@ class ToolResult:
 Modular personality components for agents.
 
 ```python
-from src.core import BasicPersonalityBlock
+from gathering.core import BasicPersonalityBlock
 
 curious = BasicPersonalityBlock.from_config({
     "type": "trait",
@@ -198,7 +198,7 @@ curious = BasicPersonalityBlock.from_config({
 Manages conversations between agents.
 
 ```python
-from src.core import BasicConversation
+from gathering.core import BasicConversation
 
 conversation = BasicConversation.create([agent1, agent2])
 conversation.add_message(agent1, "Hello!")
@@ -289,7 +289,7 @@ except ToolExecutionError as e:
 ### Creating a Research Assistant
 
 ```python
-from src.core import BasicAgent, CalculatorTool, FileSystemTool
+from gathering.core import BasicAgent, CalculatorTool, FileSystemTool
 
 # Create agent with tools and personality
 researcher = BasicAgent.from_config({
@@ -316,7 +316,7 @@ for usage in researcher.get_tool_usage_history():
 ### Multi-Agent Collaboration
 
 ```python
-from src.core import BasicAgent, BasicConversation
+from gathering.core import BasicAgent, BasicConversation
 
 # Create teacher and student agents
 teacher = BasicAgent.from_config({
@@ -354,7 +354,7 @@ responses = lesson.process_turn()
 ### Custom Tool Integration
 
 ```python
-from src.core import ITool, ToolResult
+from gathering.core import ITool, ToolResult
 from typing import Any
 
 class WeatherTool(ITool):

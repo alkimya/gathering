@@ -1,0 +1,7 @@
+sphinx>=7.0
+sphinx-rtd-theme>=2.0
+sphinx-copybutton>=0.5
+sphinx-autobuild>=2021.3
+myst-parser>=2.0
+sphinxcontrib-napoleon>=0.7
+linkify-it-py>=2.0

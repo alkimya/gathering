@@ -8,7 +8,7 @@ import sys
 import os
 from pathlib import Path
 
-# Add src to path for development
+# Add gathering to path for development
 sys.path.insert(0, str(Path(__file__).parent))
 
 from gathering.core.implementations import BasicAgent, BasicConversation, BasicPersonalityBlock, CalculatorTool
@@ -183,7 +183,7 @@ def main():
         print("✨ GatheRing is ready to use!")
         print("\nNext steps:")
         print("1. Run full test suite: pytest")
-        print("2. Check coverage: pytest --cov=src")
+        print("2. Check coverage: pytest --cov=gathering")
         print("3. Read the documentation: docs/")
         print("4. Start building your own agents!")
 

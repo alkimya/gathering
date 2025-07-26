@@ -13,7 +13,7 @@ testpaths = ["tests"]
 python_files = ["test_*.py", "*_test.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
-addopts = "--cov=src --cov-report=html --cov-report=term-missing"
+addopts = "--cov=gathering --cov-report=html --cov-report=term-missing"
 
 [tool.black]
 line-length = 100

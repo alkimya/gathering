@@ -47,7 +47,7 @@ Welcome to GatheRing, a collaborative multi-agent AI framework that enables you 
 Here's the simplest way to create and use an agent:
 
 ```python
-from src.core import BasicAgent
+from gathering.core import BasicAgent
 
 # Create a simple agent
 assistant = BasicAgent.from_config({
@@ -121,7 +121,7 @@ math_teacher = BasicAgent.from_config(teacher_config)
 Personality blocks are modular traits that influence how agents communicate:
 
 ```python
-from src.core import BasicPersonalityBlock
+from gathering.core import BasicPersonalityBlock
 
 # Create individual personality traits
 curious = BasicPersonalityBlock.from_config({
@@ -222,7 +222,7 @@ response = agent.process_message(
 ### Adding Tools to Existing Agents
 
 ```python
-from src.core import CalculatorTool
+from gathering.core import CalculatorTool
 
 # Create agent without tools
 agent = BasicAgent.from_config({
@@ -240,7 +240,7 @@ agent.add_tool(calculator)
 Control what tools can do:
 
 ```python
-from src.core import FileSystemTool
+from gathering.core import FileSystemTool
 
 # Read-only file access
 readonly_fs = FileSystemTool.from_config({
@@ -264,7 +264,7 @@ full_fs = FileSystemTool.from_config({
 Have multiple agents interact:
 
 ```python
-from src.core import BasicConversation
+from gathering.core import BasicConversation
 
 # Create agents
 interviewer = BasicAgent.from_config({
@@ -377,7 +377,7 @@ response = agent.process_message("What's my name?")
 Always handle potential errors:
 
 ```python
-from src.core.exceptions import ConfigurationError, LLMProviderError
+from gathering.core.exceptions import ConfigurationError, LLMProviderError
 
 try:
     agent = BasicAgent.from_config(config)

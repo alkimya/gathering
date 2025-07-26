@@ -38,7 +38,7 @@ Following TDD, implement these in order:
 
 #### a. Fix Import Errors
 
-- Create `src/core/implementations.py` (copy from artifact)
+- Create `gathering/core/implementations.py` (copy from artifact)
 - Ensure all imports resolve correctly
 
 #### b. Make Basic Tests Pass
@@ -49,11 +49,11 @@ Following TDD, implement these in order:
 
 ### 4. Implement Real LLM Providers
 
-#### OpenAI Provider (`src/llm/openai_provider.py`)
+#### OpenAI Provider (`gathering/llm/openai_provider.py`)
 
 ```python
 from langchain_openai import ChatOpenAI
-from src.core.interfaces import ILLMProvider
+from gathering.core.interfaces import ILLMProvider
 
 class OpenAIProvider(ILLMProvider):
     def __init__(self, config):
@@ -65,7 +65,7 @@ class OpenAIProvider(ILLMProvider):
     # ... implement interface methods
 ```
 
-#### Anthropic Provider (`src/llm/anthropic_provider.py`)
+#### Anthropic Provider (`gathering/llm/anthropic_provider.py`)
 
 ```python
 from langchain_anthropic import ChatAnthropic
@@ -98,9 +98,9 @@ from langchain_anthropic import ChatAnthropic
 ### 1. Flask Prototype
 
 ```python
-# src/web/app.py
+# gathering/web/app.py
 from flask import Flask, jsonify, request
-from src.core import BasicAgent
+from gathering.core import BasicAgent
 
 app = Flask(__name__)
 
@@ -139,7 +139,7 @@ def create_agent():
 
 - Aim for 100% coverage initially
 - Acceptable minimum: 90%
-- Check regularly: `pytest --cov=src --cov-report=html`
+- Check regularly: `pytest --cov=gathering --cov-report=html`
 
 ## Architecture Decisions to Make
 
