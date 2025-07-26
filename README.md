@@ -20,7 +20,7 @@ GatheRing is a highly customizable and modular framework for creating and managi
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/gathering.git
+git clone https://github.com/alkimya/gathering.git
 cd gathering
 
 # Install dependencies
