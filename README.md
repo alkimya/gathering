@@ -28,9 +28,6 @@ pip install -r requirements.txt
 
 # Run tests
 pytest
-
-# Start the development server
-python -m gathering.server
 ```
 
 ## Documentation
