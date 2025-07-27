@@ -484,6 +484,6 @@ Getting Help
 
 - **Discord**: Join our community server
 - **GitHub Issues**: Report bugs or request features
-- **Email**: core-team@gathering.ai
+- **Email**: gathering.ai@pm.me
 
 Thank you for contributing to GatheRing! 🎉
