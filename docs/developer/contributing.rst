@@ -20,7 +20,7 @@ Getting Started
 
    .. code-block:: bash
 
-      git clone https://github.com/yourusername/gathering.git
+      git clone https://github.com/alkimya/gathering.git
       cd gathering
 
 3. **Add upstream remote**:

@@ -77,7 +77,7 @@ GatheRing/
 1. **Clone and setup:**
 
    ```bash
-   git clone https://github.com/yourusername/gathering.git
+   git clone https://github.com/alkimya/gathering.git
    cd gathering
    git checkout develop  # Always work on develop branch
    ```

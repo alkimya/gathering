@@ -30,7 +30,7 @@ From Source (Recommended)
 .. code-block:: bash
 
    # Clone repository
-   git clone https://github.com/yourusername/gathering.git
+   git clone https://github.com/alkimya/gathering.git
    cd gathering
 
    # Create virtual environment

@@ -4,7 +4,7 @@ Welcome to GatheRing's Documentation
 ====================================
 
 .. image:: https://img.shields.io/badge/version-0.1.0-blue.svg
-   :target: https://github.com/yourusername/gathering
+   :target: https://github.com/alkimya/gathering
    :alt: Version
 
 .. image:: https://img.shields.io/badge/python-3.11+-blue.svg

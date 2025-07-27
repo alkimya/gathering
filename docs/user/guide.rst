@@ -17,7 +17,7 @@ Installation
 
    .. code-block:: bash
 
-      git clone https://github.com/yourusername/gathering.git
+      git clone https://github.com/alkimya/gathering.git
       cd gathering
 
 2. **Create a virtual environment:**

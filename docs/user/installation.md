@@ -17,7 +17,7 @@ This guide covers the installation process for GatheRing.
 
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/gathering.git
+git clone https://github.com/alkimya/gathering.git
 cd gathering
 
 # Create virtual environment

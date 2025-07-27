@@ -19,7 +19,7 @@ Welcome to GatheRing, a collaborative multi-agent AI framework that enables you 
 1. **Clone the repository:**
 
    ```bash
-   git clone https://github.com/yourusername/gathering.git
+   git clone https://github.com/alkimya/gathering.git
    cd gathering
    ```
 

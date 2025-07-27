@@ -35,7 +35,7 @@ We pledge to make participation in our project and our community a harassment-fr
 2. **Clone your fork** locally:
 
    ```bash
-   git clone https://github.com/your-username/gathering.git
+   git clone https://github.com/alkimya/gathering.git
    cd gathering
    ```
 
