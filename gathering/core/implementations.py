@@ -5,8 +5,11 @@ These will be refactored and enhanced in subsequent iterations.
 
 import json
 import asyncio
+import ast
+import operator
 from typing import List, Dict, Any, Optional, Union, AsyncGenerator
 from datetime import datetime
+from pathlib import Path
 import re
 
 from gathering.core.interfaces import (
@@ -139,110 +142,498 @@ class MockLLMProvider(ILLMProvider):
         return model_limits.get(model_name, 4000)
 
 
+class SafeExpressionEvaluator:
+    """
+    Safe mathematical expression evaluator using AST parsing.
+    Only allows basic arithmetic operations, no code execution.
+    """
+
+    # Supported operators
+    OPERATORS = {
+        ast.Add: operator.add,
+        ast.Sub: operator.sub,
+        ast.Mult: operator.mul,
+        ast.Div: operator.truediv,
+        ast.FloorDiv: operator.floordiv,
+        ast.Mod: operator.mod,
+        ast.Pow: operator.pow,
+        ast.USub: operator.neg,
+        ast.UAdd: operator.pos,
+    }
+
+    # Maximum allowed values to prevent resource exhaustion
+    MAX_VALUE = 10**100
+    MAX_POWER = 1000
+
+    @classmethod
+    def evaluate(cls, expression: str) -> float:
+        """
+        Safely evaluate a mathematical expression.
+
+        Args:
+            expression: A string containing a mathematical expression
+
+        Returns:
+            The result of the evaluation
+
+        Raises:
+            ValueError: If the expression is invalid or contains disallowed operations
+        """
+        if not expression or not isinstance(expression, str):
+            raise ValueError("Expression must be a non-empty string")
+
+        # Limit expression length to prevent DoS
+        if len(expression) > 1000:
+            raise ValueError("Expression too long (max 1000 characters)")
+
+        # Clean the expression
+        expression = expression.strip()
+
+        try:
+            tree = ast.parse(expression, mode="eval")
+        except SyntaxError as e:
+            raise ValueError(f"Invalid expression syntax: {e}")
+
+        return cls._evaluate_node(tree.body)
+
+    @classmethod
+    def _evaluate_node(cls, node: ast.AST) -> float:
+        """Recursively evaluate an AST node."""
+        if isinstance(node, ast.Constant):
+            # Python 3.8+ uses ast.Constant for numbers
+            if isinstance(node.value, (int, float)):
+                if abs(node.value) > cls.MAX_VALUE:
+                    raise ValueError(f"Number too large (max {cls.MAX_VALUE})")
+                return float(node.value)
+            raise ValueError(f"Unsupported constant type: {type(node.value).__name__}")
+
+        # Note: ast.Num is deprecated in Python 3.8+ in favor of ast.Constant
+        # We only handle ast.Constant above, which covers Python 3.8+
+
+        elif isinstance(node, ast.BinOp):
+            left = cls._evaluate_node(node.left)
+            right = cls._evaluate_node(node.right)
+
+            op_type = type(node.op)
+            if op_type not in cls.OPERATORS:
+                raise ValueError(f"Unsupported operator: {op_type.__name__}")
+
+            # Special check for power operations
+            if op_type == ast.Pow:
+                if abs(right) > cls.MAX_POWER:
+                    raise ValueError(f"Exponent too large (max {cls.MAX_POWER})")
+
+            # Special check for division by zero
+            if op_type in (ast.Div, ast.FloorDiv, ast.Mod) and right == 0:
+                raise ValueError("Division by zero")
+
+            result = cls.OPERATORS[op_type](left, right)
+
+            if abs(result) > cls.MAX_VALUE:
+                raise ValueError(f"Result too large (max {cls.MAX_VALUE})")
+
+            return result
+
+        elif isinstance(node, ast.UnaryOp):
+            operand = cls._evaluate_node(node.operand)
+            op_type = type(node.op)
+
+            if op_type not in cls.OPERATORS:
+                raise ValueError(f"Unsupported unary operator: {op_type.__name__}")
+
+            return cls.OPERATORS[op_type](operand)
+
+        elif isinstance(node, ast.Expression):
+            return cls._evaluate_node(node.body)
+
+        else:
+            raise ValueError(f"Unsupported expression type: {type(node).__name__}")
+
+
 class CalculatorTool(ITool):
-    """Simple calculator tool implementation."""
+    """
+    Secure calculator tool implementation.
+    Uses AST-based evaluation instead of eval() to prevent code injection.
+    """
 
     @classmethod
     def from_config(cls, config: Dict[str, Any]) -> "ITool":
         return cls(config["name"], config.get("type", "calculator"), config)
 
     def execute(self, input_data: Any) -> ToolResult:
+        """
+        Execute a mathematical calculation.
+
+        Supports:
+        - Basic arithmetic: +, -, *, /, //, %, **
+        - Parentheses for grouping
+        - Percentage expressions: "15% of 2500"
+        - Negative numbers
+
+        Args:
+            input_data: A string expression to evaluate
+
+        Returns:
+            ToolResult with the calculation result or error
+        """
+        if not isinstance(input_data, str):
+            return ToolResult(
+                success=False,
+                output=None,
+                error="Input must be a string expression",
+            )
+
         try:
-            if isinstance(input_data, str):
-                # Simple expression evaluation
-                expression = input_data
-                # Security: only allow basic math operations
-                allowed_chars = "0123456789+-*/()., %"
-                if not all(c in allowed_chars for c in expression):
-                    raise ValueError("Invalid characters in expression")
+            expression = input_data.strip()
 
-                # Handle percentage calculations
-                if "%" in expression:
-                    # Extract pattern like "15% of 2500"
-                    match = re.match(r"(\d+(?:\.\d+)?)\s*%\s*of\s*(\d+(?:\.\d+)?)", expression)
-                    if match:
-                        percent = float(match.group(1))
-                        value = float(match.group(2))
-                        result = (percent / 100) * value
-                    else:
-                        raise ValueError("Invalid percentage expression")
-                else:
-                    # Use eval safely for basic math
-                    result = eval(expression, {"__builtins__": {}}, {})
-
+            # Handle percentage expressions: "15% of 2500"
+            percentage_match = re.match(
+                r"^\s*(\d+(?:\.\d+)?)\s*%\s*of\s*(\d+(?:\.\d+)?)\s*$",
+                expression,
+                re.IGNORECASE,
+            )
+            if percentage_match:
+                percent = float(percentage_match.group(1))
+                value = float(percentage_match.group(2))
+                result = (percent / 100) * value
                 return ToolResult(success=True, output=result)
-            else:
-                return ToolResult(success=False, output=None, error="Input must be a string expression")
-        except Exception as e:
+
+            # Use safe AST-based evaluation
+            result = SafeExpressionEvaluator.evaluate(expression)
+            return ToolResult(success=True, output=result)
+
+        except ValueError as e:
             return ToolResult(success=False, output=None, error=str(e))
+        except (TypeError, AttributeError) as e:
+            return ToolResult(success=False, output=None, error=f"Invalid expression: {e}")
 
     async def execute_async(self, input_data: Any) -> ToolResult:
+        """Execute calculation asynchronously."""
         return self.execute(input_data)
 
     def validate_input(self, input_data: Any) -> bool:
-        return isinstance(input_data, str)
+        """Validate that input is a string."""
+        return isinstance(input_data, str) and len(input_data) <= 1000
 
     def is_available(self) -> bool:
+        """Calculator is always available."""
         return True
 
     def get_description(self) -> str:
-        return "A calculator for basic mathematical operations"
+        """Get tool description."""
+        return "A secure calculator for basic mathematical operations (+, -, *, /, //, %, **)"
 
     def get_parameters_schema(self) -> Dict[str, Any]:
+        """Get JSON schema for tool parameters."""
         return {
             "type": "object",
-            "properties": {"expression": {"type": "string", "description": "Mathematical expression to evaluate"}},
+            "properties": {
+                "expression": {
+                    "type": "string",
+                    "description": "Mathematical expression to evaluate (e.g., '2 + 2', '15% of 2500')",
+                    "maxLength": 1000,
+                }
+            },
             "required": ["expression"],
         }
 
 
+class PathTraversalError(Exception):
+    """Raised when a path traversal attack is detected."""
+
+    pass
+
+
 class FileSystemTool(ITool):
-    """Basic filesystem tool implementation."""
+    """
+    Secure filesystem tool implementation with path traversal protection.
+
+    All file operations are sandboxed to the configured base_path.
+    """
+
+    # Maximum file size in bytes (10 MB default)
+    MAX_FILE_SIZE = 10 * 1024 * 1024
+
+    # Allowed file extensions (if None, all are allowed)
+    ALLOWED_EXTENSIONS: Optional[set] = None
+
+    # Blocked file patterns
+    BLOCKED_PATTERNS = {
+        ".env",
+        ".git",
+        ".ssh",
+        "id_rsa",
+        "id_ed25519",
+        ".pem",
+        ".key",
+        "credentials",
+        "secrets",
+        "password",
+        ".htpasswd",
+        "shadow",
+        "passwd",
+    }
 
     @classmethod
     def from_config(cls, config: Dict[str, Any]) -> "ITool":
         return cls(config["name"], "filesystem", config)
 
+    def _get_base_path(self) -> Path:
+        """Get the sandboxed base path for file operations."""
+        base = self.config.get("base_path", "/tmp/gathering")
+        return Path(base).resolve()
+
+    def _validate_path(self, requested_path: str) -> Path:
+        """
+        Validate and resolve a path, ensuring it stays within the sandbox.
+
+        Args:
+            requested_path: The path requested by the user
+
+        Returns:
+            Resolved absolute path within the sandbox
+
+        Raises:
+            PathTraversalError: If the path attempts to escape the sandbox
+            ValueError: If the path contains blocked patterns
+        """
+        if not requested_path:
+            raise ValueError("Path cannot be empty")
+
+        # Normalize the path string
+        requested_path = requested_path.strip()
+
+        # Check for obviously malicious patterns
+        dangerous_patterns = ["..", "~", "${", "$(",  "%(", "`"]
+        for pattern in dangerous_patterns:
+            if pattern in requested_path:
+                raise PathTraversalError(
+                    f"Potentially dangerous pattern '{pattern}' detected in path"
+                )
+
+        # Check for blocked file patterns
+        path_lower = requested_path.lower()
+        for blocked in self.BLOCKED_PATTERNS:
+            if blocked in path_lower:
+                raise ValueError(f"Access to '{blocked}' files is not permitted")
+
+        base_path = self._get_base_path()
+
+        # Resolve the full path
+        if Path(requested_path).is_absolute():
+            # If absolute path, it must be within base_path
+            full_path = Path(requested_path).resolve()
+        else:
+            # Relative path - join with base_path
+            full_path = (base_path / requested_path).resolve()
+
+        # Critical security check: ensure path is within sandbox
+        try:
+            full_path.relative_to(base_path)
+        except ValueError:
+            raise PathTraversalError(
+                f"Path traversal detected: '{requested_path}' resolves outside sandbox"
+            )
+
+        return full_path
+
     def execute(self, input_data: Any) -> ToolResult:
+        """
+        Execute a filesystem operation.
+
+        Supported actions:
+        - read: Read file contents
+        - write: Write content to a file
+        - list: List directory contents
+        - exists: Check if path exists
+        - delete: Delete a file (requires DELETE permission)
+
+        Args:
+            input_data: Dict with 'action', 'path', and optionally 'content'
+
+        Returns:
+            ToolResult with operation outcome
+        """
         if not isinstance(input_data, dict):
-            return ToolResult(success=False, output=None, error="Input must be a dictionary")
+            return ToolResult(
+                success=False,
+                output=None,
+                error="Input must be a dictionary with 'action' and 'path'",
+            )
 
-        action = input_data.get("action")
+        action = input_data.get("action", "").lower()
+        requested_path = input_data.get("path", "")
 
-        # Check permissions
+        # Validate the path first
+        try:
+            safe_path = self._validate_path(requested_path)
+        except PathTraversalError as e:
+            raise ToolExecutionError(
+                str(e),
+                tool_name=self.name,
+                input_data=input_data,
+                error_type="path_traversal",
+            )
+        except ValueError as e:
+            return ToolResult(success=False, output=None, error=str(e))
+
+        # Permission checks
         if action == "write" and not self.has_permission(ToolPermission.WRITE):
-            raise ToolExecutionError("Write permission denied", tool_name=self.name, error_type="permission_denied")
+            raise ToolExecutionError(
+                "Write permission denied",
+                tool_name=self.name,
+                error_type="permission_denied",
+            )
 
-        if action == "read":
-            # Mock read operation
-            return ToolResult(success=True, output="File content here")
-        elif action == "write":
-            # Mock write operation
-            return ToolResult(success=True, output="File written successfully")
+        if action == "delete" and not self.has_permission(ToolPermission.DELETE):
+            raise ToolExecutionError(
+                "Delete permission denied",
+                tool_name=self.name,
+                error_type="permission_denied",
+            )
 
-        return ToolResult(success=False, output=None, error=f"Unknown action: {action}")
+        # Execute the action
+        try:
+            if action == "read":
+                return self._read_file(safe_path)
+            elif action == "write":
+                content = input_data.get("content", "")
+                return self._write_file(safe_path, content)
+            elif action == "list":
+                return self._list_directory(safe_path)
+            elif action == "exists":
+                return ToolResult(success=True, output=safe_path.exists())
+            elif action == "delete":
+                return self._delete_file(safe_path)
+            else:
+                return ToolResult(
+                    success=False,
+                    output=None,
+                    error=f"Unknown action: {action}. Supported: read, write, list, exists, delete",
+                )
+        except OSError as e:
+            return ToolResult(success=False, output=None, error=f"OS error: {e}")
+
+    def _read_file(self, path: Path) -> ToolResult:
+        """Read file contents safely."""
+        if not path.exists():
+            return ToolResult(success=False, output=None, error=f"File not found: {path.name}")
+
+        if not path.is_file():
+            return ToolResult(success=False, output=None, error="Path is not a file")
+
+        # Check file size
+        if path.stat().st_size > self.MAX_FILE_SIZE:
+            return ToolResult(
+                success=False,
+                output=None,
+                error=f"File too large (max {self.MAX_FILE_SIZE // 1024 // 1024} MB)",
+            )
+
+        try:
+            content = path.read_text(encoding="utf-8")
+            return ToolResult(success=True, output=content)
+        except UnicodeDecodeError:
+            return ToolResult(
+                success=False,
+                output=None,
+                error="Cannot read file: not a valid UTF-8 text file",
+            )
+
+    def _write_file(self, path: Path, content: str) -> ToolResult:
+        """Write content to file safely."""
+        # Check content size
+        if len(content.encode("utf-8")) > self.MAX_FILE_SIZE:
+            return ToolResult(
+                success=False,
+                output=None,
+                error=f"Content too large (max {self.MAX_FILE_SIZE // 1024 // 1024} MB)",
+            )
+
+        # Ensure parent directory exists
+        path.parent.mkdir(parents=True, exist_ok=True)
+
+        path.write_text(content, encoding="utf-8")
+        return ToolResult(success=True, output=f"File written: {path.name}")
+
+    def _list_directory(self, path: Path) -> ToolResult:
+        """List directory contents safely."""
+        if not path.exists():
+            return ToolResult(success=False, output=None, error=f"Directory not found: {path.name}")
+
+        if not path.is_dir():
+            return ToolResult(success=False, output=None, error="Path is not a directory")
+
+        entries = []
+        for entry in path.iterdir():
+            entries.append({
+                "name": entry.name,
+                "is_file": entry.is_file(),
+                "is_dir": entry.is_dir(),
+                "size": entry.stat().st_size if entry.is_file() else None,
+            })
+
+        return ToolResult(success=True, output=entries)
+
+    def _delete_file(self, path: Path) -> ToolResult:
+        """Delete a file safely."""
+        if not path.exists():
+            return ToolResult(success=False, output=None, error=f"File not found: {path.name}")
+
+        if not path.is_file():
+            return ToolResult(success=False, output=None, error="Can only delete files, not directories")
+
+        path.unlink()
+        return ToolResult(success=True, output=f"File deleted: {path.name}")
 
     async def execute_async(self, input_data: Any) -> ToolResult:
+        """Execute filesystem operation asynchronously."""
         return self.execute(input_data)
 
     def validate_input(self, input_data: Any) -> bool:
+        """Validate input data structure."""
         if not isinstance(input_data, dict):
             return False
-        return "action" in input_data
-
-    def is_available(self) -> bool:
+        if "action" not in input_data:
+            return False
+        if "path" not in input_data:
+            return False
+        if input_data["action"] == "write" and "content" not in input_data:
+            return False
         return True
 
+    def is_available(self) -> bool:
+        """Check if the filesystem tool is available."""
+        base_path = self._get_base_path()
+        # Ensure base path exists or can be created
+        try:
+            base_path.mkdir(parents=True, exist_ok=True)
+            return True
+        except OSError:
+            return False
+
     def get_description(self) -> str:
-        return "Tool for filesystem operations"
+        """Get tool description."""
+        return "Secure filesystem tool for reading, writing, and listing files within a sandboxed directory"
 
     def get_parameters_schema(self) -> Dict[str, Any]:
+        """Get JSON schema for tool parameters."""
         return {
             "type": "object",
             "properties": {
-                "action": {"type": "string", "enum": ["read", "write", "list"]},
-                "path": {"type": "string"},
-                "content": {"type": "string"},
+                "action": {
+                    "type": "string",
+                    "enum": ["read", "write", "list", "exists", "delete"],
+                    "description": "The filesystem action to perform",
+                },
+                "path": {
+                    "type": "string",
+                    "description": "Relative path within the sandbox directory",
+                },
+                "content": {
+                    "type": "string",
+                    "description": "Content to write (required for 'write' action)",
+                },
             },
             "required": ["action", "path"],
         }
@@ -327,10 +718,52 @@ def create_tool_from_string(tool_name: str) -> Optional[ITool]:
 
 
 class BasicAgent(IAgent):
-    """Basic agent implementation."""
+    """
+    Basic agent implementation with LLM provider injection.
+
+    Supports:
+    - Multiple LLM providers via factory pattern
+    - Competency-based task matching
+    - Personality-influenced responses
+    - Tool usage with proper tracking
+    - Both sync and async message processing
+    """
+
+    # Default provider factory - can be overridden for testing
+    _provider_factory = None
+
+    @classmethod
+    def set_provider_factory(cls, factory) -> None:
+        """Set the provider factory for dependency injection."""
+        cls._provider_factory = factory
 
     @classmethod
     def from_config(cls, config: Dict[str, Any]) -> "IAgent":
+        """
+        Create an agent from configuration.
+
+        Args:
+            config: Agent configuration dictionary
+
+        Required config keys:
+            - name: Agent name
+            - llm_provider: Provider name (openai, anthropic, ollama, mock)
+
+        Optional config keys:
+            - model: LLM model name
+            - api_key: API key for the provider
+            - age: Agent age
+            - history: Agent background
+            - tools: List of tool names
+            - personality_blocks: List of personality trait names
+            - competencies: List of competency names
+
+        Returns:
+            Configured BasicAgent instance
+
+        Raises:
+            ConfigurationError: If configuration is invalid
+        """
         # Validate required fields
         if not config.get("name"):
             raise ConfigurationError("Agent name is required", field="name")
@@ -343,11 +776,13 @@ class BasicAgent(IAgent):
         if age is not None and age < 0:
             raise ConfigurationError("Age must be non-negative", field="age", value=age)
 
-        # Validate provider
-        valid_providers = ["openai", "anthropic", "ollama"]
+        # Validate provider - now includes 'mock' for testing
+        valid_providers = ["openai", "anthropic", "ollama", "mock"]
         if config["llm_provider"] not in valid_providers:
             raise ConfigurationError(
-                f"Invalid LLM provider: {config['llm_provider']}", field="llm_provider", value=config["llm_provider"]
+                f"Invalid LLM provider: {config['llm_provider']}",
+                field="llm_provider",
+                value=config["llm_provider"],
             )
 
         # Create instance
@@ -363,59 +798,168 @@ class BasicAgent(IAgent):
         # Initialize personality blocks from config
         personality_names = config.get("personality_blocks", [])
         for block_name in personality_names:
-            block = BasicPersonalityBlock.from_config({"type": "trait", "name": block_name, "intensity": 0.7})
+            block = BasicPersonalityBlock.from_config({
+                "type": "trait",
+                "name": block_name,
+                "intensity": 0.7,
+            })
             instance.add_personality_block(block)
 
-        # Initialize competencies from config (simplified for now)
+        # Initialize competencies from config
         competency_names = config.get("competencies", [])
-        # We'll just store the names for now as we don't have ICompetency implementation
+        for comp_name in competency_names:
+            try:
+                from gathering.core.competencies import CompetencyRegistry
+                competency = CompetencyRegistry.create(comp_name)
+                instance.add_competency(competency)
+            except Exception:
+                # If competency module not available, skip
+                pass
 
         return instance
 
     def _create_memory(self, config: Dict[str, Any]) -> IMemory:
+        """Create memory system for the agent."""
         return BasicMemory()
 
     def _create_llm_provider(self, config: Dict[str, Any]) -> ILLMProvider:
-        provider_config = {"api_key": config.get("api_key", "test_key"), "model": config.get("model", "gpt-4")}
-        return MockLLMProvider.create(config["llm_provider"], provider_config)
+        """
+        Create LLM provider using factory pattern.
+
+        Uses the configured provider factory if set, otherwise falls back
+        to MockLLMProvider for backward compatibility.
+
+        For development/testing, always uses MockLLMProvider unless a real
+        API key is provided and the USE_REAL_LLM config is set.
+        """
+        provider_name = config.get("llm_provider", "mock")
+        api_key = config.get("api_key", "test_key")
+
+        provider_config = {
+            "api_key": api_key,
+            "model": config.get("model", "gpt-4"),
+            "temperature": config.get("temperature", 0.7),
+            "max_tokens": config.get("max_tokens"),
+            "rate_limit_per_minute": config.get("rate_limit_per_minute", 60),
+            "enable_cache": config.get("enable_cache", True),
+        }
+
+        # Use injected factory if available
+        if self._provider_factory:
+            return self._provider_factory.create(provider_name, provider_config)
+
+        # Check if we should use real providers
+        use_real_llm = config.get("use_real_llm", False)
+        is_test_key = api_key in ("test_key", "test-key", None, "")
+
+        # If it's a test key or not explicitly requesting real LLM, use mock
+        if is_test_key or not use_real_llm:
+            return MockLLMProvider.create(provider_name, provider_config)
+
+        # Try to use LLMProviderFactory for real providers
+        try:
+            from gathering.llm.providers import LLMProviderFactory
+            return LLMProviderFactory.create(provider_name, provider_config)
+        except (ImportError, Exception):
+            # Fall back to mock provider
+            return MockLLMProvider.create(provider_name, provider_config)
+
+    def _build_messages(self, user_message: str) -> List[Dict[str, str]]:
+        """Build the message list for the LLM, including system prompt."""
+        messages = []
+
+        # Add system prompt
+        system_prompt = self.get_system_prompt()
+        if system_prompt:
+            messages.append({"role": "system", "content": system_prompt})
+
+        # Add conversation history
+        history = self.memory.get_conversation_history()
+        for msg in history:
+            messages.append({"role": msg.role, "content": msg.content})
+
+        return messages
+
+    def _get_tool_schemas(self, message: str) -> Optional[List[Dict[str, Any]]]:
+        """Get tool schemas if tools might be needed for this message."""
+        if not self.tools:
+            return None
+
+        # Keywords that might indicate tool usage
+        tool_keywords = ["calculate", "compute", "save", "file", "read", "write", "search"]
+
+        if any(keyword in message.lower() for keyword in tool_keywords):
+            return [
+                {
+                    "name": tool.name,
+                    "description": tool.get_description(),
+                    "parameters": tool.get_parameters_schema(),
+                }
+                for tool in self.tools.values()
+            ]
+
+        return None
+
+    def _execute_tool_calls(self, tool_calls: List[Dict[str, Any]], original_message: str) -> List[ToolResult]:
+        """Execute tool calls and track usage."""
+        results = []
+
+        for tool_call in tool_calls:
+            tool_name = tool_call.get("name")
+            arguments = tool_call.get("arguments", {})
+
+            if tool_name in self.tools:
+                tool = self.tools[tool_name]
+                # Use arguments if provided, otherwise use message
+                input_data = arguments if arguments else original_message
+                result = tool.execute(input_data)
+                results.append(result)
+
+                # Track tool usage
+                self._tool_usage_history.append({
+                    "tool": tool_name,
+                    "input": input_data,
+                    "output": result.output,
+                    "success": result.success,
+                    "timestamp": datetime.now(),
+                })
+
+        return results
 
     def process_message(self, message: str, context: Optional[Dict[str, Any]] = None) -> str:
-        # Add message to memory
+        """
+        Process an incoming message and generate a response.
+
+        Args:
+            message: The user's message
+            context: Optional additional context
+
+        Returns:
+            The agent's response
+        """
+        # Add user message to memory
         self.memory.add_message(Message(role="user", content=message))
 
-        # Get conversation history
-        history = self.memory.get_conversation_history()
-        messages = [{"role": msg.role, "content": msg.content} for msg in history]
+        # Build messages for LLM
+        messages = self._build_messages(message)
 
-        # Check if tools might be needed
-        tool_schemas = None
-        if self.tools and any(keyword in message.lower() for keyword in ["calculate", "save", "file"]):
-            tool_schemas = [tool.get_parameters_schema() for tool in self.tools.values()]
+        # Get tool schemas if needed
+        tool_schemas = self._get_tool_schemas(message)
 
         # Get response from LLM
         response = self.llm_provider.complete(messages, tools=tool_schemas)
 
         # Handle tool calls if present
-        if "tool_calls" in response:
-            # Execute tools and get results
-            tool_results = []
-            for tool_call in response["tool_calls"]:
-                tool_name = tool_call["name"]
-                if tool_name == "calculator":
-                    tool = CalculatorTool.from_config({"name": "calculator"})
-                    result = tool.execute(message)  # Simplified for testing
-                    tool_results.append(result)
-                    self._tool_usage_history.append(
-                        {"tool": "calculator", "input": message, "output": result.output, "timestamp": datetime.now()}
-                    )
+        if "tool_calls" in response and response["tool_calls"]:
+            tool_results = self._execute_tool_calls(response["tool_calls"], message)
+            # Could add tool results to context for follow-up
 
-        # Generate final response
-        content = response.get("content", "I've processed your request.")
+        # Get content from response
+        content = response.get("content") or "I've processed your request."
 
-        # Apply personality modifiers
-        if self.personality_blocks:
-            system_prompt = self.get_system_prompt()
-            # In real implementation, would re-query LLM with personality context
+        # Apply personality influence if blocks are defined
+        for block in self.personality_blocks:
+            content = block.influence_response(content)
 
         # Add response to memory
         self.memory.add_message(Message(role="assistant", content=content))
@@ -423,7 +967,56 @@ class BasicAgent(IAgent):
         return content
 
     async def process_message_async(self, message: str, context: Optional[Dict[str, Any]] = None) -> str:
-        return self.process_message(message, context)
+        """
+        Process a message asynchronously.
+
+        Uses async LLM streaming when available for better responsiveness.
+
+        Args:
+            message: The user's message
+            context: Optional additional context
+
+        Returns:
+            The agent's response
+        """
+        # Add user message to memory
+        self.memory.add_message(Message(role="user", content=message))
+
+        # Build messages for LLM
+        messages = self._build_messages(message)
+
+        # Get tool schemas if needed
+        tool_schemas = self._get_tool_schemas(message)
+
+        # Try async completion if available
+        try:
+            # Collect streamed response
+            content_parts = []
+            async for chunk in self.llm_provider.stream(messages, tools=tool_schemas):
+                content_parts.append(chunk)
+
+            content = "".join(content_parts).strip()
+
+            if not content:
+                content = "I've processed your request."
+
+        except (NotImplementedError, AttributeError):
+            # Fall back to sync completion
+            response = self.llm_provider.complete(messages, tools=tool_schemas)
+            content = response.get("content") or "I've processed your request."
+
+            # Handle tool calls
+            if "tool_calls" in response and response["tool_calls"]:
+                self._execute_tool_calls(response["tool_calls"], message)
+
+        # Apply personality influence
+        for block in self.personality_blocks:
+            content = block.influence_response(content)
+
+        # Add response to memory
+        self.memory.add_message(Message(role="assistant", content=content))
+
+        return content
 
     def add_tool(self, tool: ITool) -> None:
         self.tools[tool.name] = tool

@@ -66,7 +66,7 @@ class TestIAgent:
         assert agent.history == "20 years of experience in marine biology"
         # With our updated implementation, these are now created
         assert len(agent.personality_blocks) == 3
-        assert len(agent.competencies) == 0  # Still 0 as we don't have ICompetency impl
+        assert len(agent.competencies) == 2  # Now we have ICompetency implementation
         assert len(agent.tools) == 2
 
     def test_agent_invalid_config_raises_error(self):

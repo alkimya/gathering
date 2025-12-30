@@ -1,0 +1,69 @@
+# =============================================================================
+# GatheRing Framework - Development Dependencies
+# =============================================================================
+# Install: pip install -r requirements-dev.txt
+# =============================================================================
+
+# Include base requirements
+-r requirements.txt
+
+# -----------------------------------------------------------------------------
+# Testing
+# -----------------------------------------------------------------------------
+
+pytest>=7.4
+pytest-cov>=4.1
+pytest-asyncio>=0.21
+pytest-mock>=3.12
+pytest-xdist>=3.5        # Parallel test execution
+hypothesis>=6.0          # Property-based testing
+
+# -----------------------------------------------------------------------------
+# Code Quality
+# -----------------------------------------------------------------------------
+
+# Formatting
+black>=23.0
+isort>=5.12
+
+# Linting
+flake8>=6.1
+flake8-bugbear>=23.0     # Additional checks
+ruff>=0.1.0              # Fast linter (alternative to flake8)
+
+# Type checking
+mypy>=1.0
+types-aiofiles>=23.0
+
+# -----------------------------------------------------------------------------
+# Security Analysis
+# -----------------------------------------------------------------------------
+
+bandit>=1.7              # Security linter
+safety>=2.3              # Dependency vulnerability checker
+pip-audit>=2.6           # Another dependency checker
+
+# -----------------------------------------------------------------------------
+# Pre-commit Hooks
+# -----------------------------------------------------------------------------
+
+pre-commit>=3.5
+
+# -----------------------------------------------------------------------------
+# Documentation
+# -----------------------------------------------------------------------------
+
+sphinx>=7.0
+sphinx-rtd-theme>=2.0
+sphinx-copybutton>=0.5
+myst-parser>=2.0
+mkdocs>=1.5
+mkdocs-material>=9.0
+
+# -----------------------------------------------------------------------------
+# Development Utilities
+# -----------------------------------------------------------------------------
+
+ipython>=8.0             # Better REPL
+ipdb>=0.13               # Debugger
+watchdog>=3.0            # File watching

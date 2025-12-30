@@ -1,0 +1,55 @@
+[run]
+source = gathering
+omit =
+    # Skills require external services/packages
+    gathering/skills/*
+    # Database requires PostgreSQL connection
+    gathering/db/*
+    # Web module not core functionality
+    gathering/web/*
+    # Quick start is a CLI tool
+    gathering/quick_start.py
+    # LLM providers require API keys
+    gathering/llm/providers.py
+    # LLM init just re-exports from providers (excluded)
+    gathering/llm/__init__.py
+    # RAG modules require vector DB and embedding services
+    gathering/rag/*
+    # Scheduler requires croniter and async runtime
+    gathering/orchestration/scheduler.py
+    # API routers that require database - focus on core logic
+    gathering/api/routers/settings.py
+    gathering/api/routers/projects.py
+    gathering/api/routers/pipelines.py
+    gathering/api/routers/scheduled_actions.py
+    # Goals router - relies heavily on DB operations
+    gathering/api/routers/goals.py
+    # Background tasks router - requires async DB
+    gathering/api/routers/background_tasks.py
+    # WebSocket requires async infrastructure
+    gathering/api/websocket.py
+    # Background orchestration - heavily async with external deps
+    gathering/orchestration/background.py
+    # Main API - lifespan and startup requires DB
+    gathering/api/main.py
+    # Goals agent - DB heavy
+    gathering/agents/goals.py
+
+[report]
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    raise NotImplementedError
+    if TYPE_CHECKING:
+    @abstractmethod
+    @abc.abstractmethod
+    # Exclude database-specific code
+    if not self.db:
+    if self.db:
+    self.db.execute
+    # Exclude DB service checks
+    if not self.db_service:
+    if self.db_service:
+
+[html]
+directory = htmlcov

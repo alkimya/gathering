@@ -1,8 +1,14 @@
 """
 Core module for GatheRing framework.
-Contains all base interfaces and implementations.
+Contains all base interfaces, implementations, and utilities.
+
+Usage:
+    from gathering.core import BasicAgent, CalculatorTool
+    from gathering.core.config import get_settings
+    from gathering.core.schemas import AgentConfig
 """
 
+# Interfaces
 from gathering.core.interfaces import (
     IAgent,
     ILLMProvider,
@@ -18,21 +24,27 @@ from gathering.core.interfaces import (
     ToolPermission,
 )
 
+# Exceptions
 from gathering.core.exceptions import (
     GatheringError,
     ConfigurationError,
     AgentError,
     LLMProviderError,
     ToolExecutionError,
-    PermissionError,
-    MemoryError,
+    ToolPermissionError,
+    SecurityError,
+    MemoryOperationError,
     PersonalityError,
     CompetencyError,
     ConversationError,
     RegistryError,
     ValidationError,
+    # Backward compatibility aliases
+    PermissionError,
+    MemoryError,
 )
 
+# Implementations
 from gathering.core.implementations import (
     BasicAgent,
     BasicMemory,
@@ -41,10 +53,14 @@ from gathering.core.implementations import (
     BasicConversation,
     CalculatorTool,
     FileSystemTool,
+    SafeExpressionEvaluator,
+    PathTraversalError,
 )
 
 __all__ = [
-    # Interfaces
+    # ==========================================================================
+    # Interfaces (Abstract Base Classes)
+    # ==========================================================================
     "IAgent",
     "ILLMProvider",
     "ITool",
@@ -54,29 +70,44 @@ __all__ = [
     "IConversation",
     "IAgentManager",
     "IToolRegistry",
-    # Data classes
+    # ==========================================================================
+    # Data Classes
+    # ==========================================================================
     "Message",
     "ToolResult",
     "ToolPermission",
+    # ==========================================================================
     # Exceptions
+    # ==========================================================================
     "GatheringError",
     "ConfigurationError",
     "AgentError",
     "LLMProviderError",
     "ToolExecutionError",
-    "PermissionError",
-    "MemoryError",
+    "ToolPermissionError",
+    "SecurityError",
+    "MemoryOperationError",
     "PersonalityError",
     "CompetencyError",
     "ConversationError",
     "RegistryError",
     "ValidationError",
-    # Basic implementations
+    # Backward compatibility
+    "PermissionError",
+    "MemoryError",
+    # ==========================================================================
+    # Basic Implementations
+    # ==========================================================================
     "BasicAgent",
     "BasicMemory",
     "MockLLMProvider",
     "BasicPersonalityBlock",
     "BasicConversation",
+    # ==========================================================================
+    # Tools
+    # ==========================================================================
     "CalculatorTool",
     "FileSystemTool",
+    "SafeExpressionEvaluator",
+    "PathTraversalError",
 ]
