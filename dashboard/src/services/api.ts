@@ -727,4 +727,79 @@ export const pipelines = {
     }),
 };
 
-export default { health, agents, circles, conversations, memories, providers, models, personas, backgroundTasks, scheduledActions, goals, settings, projects, pipelines };
+// Generic HTTP methods for workspace endpoints
+export const get = (path: string, options?: { params?: Record<string, any> }) => {
+  let fullPath = path;
+  if (options?.params) {
+    const params = new URLSearchParams();
+    Object.entries(options.params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        params.set(key, String(value));
+      }
+    });
+    const queryString = params.toString();
+    if (queryString) {
+      fullPath += `?${queryString}`;
+    }
+  }
+  return request(fullPath, { method: 'GET' }).then(data => ({ data }));
+};
+
+export const post = (path: string, data?: any, options?: { params?: Record<string, any> }) => {
+  let fullPath = path;
+  if (options?.params) {
+    const params = new URLSearchParams();
+    Object.entries(options.params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        params.set(key, String(value));
+      }
+    });
+    const queryString = params.toString();
+    if (queryString) {
+      fullPath += `?${queryString}`;
+    }
+  }
+  return request(fullPath, {
+    method: 'POST',
+    body: data ? JSON.stringify(data) : undefined,
+  }).then(data => ({ data }));
+};
+
+export const put = (path: string, data?: any, options?: { params?: Record<string, any> }) => {
+  let fullPath = path;
+  if (options?.params) {
+    const params = new URLSearchParams();
+    Object.entries(options.params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        params.set(key, String(value));
+      }
+    });
+    const queryString = params.toString();
+    if (queryString) {
+      fullPath += `?${queryString}`;
+    }
+  }
+  return request(fullPath, {
+    method: 'PUT',
+    body: data ? JSON.stringify(data) : undefined,
+  }).then(data => ({ data }));
+};
+
+export const del = (path: string, options?: { params?: Record<string, any> }) => {
+  let fullPath = path;
+  if (options?.params) {
+    const params = new URLSearchParams();
+    Object.entries(options.params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        params.set(key, String(value));
+      }
+    });
+    const queryString = params.toString();
+    if (queryString) {
+      fullPath += `?${queryString}`;
+    }
+  }
+  return request(fullPath, { method: 'DELETE' }).then(data => ({ data }));
+};
+
+export default { get, post, put, delete: del, health, agents, circles, conversations, memories, providers, models, personas, backgroundTasks, scheduledActions, goals, settings, projects, pipelines };

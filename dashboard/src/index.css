@@ -369,3 +369,38 @@ body {
   background: rgba(139, 92, 246, 0.3);
   color: var(--text-primary);
 }
+
+/* Custom scrollbar for workspace */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(139, 92, 246, 0.3);
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(139, 92, 246, 0.5);
+}
+
+/* Stat card styles for workspace stats */
+.stat-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  border-radius: 1rem;
+  transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+  border-color: rgba(139, 92, 246, 0.3);
+  box-shadow: 0 8px 32px rgba(139, 92, 246, 0.15);
+  transform: translateY(-2px);
+}

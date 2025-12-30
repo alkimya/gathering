@@ -24,6 +24,7 @@ from gathering.api.routers import (
     projects_router,
     pipelines_router,
     websocket_router,
+    workspace_router,
 )
 from gathering.api.middleware import (
     AuthenticationMiddleware,
@@ -190,6 +191,7 @@ def create_app(
     app.include_router(projects_router)
     app.include_router(pipelines_router)
     app.include_router(websocket_router)
+    app.include_router(workspace_router)
 
     # WebSocket endpoint
     if enable_websocket:

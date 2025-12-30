@@ -156,6 +156,13 @@ function ProjectCard({
             <RefreshCw className="w-4 h-4" />
           </button>
           <Link
+            to={`/workspace/${project.id}`}
+            className="p-2 text-zinc-400 hover:text-cyan-400 hover:bg-zinc-700 rounded-lg transition-colors"
+            title="Open Workspace"
+          >
+            <Code2 className="w-4 h-4" />
+          </Link>
+          <Link
             to={`/projects/${project.id}`}
             className="p-2 text-zinc-400 hover:text-purple-400 hover:bg-zinc-700 rounded-lg transition-colors"
             title="Project Dashboard"

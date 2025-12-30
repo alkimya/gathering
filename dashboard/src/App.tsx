@@ -24,6 +24,7 @@ import { Pipelines } from './pages/Pipelines';
 import { AgentDashboard } from './pages/AgentDashboard';
 import { Calendar } from './pages/Calendar';
 import { ProjectDetail } from './pages/ProjectDetail';
+import { Workspace } from './pages/Workspace';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -42,6 +43,10 @@ function App() {
       <ToastProvider>
         <BrowserRouter>
           <Routes>
+            {/* Workspace route outside Layout for full-screen experience */}
+            <Route path="/workspace/:projectId" element={<Workspace />} />
+
+            {/* All other routes use Layout */}
             <Route path="/" element={<Layout />}>
               <Route index element={<Dashboard />} />
               <Route path="activity" element={<Activity />} />

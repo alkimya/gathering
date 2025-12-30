@@ -15,6 +15,7 @@ import {
   Calendar,
   Zap,
   BarChart3,
+  Code2,
 } from 'lucide-react';
 
 // Types
@@ -271,7 +272,7 @@ function SprintBoard({ sprint }: { sprint: Sprint }) {
 }
 
 export function ProjectDetail() {
-  const { projectId: _projectId } = useParams<{ projectId: string }>();
+  const { projectId } = useParams<{ projectId: string }>();
   const [activeTab, setActiveTab] = useState<'overview' | 'sprint' | 'analytics'>('overview');
 
   // Demo data
@@ -313,6 +314,13 @@ export function ProjectDetail() {
         </div>
 
         <div className="flex items-center gap-3">
+          <Link
+            to={`/workspace/${projectId}`}
+            className="flex items-center gap-2 px-4 py-2 glass-card rounded-xl text-cyan-400 hover:text-cyan-300 transition-colors"
+          >
+            <Code2 className="w-4 h-4" />
+            <span className="text-sm font-medium">Open Workspace</span>
+          </Link>
           <span className="px-3 py-1 text-xs rounded-full bg-emerald-500/20 text-emerald-400">
             Active
           </span>
