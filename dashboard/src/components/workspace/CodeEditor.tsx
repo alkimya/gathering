@@ -224,12 +224,6 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
               bracketPairs: true,
               indentation: true,
             },
-            // Enable hover explicitly
-            hover: {
-              enabled: true,
-              delay: 300,
-              sticky: true,
-            },
             // Enable quick suggestions for better autocomplete
             quickSuggestions: {
               other: true,
