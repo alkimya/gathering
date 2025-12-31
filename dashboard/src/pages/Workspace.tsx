@@ -67,6 +67,7 @@ export function Workspace() {
   const [showFileExplorer, setShowFileExplorer] = useState(true);
   const [showActivityFeed, setShowActivityFeed] = useState(true);
   const [showGitView, setShowGitView] = useState(false);
+  const [gitViewMaximized, setGitViewMaximized] = useState(false);
   const [showTerminal, setShowTerminal] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -509,13 +510,21 @@ export function Workspace() {
           </div>
         )}
 
-        {/* Git View - Full height panel */}
+        {/* Git View - Full height panel (can be maximized) */}
         {showGitView && workspaceInfo?.is_git_repo && (
-          <div className="w-[600px] glass-card border-l border-white/5 flex flex-col">
+          <div
+            className={`glass-card border-l border-white/5 flex flex-col transition-all ${
+              gitViewMaximized
+                ? 'absolute inset-0 z-50 w-full'
+                : 'w-[600px]'
+            }`}
+          >
             <Suspense fallback={<ComponentLoader />}>
               <GitView
                 projectId={parseInt(projectId || '0')}
                 onClose={() => setShowGitView(false)}
+                onToggleMaximize={() => setGitViewMaximized(!gitViewMaximized)}
+                isMaximized={gitViewMaximized}
               />
             </Suspense>
           </div>

@@ -8,7 +8,7 @@
  */
 
 import { useState } from 'react';
-import { GitBranch, FileText, History, X } from 'lucide-react';
+import { GitBranch, FileText, History, X, Maximize2, Minimize2 } from 'lucide-react';
 import { GitTimeline } from './GitTimeline';
 import { GitCommitDetail } from './GitCommitDetail';
 import { GitStagingArea } from './GitStagingArea';
@@ -17,11 +17,13 @@ import { GitBranchManager } from './GitBranchManager';
 interface GitViewProps {
   projectId: number;
   onClose?: () => void;
+  onToggleMaximize?: () => void;
+  isMaximized?: boolean;
 }
 
 type TabType = 'timeline' | 'status' | 'branches';
 
-export function GitView({ projectId, onClose }: GitViewProps) {
+export function GitView({ projectId, onClose, onToggleMaximize, isMaximized = false }: GitViewProps) {
   const [activeTab, setActiveTab] = useState<TabType>('timeline');
   const [selectedCommit, setSelectedCommit] = useState<string | null>(null);
   const [selectedBranch, setSelectedBranch] = useState<string | null>(null);
@@ -57,15 +59,30 @@ export function GitView({ projectId, onClose }: GitViewProps) {
               </p>
             </div>
           </div>
-          {onClose && (
-            <button
-              onClick={onClose}
-              className="p-1.5 hover:bg-white/10 rounded transition-colors"
-              title="Close Git view"
-            >
-              <X className="w-4 h-4 text-zinc-400" />
-            </button>
-          )}
+          <div className="flex items-center gap-2">
+            {onToggleMaximize && (
+              <button
+                onClick={onToggleMaximize}
+                className="p-1.5 hover:bg-white/10 rounded transition-colors"
+                title={isMaximized ? "Restore" : "Maximize"}
+              >
+                {isMaximized ? (
+                  <Minimize2 className="w-4 h-4 text-zinc-400" />
+                ) : (
+                  <Maximize2 className="w-4 h-4 text-zinc-400" />
+                )}
+              </button>
+            )}
+            {onClose && (
+              <button
+                onClick={onClose}
+                className="p-1.5 hover:bg-white/10 rounded transition-colors"
+                title="Close Git view"
+              >
+                <X className="w-4 h-4 text-zinc-400" />
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
