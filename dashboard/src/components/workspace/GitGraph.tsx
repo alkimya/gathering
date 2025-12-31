@@ -108,25 +108,59 @@ export function GitGraph({ projectId, onCommitSelect }: GitGraphProps) {
     return 'text-zinc-400 bg-white/5 border-white/10';
   };
 
-  // Build graph structure (simplified version)
+  // Build graph structure with proper branching visualization
   const buildGraph = () => {
-    const graph: { commit: GraphCommit; column: number }[] = [];
-    const columns = new Map<string, number>();
+    interface GraphNode {
+      commit: GraphCommit;
+      column: number;
+      paths: { from: number; to: number; isMerge?: boolean }[];
+    }
+
+    const graph: GraphNode[] = [];
+    const commitColumns = new Map<string, number>();
+    const branchColumns = new Map<string, number>();
     let nextColumn = 0;
 
+    // First pass: assign columns based on branches
     commits.forEach((commit) => {
-      // Assign column based on parents
       let column = 0;
 
-      if (commit.parents.length > 0) {
-        const parentColumn = columns.get(commit.parents[0]);
+      // If commit has branches, use branch column
+      if (commit.branches.length > 0) {
+        const branchName = commit.branches[0];
+        if (!branchColumns.has(branchName)) {
+          branchColumns.set(branchName, nextColumn++);
+        }
+        column = branchColumns.get(branchName)!;
+      } else if (commit.parents.length > 0) {
+        // Use parent's column
+        const parentColumn = commitColumns.get(commit.parents[0]);
         column = parentColumn !== undefined ? parentColumn : nextColumn++;
       } else {
         column = nextColumn++;
       }
 
-      columns.set(commit.hash, column);
-      graph.push({ commit, column });
+      commitColumns.set(commit.hash, column);
+    });
+
+    // Second pass: build graph with paths
+    commits.forEach((commit) => {
+      const column = commitColumns.get(commit.hash) || 0;
+      const paths: { from: number; to: number; isMerge?: boolean }[] = [];
+
+      // Add paths to parents
+      commit.parents.forEach((parentHash, pIndex) => {
+        const parentColumn = commitColumns.get(parentHash);
+        if (parentColumn !== undefined) {
+          paths.push({
+            from: column,
+            to: parentColumn,
+            isMerge: commit.is_merge && pIndex > 0,
+          });
+        }
+      });
+
+      graph.push({ commit, column, paths });
     });
 
     return graph;
@@ -191,55 +225,95 @@ export function GitGraph({ projectId, onCommitSelect }: GitGraphProps) {
             <p className="text-zinc-500 text-sm">No commits found</p>
           </div>
         ) : (
-          <div className="space-y-0">
-            {graphData.map(({ commit, column }, index) => {
-              const prevCommit = index > 0 ? graphData[index - 1] : null;
-              const nextCommit = index < graphData.length - 1 ? graphData[index + 1] : null;
+          <div className="relative">
+            {graphData.map(({ commit, column, paths }, index) => {
+              const nextNode = index < graphData.length - 1 ? graphData[index + 1] : null;
+              const COLUMN_WIDTH = 24;
+              const ROW_HEIGHT = 80;
+              const NODE_SIZE = commit.is_merge ? 10 : 8;
 
               return (
                 <div
                   key={commit.hash}
-                  className={`relative flex items-start gap-3 pb-4 ${
-                    selectedCommit === commit.hash ? 'bg-cyan-500/5' : ''
+                  className={`relative flex items-start gap-3 ${
+                    selectedCommit === commit.hash ? 'bg-cyan-500/5 rounded-lg' : ''
                   }`}
+                  style={{ minHeight: `${ROW_HEIGHT}px` }}
                 >
-                  {/* Graph visualization */}
-                  <div className="flex-shrink-0 w-16 relative flex items-center justify-center">
-                    {/* Connecting line from previous */}
-                    {prevCommit && (
-                      <div
-                        className="absolute top-0 h-4 w-0.5 bg-cyan-500/30"
-                        style={{
-                          left: `${column * 16 + 8}px`,
-                        }}
+                  {/* SVG Graph visualization */}
+                  <svg
+                    className="flex-shrink-0"
+                    width={COLUMN_WIDTH * 6}
+                    height={ROW_HEIGHT}
+                    style={{ position: 'relative', top: 0 }}
+                  >
+                    {/* Draw paths to next commits */}
+                    {nextNode && (
+                      <line
+                        x1={column * COLUMN_WIDTH + COLUMN_WIDTH / 2}
+                        y1={NODE_SIZE}
+                        x2={nextNode.column * COLUMN_WIDTH + COLUMN_WIDTH / 2}
+                        y2={ROW_HEIGHT}
+                        stroke="rgba(34, 211, 238, 0.3)"
+                        strokeWidth="2"
                       />
                     )}
+
+                    {/* Draw merge paths (curved lines for merges) */}
+                    {paths.map((path, pIndex) => {
+                      const nextIndex = commits.findIndex(c => c.hash === commit.parents[pIndex]);
+                      if (nextIndex === -1) return null;
+
+                      const nextCommit = graphData[nextIndex];
+                      if (!nextCommit) return null;
+
+                      const startX = column * COLUMN_WIDTH + COLUMN_WIDTH / 2;
+                      const startY = NODE_SIZE;
+                      const endX = nextCommit.column * COLUMN_WIDTH + COLUMN_WIDTH / 2;
+                      const endY = (nextIndex - index) * ROW_HEIGHT;
+
+                      // Use curved path for branches/merges
+                      if (path.from !== path.to) {
+                        const controlY = endY / 2;
+                        const pathD = `M ${startX},${startY} C ${startX},${controlY} ${endX},${controlY} ${endX},${endY}`;
+
+                        return (
+                          <path
+                            key={pIndex}
+                            d={pathD}
+                            stroke={path.isMerge ? 'rgba(168, 85, 247, 0.5)' : 'rgba(34, 211, 238, 0.3)'}
+                            strokeWidth={path.isMerge ? '2.5' : '2'}
+                            fill="none"
+                            strokeDasharray={path.isMerge ? '4,2' : 'none'}
+                          />
+                        );
+                      }
+                      return null;
+                    })}
 
                     {/* Commit node */}
-                    <div
-                      className="relative z-10"
-                      style={{
-                        marginLeft: `${column * 16}px`,
-                      }}
-                    >
-                      {commit.is_merge ? (
-                        <div className="w-4 h-4 rounded-full bg-purple-500 border-2 border-purple-400 glow-purple" />
-                      ) : (
-                        <div className="w-3 h-3 rounded-full bg-cyan-500 border-2 border-cyan-400" />
-                      )}
-                    </div>
+                    <circle
+                      cx={column * COLUMN_WIDTH + COLUMN_WIDTH / 2}
+                      cy={NODE_SIZE}
+                      r={NODE_SIZE / 2}
+                      fill={commit.is_merge ? '#a855f7' : '#06b6d4'}
+                      stroke={commit.is_merge ? '#c084fc' : '#22d3ee'}
+                      strokeWidth="2"
+                      className={commit.is_merge ? 'drop-shadow-[0_0_4px_rgba(168,85,247,0.5)]' : ''}
+                    />
 
-                    {/* Connecting line to next */}
-                    {nextCommit && (
-                      <div
-                        className="absolute bottom-0 h-full w-0.5 bg-cyan-500/30"
-                        style={{
-                          left: `${column * 16 + 8}px`,
-                          top: '16px',
-                        }}
+                    {/* Branch label background */}
+                    {commit.branches.length > 0 && (
+                      <rect
+                        x={column * COLUMN_WIDTH + COLUMN_WIDTH / 2 + 12}
+                        y={NODE_SIZE - 8}
+                        width="60"
+                        height="16"
+                        fill="rgba(0,0,0,0.5)"
+                        rx="3"
                       />
                     )}
-                  </div>
+                  </svg>
 
                   {/* Commit info */}
                   <button
