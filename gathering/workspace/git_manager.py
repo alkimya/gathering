@@ -438,25 +438,45 @@ class GitManager:
                         behind = int(tracking_info.split("behind ")[1].split("]")[0])
 
             # Parse file statuses
+            # Porcelain format: XY filename
+            # X = status in index (staged)
+            # Y = status in working tree (unstaged)
             modified = []
             added = []
             deleted = []
             untracked = []
 
+            staged_modified = []
+            staged_added = []
+            staged_deleted = []
+
             for line in lines[1:]:
                 if not line.strip():
                     continue
 
-                status = line[:2]
+                index_status = line[0]  # First character: staged
+                worktree_status = line[1]  # Second character: unstaged
                 filepath = line[3:].strip()
 
-                if status == "??":
+                # Untracked files
+                if index_status == "?" and worktree_status == "?":
                     untracked.append(filepath)
-                elif "M" in status:
+                    continue
+
+                # Staged changes (index status)
+                if index_status == "M":
+                    staged_modified.append(filepath)
+                elif index_status == "A":
+                    staged_added.append(filepath)
+                elif index_status == "D":
+                    staged_deleted.append(filepath)
+
+                # Unstaged changes (worktree status)
+                if worktree_status == "M":
                     modified.append(filepath)
-                elif "A" in status:
+                elif worktree_status == "A":
                     added.append(filepath)
-                elif "D" in status:
+                elif worktree_status == "D":
                     deleted.append(filepath)
 
             return {
@@ -468,6 +488,11 @@ class GitManager:
                 "added": added,
                 "deleted": deleted,
                 "untracked": untracked,
+                "staged": {
+                    "modified": staged_modified,
+                    "added": staged_added,
+                    "deleted": staged_deleted,
+                },
                 "clean": len(modified) + len(added) + len(deleted) + len(untracked) == 0,
             }
 
@@ -575,4 +600,254 @@ class GitManager:
             return {"error": str(e.stderr)}
         except Exception as e:
             logger.error(f"Error getting git graph: {e}")
+            return {"error": str(e)}
+
+    @classmethod
+    def stage_files(cls, project_path: str, files: List[str]) -> Dict[str, Any]:
+        """
+        Stage files for commit.
+
+        Args:
+            project_path: Path to project.
+            files: List of file paths to stage.
+
+        Returns:
+            Status information or error.
+        """
+        if not cls.is_git_repo(project_path):
+            return {"error": "Not a git repository"}
+
+        try:
+            # Stage each file
+            for file_path in files:
+                result = subprocess.run(
+                    ["git", "add", file_path],
+                    cwd=project_path,
+                    capture_output=True,
+                    text=True,
+                    timeout=5,
+                )
+
+                if result.returncode != 0:
+                    logger.error(f"Failed to stage {file_path}: {result.stderr}")
+                    return {"error": f"Failed to stage {file_path}: {result.stderr}"}
+
+            return {"success": True, "files": files}
+
+        except Exception as e:
+            logger.error(f"Error staging files: {e}")
+            return {"error": str(e)}
+
+    @classmethod
+    def unstage_files(cls, project_path: str, files: List[str]) -> Dict[str, Any]:
+        """
+        Unstage files.
+
+        Args:
+            project_path: Path to project.
+            files: List of file paths to unstage.
+
+        Returns:
+            Status information or error.
+        """
+        if not cls.is_git_repo(project_path):
+            return {"error": "Not a git repository"}
+
+        try:
+            # Unstage each file
+            for file_path in files:
+                result = subprocess.run(
+                    ["git", "restore", "--staged", file_path],
+                    cwd=project_path,
+                    capture_output=True,
+                    text=True,
+                    timeout=5,
+                )
+
+                if result.returncode != 0:
+                    logger.error(f"Failed to unstage {file_path}: {result.stderr}")
+                    return {"error": f"Failed to unstage {file_path}: {result.stderr}"}
+
+            return {"success": True, "files": files}
+
+        except Exception as e:
+            logger.error(f"Error unstaging files: {e}")
+            return {"error": str(e)}
+
+    @classmethod
+    def commit(
+        cls,
+        project_path: str,
+        message: str,
+        author_name: Optional[str] = None,
+        author_email: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """
+        Create a commit.
+
+        Args:
+            project_path: Path to project.
+            message: Commit message.
+            author_name: Optional author name.
+            author_email: Optional author email.
+
+        Returns:
+            Commit information or error.
+        """
+        if not cls.is_git_repo(project_path):
+            return {"error": "Not a git repository"}
+
+        if not message or not message.strip():
+            return {"error": "Commit message is required"}
+
+        try:
+            cmd = ["git", "commit", "-m", message]
+
+            # Add author if provided
+            if author_name and author_email:
+                cmd.extend(["--author", f"{author_name} <{author_email}>"])
+
+            result = subprocess.run(
+                cmd,
+                cwd=project_path,
+                capture_output=True,
+                text=True,
+                timeout=10,
+            )
+
+            if result.returncode != 0:
+                logger.error(f"Commit failed: {result.stderr}")
+                return {"error": result.stderr}
+
+            # Extract commit hash from output
+            output = result.stdout
+            commit_hash = None
+            if output:
+                # Parse output like "[branch abc1234] message"
+                parts = output.split()
+                if len(parts) >= 2:
+                    commit_hash = parts[1].strip("[]")
+
+            return {
+                "success": True,
+                "message": message,
+                "hash": commit_hash,
+                "output": output,
+            }
+
+        except Exception as e:
+            logger.error(f"Error creating commit: {e}")
+            return {"error": str(e)}
+
+    @classmethod
+    def push(
+        cls,
+        project_path: str,
+        remote: str = "origin",
+        branch: Optional[str] = None,
+        set_upstream: bool = False,
+    ) -> Dict[str, Any]:
+        """
+        Push to remote repository.
+
+        Args:
+            project_path: Path to project.
+            remote: Remote name (default: origin).
+            branch: Branch name (None = current branch).
+            set_upstream: Set upstream tracking.
+
+        Returns:
+            Status information or error.
+        """
+        if not cls.is_git_repo(project_path):
+            return {"error": "Not a git repository"}
+
+        try:
+            cmd = ["git", "push"]
+
+            if set_upstream:
+                cmd.append("-u")
+
+            cmd.append(remote)
+
+            if branch:
+                cmd.append(branch)
+
+            result = subprocess.run(
+                cmd,
+                cwd=project_path,
+                capture_output=True,
+                text=True,
+                timeout=30,
+            )
+
+            if result.returncode != 0:
+                logger.error(f"Push failed: {result.stderr}")
+                return {"error": result.stderr}
+
+            return {
+                "success": True,
+                "remote": remote,
+                "branch": branch,
+                "output": result.stdout + result.stderr,
+            }
+
+        except subprocess.TimeoutExpired:
+            logger.error("Push timed out")
+            return {"error": "Push operation timed out"}
+        except Exception as e:
+            logger.error(f"Error pushing: {e}")
+            return {"error": str(e)}
+
+    @classmethod
+    def pull(
+        cls,
+        project_path: str,
+        remote: str = "origin",
+        branch: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """
+        Pull from remote repository.
+
+        Args:
+            project_path: Path to project.
+            remote: Remote name (default: origin).
+            branch: Branch name (None = current branch).
+
+        Returns:
+            Status information or error.
+        """
+        if not cls.is_git_repo(project_path):
+            return {"error": "Not a git repository"}
+
+        try:
+            cmd = ["git", "pull", remote]
+
+            if branch:
+                cmd.append(branch)
+
+            result = subprocess.run(
+                cmd,
+                cwd=project_path,
+                capture_output=True,
+                text=True,
+                timeout=30,
+            )
+
+            if result.returncode != 0:
+                logger.error(f"Pull failed: {result.stderr}")
+                return {"error": result.stderr}
+
+            return {
+                "success": True,
+                "remote": remote,
+                "branch": branch,
+                "output": result.stdout + result.stderr,
+            }
+
+        except subprocess.TimeoutExpired:
+            logger.error("Pull timed out")
+            return {"error": "Pull operation timed out"}
+        except Exception as e:
+            logger.error(f"Error pulling: {e}")
             return {"error": str(e)}

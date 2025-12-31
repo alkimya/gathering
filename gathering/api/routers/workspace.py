@@ -5,7 +5,7 @@ Provides endpoints for workspace management, file operations,
 git integration, and activity tracking.
 """
 
-from fastapi import APIRouter, HTTPException, Query, Depends
+from fastapi import APIRouter, HTTPException, Query, Body, Depends
 from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel
 from typing import List, Dict, Any, Optional
@@ -28,6 +28,7 @@ from gathering.cache import (
     cache_git_commits,
     get_cached_git_status,
     cache_git_status,
+    invalidate_workspace_cache,
 )
 
 logger = logging.getLogger(__name__)
@@ -375,6 +376,150 @@ async def get_file_history(
     try:
         history = GitManager.get_file_history(project_path, file_path, limit)
         return history
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/{project_id}/git/stage")
+async def stage_files(
+    project_id: int,
+    files: List[str] = Body(..., description="List of file paths to stage"),
+):
+    """Stage files for commit."""
+    project_path = get_project_path(project_id)
+
+    try:
+        if not GitManager.is_git_repo(project_path):
+            raise HTTPException(status_code=400, detail="Not a git repository")
+
+        result = GitManager.stage_files(project_path, files)
+
+        if "error" in result:
+            raise HTTPException(status_code=500, detail=result["error"])
+
+        # Invalidate status cache
+        invalidate_workspace_cache(project_id)
+
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/{project_id}/git/unstage")
+async def unstage_files(
+    project_id: int,
+    files: List[str] = Body(..., description="List of file paths to unstage"),
+):
+    """Unstage files."""
+    project_path = get_project_path(project_id)
+
+    try:
+        if not GitManager.is_git_repo(project_path):
+            raise HTTPException(status_code=400, detail="Not a git repository")
+
+        result = GitManager.unstage_files(project_path, files)
+
+        if "error" in result:
+            raise HTTPException(status_code=500, detail=result["error"])
+
+        # Invalidate status cache
+        invalidate_workspace_cache(project_id)
+
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/{project_id}/git/commit")
+async def create_commit(
+    project_id: int,
+    message: str = Body(..., description="Commit message"),
+    author_name: Optional[str] = Body(None, description="Author name"),
+    author_email: Optional[str] = Body(None, description="Author email"),
+):
+    """Create a commit."""
+    project_path = get_project_path(project_id)
+
+    try:
+        if not GitManager.is_git_repo(project_path):
+            raise HTTPException(status_code=400, detail="Not a git repository")
+
+        result = GitManager.commit(
+            project_path, message, author_name=author_name, author_email=author_email
+        )
+
+        if "error" in result:
+            raise HTTPException(status_code=500, detail=result["error"])
+
+        # Invalidate all git caches
+        invalidate_workspace_cache(project_id)
+
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/{project_id}/git/push")
+async def push_to_remote(
+    project_id: int,
+    remote: str = Body(default="origin", description="Remote name"),
+    branch: Optional[str] = Body(None, description="Branch name"),
+    set_upstream: bool = Body(default=False, description="Set upstream tracking"),
+):
+    """Push to remote repository."""
+    project_path = get_project_path(project_id)
+
+    try:
+        if not GitManager.is_git_repo(project_path):
+            raise HTTPException(status_code=400, detail="Not a git repository")
+
+        result = GitManager.push(
+            project_path, remote=remote, branch=branch, set_upstream=set_upstream
+        )
+
+        if "error" in result:
+            raise HTTPException(status_code=500, detail=result["error"])
+
+        # Invalidate status cache
+        invalidate_workspace_cache(project_id)
+
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/{project_id}/git/pull")
+async def pull_from_remote(
+    project_id: int,
+    remote: str = Body(default="origin", description="Remote name"),
+    branch: Optional[str] = Body(None, description="Branch name"),
+):
+    """Pull from remote repository."""
+    project_path = get_project_path(project_id)
+
+    try:
+        if not GitManager.is_git_repo(project_path):
+            raise HTTPException(status_code=400, detail="Not a git repository")
+
+        result = GitManager.pull(project_path, remote=remote, branch=branch)
+
+        if "error" in result:
+            raise HTTPException(status_code=500, detail=result["error"])
+
+        # Invalidate all git caches after pull
+        invalidate_workspace_cache(project_id)
+
+        return result
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
