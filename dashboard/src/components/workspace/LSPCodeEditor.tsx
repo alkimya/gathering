@@ -13,10 +13,196 @@ import { CodeEditor, type CodeEditorHandle } from './CodeEditor';
 import lspService from '../../services/lsp';
 import * as monaco from 'monaco-editor';
 
+// Global storage for provider disposables per language
+const providerDisposables = new Map<string, monaco.IDisposable[]>();
+const hoverDebounceTimers = new Map<string, number>();
+
 interface LSPCodeEditorProps {
   projectId: number;
   filePath: string | null;
   onContentChange?: (content: string) => void;
+}
+
+/**
+ * Register LSP providers for a language GLOBALLY before Monaco editor mounts.
+ * This function should be called from the beforeMount callback.
+ */
+export function registerLSPProviders(
+  monacoInstance: typeof monaco,
+  language: string,
+  projectId: number,
+  getCurrentFilePath: () => string | null
+) {
+  // Skip if already registered for this language
+  if (providerDisposables.has(language)) {
+    console.log(`[LSP] Providers already registered for ${language}`);
+    return;
+  }
+
+  console.log(`[LSP] Registering providers for ${language}`);
+
+  const disposables: monaco.IDisposable[] = [];
+
+  // Register Completion Provider
+  disposables.push(
+    monacoInstance.languages.registerCompletionItemProvider(language, {
+      triggerCharacters: ['.', ':', '<', '(', '['],
+      async provideCompletionItems(model, position) {
+        const filePath = getCurrentFilePath();
+        if (!filePath) return { suggestions: [] };
+
+        const content = model.getValue();
+        const line = position.lineNumber;
+        const character = position.column - 1;
+
+        try {
+          const completions = await lspService.getCompletions(
+            projectId,
+            language,
+            filePath,
+            line,
+            character,
+            content
+          );
+
+          return {
+            suggestions: completions.map(item => ({
+              label: item.label,
+              kind: item.kind as monaco.languages.CompletionItemKind,
+              insertText: item.insertText,
+              detail: item.detail,
+              documentation: item.documentation,
+              range: new monacoInstance.Range(
+                position.lineNumber,
+                position.column,
+                position.lineNumber,
+                position.column
+              )
+            }))
+          } as monaco.languages.CompletionList;
+        } catch (error) {
+          console.error('[LSP] Completion error:', error);
+          return { suggestions: [] };
+        }
+      }
+    })
+  );
+
+  // Register Hover Provider
+  disposables.push(
+    monacoInstance.languages.registerHoverProvider(language, {
+      provideHover(model, position) {
+        console.log(`[HOVER] Triggered for ${language} at line ${position.lineNumber}, col ${position.column}`);
+
+        const filePath = getCurrentFilePath();
+        if (!filePath) {
+          console.log('[HOVER] No file path available');
+          return null;
+        }
+
+        return new Promise<monaco.languages.Hover | null>((resolve) => {
+          // Debounce hover requests
+          const timerKey = `${language}-hover`;
+          const existingTimer = hoverDebounceTimers.get(timerKey);
+          if (existingTimer) {
+            clearTimeout(existingTimer);
+          }
+
+          const timer = window.setTimeout(async () => {
+            const content = model.getValue();
+            const line = position.lineNumber;
+            const character = position.column - 1;
+
+            console.log(`[HOVER] Requesting hover for ${filePath} at ${line}:${character}`);
+
+            try {
+              const hover = await lspService.getHover(
+                projectId,
+                language,
+                filePath,
+                line,
+                character,
+                content
+              );
+
+              console.log('[HOVER] Backend response:', hover);
+
+              if (hover?.contents?.value) {
+                const hoverContent = hover.contents.value;
+                console.log(`[HOVER] ✓ Displaying documentation (${hoverContent.length} chars)`);
+
+                resolve({
+                  contents: [
+                    {
+                      value: hoverContent,
+                      isTrusted: true,
+                      supportHtml: false
+                    }
+                  ]
+                } as monaco.languages.Hover);
+              } else {
+                console.log('[HOVER] No content in response');
+                resolve(null);
+              }
+            } catch (error) {
+              console.error('[HOVER] ❌ Error:', error);
+              resolve(null);
+            }
+
+            hoverDebounceTimers.delete(timerKey);
+          }, 200);
+
+          hoverDebounceTimers.set(timerKey, timer);
+        });
+      }
+    })
+  );
+
+  // Register Definition Provider
+  disposables.push(
+    monacoInstance.languages.registerDefinitionProvider(language, {
+      async provideDefinition(model, position) {
+        const filePath = getCurrentFilePath();
+        if (!filePath) return null;
+
+        const content = model.getValue();
+        const line = position.lineNumber;
+        const character = position.column - 1;
+
+        try {
+          const definition = await lspService.getDefinition(
+            projectId,
+            language,
+            filePath,
+            line,
+            character,
+            content
+          );
+
+          if (definition?.uri) {
+            const defFilePath = definition.uri.replace('file://', '');
+
+            return {
+              uri: monacoInstance.Uri.file(defFilePath),
+              range: {
+                startLineNumber: definition.range.start.line + 1,
+                startColumn: definition.range.start.character + 1,
+                endLineNumber: definition.range.end.line + 1,
+                endColumn: definition.range.end.character + 1
+              }
+            };
+          }
+        } catch (error) {
+          console.error('[LSP] Definition error:', error);
+        }
+
+        return null;
+      }
+    })
+  );
+
+  providerDisposables.set(language, disposables);
+  console.log(`✓ LSP providers registered for ${language}`);
 }
 
 export const LSPCodeEditor = React.forwardRef<CodeEditorHandle, LSPCodeEditorProps>(
@@ -25,7 +211,10 @@ export const LSPCodeEditor = React.forwardRef<CodeEditorHandle, LSPCodeEditorPro
   const [lspEnabled, setLspEnabled] = useState(false);
   const [language, setLanguage] = useState<string | null>(null);
   const debounceTimer = useRef<number | null>(null);
-  const hoverDebounceTimer = useRef<number | null>(null);
+  const currentFilePathRef = useRef<string | null>(null);
+
+  // Keep track of current file path for provider callbacks
+  currentFilePathRef.current = filePath;
 
   // Expose the editor instance to parent components
   useImperativeHandle(ref, () => ({
@@ -48,7 +237,7 @@ export const LSPCodeEditor = React.forwardRef<CodeEditorHandle, LSPCodeEditorPro
       return;
     }
 
-    // Initialize LSP server
+    // Initialize LSP server AND register providers globally
     const initLSP = async () => {
       try {
         await lspService.initialize(
@@ -56,6 +245,21 @@ export const LSPCodeEditor = React.forwardRef<CodeEditorHandle, LSPCodeEditorPro
           detectedLanguage,
           `/workspace/${projectId}`
         );
+
+        // Get Monaco instance from window (set by CodeEditor's beforeMount)
+        const monacoInstance = (window as any).__monaco;
+        if (monacoInstance) {
+          // Register providers globally for this language
+          registerLSPProviders(
+            monacoInstance,
+            detectedLanguage,
+            projectId,
+            () => currentFilePathRef.current
+          );
+        } else {
+          console.warn('[LSP] Monaco instance not available in window.__monaco');
+        }
+
         setLspEnabled(true);
         console.log(`✓ LSP enabled for ${detectedLanguage}`);
       } catch (error) {
@@ -72,154 +276,6 @@ export const LSPCodeEditor = React.forwardRef<CodeEditorHandle, LSPCodeEditorPro
 
     const editor = editorRef.current?.getEditor();
     if (!editor) return;
-
-    console.log('✓ Setting up LSP providers for', language, 'file:', filePath);
-
-    // Register Completion Provider
-    const completionDisposable = monaco.languages.registerCompletionItemProvider(
-      language,
-      {
-        triggerCharacters: ['.', ':', '<', '(', '['],
-        async provideCompletionItems(model, position) {
-          const content = model.getValue();
-          const line = position.lineNumber;
-          const character = position.column - 1;
-
-          try {
-            const completions = await lspService.getCompletions(
-              projectId,
-              language,
-              filePath,
-              line,
-              character,
-              content
-            );
-
-            return {
-              suggestions: completions.map(item => ({
-                label: item.label,
-                kind: item.kind as monaco.languages.CompletionItemKind,
-                insertText: item.insertText,
-                detail: item.detail,
-                documentation: item.documentation,
-                range: new monaco.Range(
-                  position.lineNumber,
-                  position.column,
-                  position.lineNumber,
-                  position.column
-                )
-              }))
-            } as monaco.languages.CompletionList;
-          } catch (error) {
-            console.error('Completion error:', error);
-            return { suggestions: [] };
-          }
-        }
-      }
-    );
-
-    // Register Hover Provider with debounce
-    const hoverDisposable = monaco.languages.registerHoverProvider(
-      language,
-      {
-        provideHover(model, position) {
-          console.log(`[HOVER] Triggered at line ${position.lineNumber}, col ${position.column}`);
-
-          // Return a promise that debounces the hover request
-          return new Promise<monaco.languages.Hover | null>((resolve) => {
-            if (hoverDebounceTimer.current) {
-              clearTimeout(hoverDebounceTimer.current);
-            }
-
-            hoverDebounceTimer.current = window.setTimeout(async () => {
-              const content = model.getValue();
-              const line = position.lineNumber;
-              const character = position.column - 1;
-
-              console.log(`[HOVER] Requesting hover for ${filePath} at ${line}:${character}`);
-
-              try {
-                const hover = await lspService.getHover(
-                  projectId,
-                  language,
-                  filePath,
-                  line,
-                  character,
-                  content
-                );
-
-                console.log('[HOVER] Backend response:', hover);
-
-                if (hover?.contents?.value) {
-                  const hoverContent = hover.contents.value;
-                  console.log('[HOVER] ✓ Displaying documentation (' + hoverContent.length + ' chars)');
-
-                  resolve({
-                    contents: [
-                      {
-                        value: hoverContent,
-                        isTrusted: true,
-                        supportHtml: false
-                      }
-                    ]
-                  } as monaco.languages.Hover);
-                } else {
-                  console.log('[HOVER] No content in response');
-                  resolve(null);
-                }
-              } catch (error) {
-                console.error('[HOVER] ❌ Error:', error);
-                resolve(null);
-              }
-            }, 200); // 200ms debounce for hover
-          });
-        }
-      }
-    );
-
-    console.log('✓ Hover provider registered for', language);
-
-    // Register Definition Provider
-    const definitionDisposable = monaco.languages.registerDefinitionProvider(
-      language,
-      {
-        async provideDefinition(model, position) {
-          const content = model.getValue();
-          const line = position.lineNumber;
-          const character = position.column - 1;
-
-          try {
-            const definition = await lspService.getDefinition(
-              projectId,
-              language,
-              filePath,
-              line,
-              character,
-              content
-            );
-
-            if (definition?.uri) {
-              // Parse file:// URI
-              const filePath = definition.uri.replace('file://', '');
-
-              return {
-                uri: monaco.Uri.file(filePath),
-                range: {
-                  startLineNumber: definition.range.start.line + 1,
-                  startColumn: definition.range.start.character + 1,
-                  endLineNumber: definition.range.end.line + 1,
-                  endColumn: definition.range.end.character + 1
-                }
-              };
-            }
-          } catch (error) {
-            console.error('Definition error:', error);
-          }
-
-          return null;
-        }
-      }
-    );
 
     // Update diagnostics on content change (debounced)
     const updateDiagnostics = async () => {
@@ -268,16 +324,10 @@ export const LSPCodeEditor = React.forwardRef<CodeEditorHandle, LSPCodeEditorPro
 
     // Cleanup
     return () => {
-      completionDisposable.dispose();
-      hoverDisposable.dispose();
-      definitionDisposable.dispose();
       changeDisposable.dispose();
 
       if (debounceTimer.current) {
         clearTimeout(debounceTimer.current);
-      }
-      if (hoverDebounceTimer.current) {
-        clearTimeout(hoverDebounceTimer.current);
       }
     };
   }, [lspEnabled, language, filePath, projectId]);

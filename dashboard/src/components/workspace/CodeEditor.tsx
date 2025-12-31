@@ -66,6 +66,15 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
     }
   };
 
+  const handleBeforeMount = (monaco: any) => {
+    // Monaco instance is available here BEFORE editor mounts
+    // This is where we should register language providers
+    // Store monaco reference for parent components
+    if (window) {
+      (window as any).__monaco = monaco;
+    }
+  };
+
   const handleEditorDidMount = (editor: any, monaco: any) => {
     editorRef.current = editor;
 
@@ -196,6 +205,7 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
           language={getLanguage(filePath)}
           value={currentValue}
           onChange={handleEditorChange}
+          beforeMount={handleBeforeMount}
           onMount={handleEditorDidMount}
           theme="vs-dark"
           options={{
