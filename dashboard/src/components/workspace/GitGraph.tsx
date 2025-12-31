@@ -127,10 +127,10 @@ export function GitGraph({ projectId, onCommitSelect }: GitGraphProps) {
       branchLanes.set(branch, index);
     });
 
-    // 4. Position commits horizontally by timestamp, vertically by branch
+    // 4. Position commits horizontally by index with smart spacing, vertically by branch
     interface LayoutCommit {
       commit: GraphCommit;
-      x: number; // horizontal position (time-based)
+      x: number; // horizontal position (index-based with spacing)
       lane: number; // vertical lane (branch)
       branch: string;
     }
@@ -138,19 +138,17 @@ export function GitGraph({ projectId, onCommitSelect }: GitGraphProps) {
     const layoutCommits: LayoutCommit[] = [];
     const commitPositions = new Map<string, { x: number; lane: number }>();
 
-    // Find time range
-    const timestamps = commits.map(c => c.timestamp);
-    const minTime = Math.min(...timestamps);
-    const maxTime = Math.max(...timestamps);
-    const timeRange = maxTime - minTime || 1;
+    // Sort commits by timestamp (oldest first)
+    const sortedCommits = [...commits].sort((a, b) => a.timestamp - b.timestamp);
 
-    commits.forEach((commit) => {
+    sortedCommits.forEach((commit, index) => {
       // Determine branch (use first branch if multiple)
       const branch = commit.branches.length > 0 ? commit.branches[0] : 'unknown';
       const lane = branchLanes.get(branch) ?? orderedBranches.length;
 
-      // Position x based on timestamp (0-100 scale)
-      const x = ((commit.timestamp - minTime) / timeRange) * 100;
+      // Position x based on index (evenly spaced)
+      // Use index instead of timestamp to ensure all commits are visible
+      const x = (index / Math.max(sortedCommits.length - 1, 1)) * 100;
 
       layoutCommits.push({ commit, x, lane, branch });
       commitPositions.set(commit.hash, { x, lane });

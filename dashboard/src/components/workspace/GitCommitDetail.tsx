@@ -67,14 +67,18 @@ export function GitCommitDetail({ projectId, commitHash }: GitCommitDetailProps)
       setLoading(true);
       setError(null);
 
-      // Fetch single commit with details
+      // Fetch commits and find the one we need
       const response = await api.get(`/workspace/${projectId}/git/commits`, {
-        params: { limit: 1 }
+        params: { limit: 100 }
       });
 
       const commits = response.data as any[];
       if (commits.length > 0) {
-        const commitData = commits.find((c: any) => c.hash === commitHash) || commits[0];
+        const commitData = commits.find((c: any) => c.hash === commitHash);
+        if (!commitData) {
+          setError('Commit not found');
+          return;
+        }
 
         // Convert files array to CommitFile objects
         const files: CommitFile[] = (commitData.files || []).map((filePath: string) => ({

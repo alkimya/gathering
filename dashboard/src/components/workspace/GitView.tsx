@@ -45,6 +45,12 @@ export function GitView({ projectId, onClose, onToggleMaximize, isMaximized = fa
     // Could filter timeline by branch here
   };
 
+  // Reset selected commit when changing tabs
+  const handleTabChange = (tabId: TabType) => {
+    setActiveTab(tabId);
+    setSelectedCommit(null);
+  };
+
   return (
     <div className="flex flex-col h-full bg-[#0a0a0a]">
       {/* Header */}
@@ -95,7 +101,7 @@ export function GitView({ projectId, onClose, onToggleMaximize, isMaximized = fa
           return (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => handleTabChange(tab.id)}
               className={`px-3 py-1.5 rounded flex items-center gap-2 text-sm font-medium transition-all ${
                 activeTab === tab.id
                   ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30'
