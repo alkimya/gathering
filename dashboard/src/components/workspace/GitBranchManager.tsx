@@ -61,29 +61,20 @@ export function GitBranchManager({ projectId, onBranchSelect }: GitBranchManager
       const response = await api.get(`/workspace/${projectId}/git/branches`);
       const data = response.data as any;
 
-      setCurrentBranch(data.current || '');
+      // Handle nested branches structure
+      const branchesData = data.branches || data;
 
-      // Combine all branches
+      setCurrentBranch(branchesData.current || '');
+
+      // Parse branches array
       const allBranches: Branch[] = [];
 
-      // Local branches
-      if (data.local) {
-        data.local.forEach((name: string) => {
+      if (branchesData.branches && Array.isArray(branchesData.branches)) {
+        branchesData.branches.forEach((branch: any) => {
           allBranches.push({
-            name,
-            is_current: name === data.current,
-            is_remote: false
-          });
-        });
-      }
-
-      // Remote branches
-      if (data.remote) {
-        data.remote.forEach((name: string) => {
-          allBranches.push({
-            name,
-            is_current: false,
-            is_remote: true
+            name: branch.name,
+            is_current: branch.current || false,
+            is_remote: branch.type === 'remote'
           });
         });
       }

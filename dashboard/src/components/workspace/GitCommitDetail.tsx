@@ -76,17 +76,28 @@ export function GitCommitDetail({ projectId, commitHash }: GitCommitDetailProps)
       if (commits.length > 0) {
         const commitData = commits.find((c: any) => c.hash === commitHash) || commits[0];
 
+        // Convert files array to CommitFile objects
+        const files: CommitFile[] = (commitData.files || []).map((filePath: string) => ({
+          path: filePath,
+          status: 'M',  // Default to modified, we don't have this info
+          additions: 0,  // Not available without individual file diffs
+          deletions: 0
+        }));
+
+        // Handle stats mapping (backend uses insertions/deletions, not total_insertions/total_deletions)
+        const stats = commitData.stats || {};
+
         setCommit({
           hash: commitData.hash,
           author_name: commitData.author_name,
           author_email: commitData.author_email,
           date: commitData.date,
           message: commitData.message,
-          files: commitData.files || [],
-          stats: commitData.stats || {
-            total_insertions: 0,
-            total_deletions: 0,
-            files_changed: 0
+          files: files,
+          stats: {
+            total_insertions: stats.insertions || 0,
+            total_deletions: stats.deletions || 0,
+            files_changed: stats.files_changed || files.length
           }
         });
       }

@@ -62,7 +62,21 @@ export function GitStagingArea({ projectId }: GitStagingAreaProps) {
       setError(null);
 
       const response = await api.get(`/workspace/${projectId}/git/status`);
-      setStatus(response.data as GitStatus);
+      const data = response.data as any;
+
+      // Handle nested status structure
+      const statusData = data.status || data;
+
+      // Ensure staged object exists (might not be in backend response)
+      if (!statusData.staged) {
+        statusData.staged = {
+          modified: [],
+          added: [],
+          deleted: []
+        };
+      }
+
+      setStatus(statusData as GitStatus);
     } catch (err: any) {
       console.error('Failed to load git status:', err);
       setError(err.message || 'Failed to load git status');
