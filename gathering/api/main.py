@@ -25,6 +25,7 @@ from gathering.api.routers import (
     pipelines_router,
     websocket_router,
     workspace_router,
+    lsp_router,
 )
 from gathering.api.middleware import (
     AuthenticationMiddleware,
@@ -192,6 +193,7 @@ def create_app(
     app.include_router(pipelines_router)
     app.include_router(websocket_router)
     app.include_router(workspace_router)
+    app.include_router(lsp_router)
 
     # WebSocket endpoint
     if enable_websocket:
@@ -256,6 +258,89 @@ def create_app(
 
             except WebSocketDisconnect:
                 await ws_manager.disconnect(conn_id)
+
+        @app.websocket("/ws/terminal/{project_id}")
+        async def terminal_websocket(websocket: WebSocket, project_id: int):
+            """
+            WebSocket endpoint for terminal sessions with real PTY.
+
+            Provides real-time terminal I/O for workspace projects.
+            """
+            import asyncio
+            import json
+            import os
+
+            await websocket.accept()
+
+            try:
+                from gathering.workspace.terminal_manager import terminal_manager
+
+                # Get project path (for now use cwd, later integrate with projects)
+                project_path = os.getcwd()
+
+                # Create unique session ID
+                session_id = f"{project_id}-{id(websocket)}"
+
+                # Create terminal session
+                session = terminal_manager.create_session(project_path, session_id)
+
+                async def read_output():
+                    """Background task to read terminal output."""
+                    while session.running:
+                        data = await session.read()
+                        if data:
+                            await websocket.send_text(data.decode('utf-8', errors='ignore'))
+                        await asyncio.sleep(0.01)
+
+                # Start output reader
+                output_task = asyncio.create_task(read_output())
+
+                try:
+                    while True:
+                        # Receive input from client
+                        message = await websocket.receive_text()
+                        data = json.loads(message)
+
+                        if data.get("type") == "input":
+                            input_data = data.get("data", "")
+                            await session.write(input_data)
+
+                        elif data.get("type") == "resize":
+                            rows = data.get("rows", 24)
+                            cols = data.get("cols", 80)
+                            session.resize(rows, cols)
+
+                except WebSocketDisconnect:
+                    pass
+                finally:
+                    # Cleanup
+                    output_task.cancel()
+                    terminal_manager.close_session(session_id)
+
+            except ImportError:
+                # Fallback to echo mode if PTY not available (Windows, etc.)
+                print("PTY not available, using echo mode")
+                try:
+                    while True:
+                        message = await websocket.receive_text()
+                        data = json.loads(message)
+
+                        if data.get("type") == "input":
+                            input_data = data.get("data", "")
+                            if input_data == "\r":
+                                await websocket.send_text("\r\n$ ")
+                            elif input_data == "\x7F":
+                                await websocket.send_text("\b \b")
+                            else:
+                                await websocket.send_text(input_data)
+
+                except WebSocketDisconnect:
+                    pass
+
+            except Exception as e:
+                print(f"Terminal WebSocket error: {e}")
+                import traceback
+                traceback.print_exc()
 
     # Root endpoint
     @app.get("/")

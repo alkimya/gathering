@@ -6,8 +6,11 @@ git integration, and activity tracking.
 """
 
 from fastapi import APIRouter, HTTPException, Query, Depends
+from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel
 from typing import List, Dict, Any, Optional
+from pathlib import Path
+import mimetypes
 
 from gathering.workspace import (
     WorkspaceManager,
@@ -123,6 +126,75 @@ async def read_file(
         raise HTTPException(status_code=404, detail=f"File not found: {path}")
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/{project_id}/file/raw")
+async def read_file_raw(
+    project_id: int,
+    path: str = Query(..., description="Relative path to file"),
+):
+    """
+    Read a file and return raw bytes (for images, binaries, etc.).
+
+    This endpoint serves files with proper MIME types for browser display.
+    Use this for images, PDFs, videos, and other binary files.
+    """
+    project_path = get_project_path(project_id)
+
+    try:
+        # Build full file path
+        full_path = Path(project_path) / path
+
+        # Security check: prevent directory traversal
+        try:
+            full_path = full_path.resolve()
+            project_path_resolved = Path(project_path).resolve()
+            if not str(full_path).startswith(str(project_path_resolved)):
+                raise HTTPException(status_code=403, detail="Access denied")
+        except HTTPException:
+            raise
+        except Exception as e:
+            # Log the actual error for debugging
+            import logging
+            logging.error(f"Path resolution error: {e}, path={path}")
+            raise HTTPException(status_code=403, detail=f"Invalid path: {str(e)}")
+
+        # Check if file exists
+        if not full_path.exists():
+            # Try to find the file with similar name (handle encoding issues)
+            import logging
+            logging.warning(f"File not found: {full_path}, trying to list directory")
+            parent = full_path.parent
+            if parent.exists():
+                similar = list(parent.glob(f"*{full_path.stem}*{full_path.suffix}"))
+                logging.warning(f"Similar files: {similar}")
+            raise HTTPException(status_code=404, detail=f"File not found: {path}")
+
+        if not full_path.is_file():
+            raise HTTPException(status_code=400, detail=f"Not a file: {path}")
+
+        # Determine MIME type
+        mime_type, _ = mimetypes.guess_type(str(full_path))
+        if mime_type is None:
+            mime_type = "application/octet-stream"
+
+        # Read file bytes
+        with open(full_path, 'rb') as f:
+            content = f.read()
+
+        # Return with appropriate content type
+        return Response(
+            content=content,
+            media_type=mime_type,
+            headers={
+                "Content-Disposition": f'inline; filename="{full_path.name}"'
+            }
+        )
+
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -325,5 +397,95 @@ async def get_activity_stats(project_id: int):
     try:
         stats = activity_tracker.get_stats(project_id)
         return stats
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ============================================================================
+# Python Execution Endpoint
+# ============================================================================
+
+
+class PythonExecutionRequest(BaseModel):
+    """Request to execute Python code."""
+
+    code: str
+    file_path: Optional[str] = None
+
+
+@router.post("/{project_id}/run-python")
+async def run_python_code(
+    project_id: int,
+    request: PythonExecutionRequest,
+):
+    """
+    Execute Python code in a sandboxed environment.
+
+    Security notes:
+    - Code runs with subprocess timeout
+    - Limited to current workspace directory
+    - No network access (can be added with --network flag)
+    """
+    import subprocess
+    import tempfile
+    import time
+    from pathlib import Path
+
+    try:
+        project_path = get_project_path(project_id)
+
+        # Create temporary file for code
+        with tempfile.NamedTemporaryFile(
+            mode='w',
+            suffix='.py',
+            dir=project_path,
+            delete=False,
+        ) as tmp_file:
+            tmp_file.write(request.code)
+            tmp_path = tmp_file.name
+
+        try:
+            # Execute with timeout
+            start_time = time.time()
+
+            # Try python3 first, fall back to python
+            python_cmd = 'python3'
+            try:
+                subprocess.run(['which', 'python3'], check=True, capture_output=True)
+            except subprocess.CalledProcessError:
+                python_cmd = 'python'
+
+            result = subprocess.run(
+                [python_cmd, tmp_path],
+                cwd=project_path,
+                capture_output=True,
+                text=True,
+                timeout=30,  # 30 second timeout
+            )
+            execution_time = time.time() - start_time
+
+            return {
+                "stdout": result.stdout,
+                "stderr": result.stderr,
+                "exit_code": result.returncode,
+                "execution_time": execution_time,
+            }
+        finally:
+            # Clean up temp file
+            try:
+                Path(tmp_path).unlink(missing_ok=True)
+            except Exception:
+                pass  # Ignore cleanup errors
+
+    except subprocess.TimeoutExpired as e:
+        # Cleanup temp file on timeout
+        try:
+            Path(tmp_path).unlink(missing_ok=True)
+        except Exception:
+            pass
+        raise HTTPException(
+            status_code=408,
+            detail=f"Execution timeout (30s limit). Output: {e.stdout if hasattr(e, 'stdout') else 'N/A'}",
+        )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

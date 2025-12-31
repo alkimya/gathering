@@ -2,8 +2,8 @@
  * Git Timeline Component - Web3 Dark Theme
  */
 
-import React, { useState, useEffect } from 'react';
-import { GitCommit, GitBranch, User, Calendar, Loader2, Eye, EyeOff } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { GitCommit, GitBranch, User, Calendar, Loader2, Eye } from 'lucide-react';
 import api from '../../services/api';
 
 interface Commit {
@@ -40,7 +40,7 @@ export function GitTimeline({ projectId }: GitTimelineProps) {
         params: { limit: 50 },
       });
 
-      setCommits(response.data);
+      setCommits(response.data as Commit[]);
     } catch (err: any) {
       console.error('Failed to load commits:', err);
       setError(err.message || 'Failed to load commits');
@@ -55,7 +55,7 @@ export function GitTimeline({ projectId }: GitTimelineProps) {
       const response = await api.get(`/workspace/${projectId}/git/diff`, {
         params: { commit: commitHash },
       });
-      setDiff(response.data.diff);
+      setDiff((response.data as any)?.diff);
     } catch (err: any) {
       console.error('Failed to load diff:', err);
     } finally {

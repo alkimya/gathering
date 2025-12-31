@@ -20,6 +20,7 @@ from gathering.workspace import (
     ActivityTracker,
 )
 from gathering.workspace.activity_tracker import ActivityType
+from gathering.workspace.terminal_manager import TerminalManager, terminal_manager
 
 
 class TestWorkspaceManager:
@@ -509,3 +510,24 @@ class TestActivityTracker:
 
         activities = self.tracker.get_activities(project_id=1)
         assert len(activities) == 0
+
+
+class TestTerminalManager:
+    """Test TerminalManager class."""
+
+    def test_global_instance_exists(self):
+        """Test that global terminal manager instance exists."""
+        assert terminal_manager is not None
+        assert isinstance(terminal_manager, TerminalManager)
+
+    def test_sessions_dict_exists(self):
+        """Test that sessions dictionary exists."""
+        assert hasattr(terminal_manager, 'sessions')
+        assert isinstance(terminal_manager.sessions, dict)
+
+    def test_manager_creation(self):
+        """Test creating a new terminal manager."""
+        manager = TerminalManager()
+        assert manager is not None
+        assert isinstance(manager.sessions, dict)
+        assert len(manager.sessions) == 0

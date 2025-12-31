@@ -306,6 +306,9 @@ class Circle(Base):
     # Owner
     owner_id = Column(String(100))
 
+    # Project association
+    project_id = Column(BigInteger, ForeignKey("project.projects.id"))
+
     # Circle settings
     settings = Column(JSON, default={})
 

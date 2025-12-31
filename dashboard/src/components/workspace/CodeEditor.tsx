@@ -2,24 +2,34 @@
  * Code Editor Component - Web3 Dark Theme with Monaco
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
 import Editor from '@monaco-editor/react';
 import { Save, Loader2, FileCode, AlertCircle } from 'lucide-react';
 import api from '../../services/api';
 
 interface CodeEditorProps {
   projectId: number;
+  onContentChange?: (content: string) => void;
   filePath: string | null;
 }
 
-export function CodeEditor({ projectId, filePath }: CodeEditorProps) {
-  const [fileContent, setFileContent] = useState<any>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [hasChanges, setHasChanges] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const editorRef = useRef<any>(null);
-  const [currentValue, setCurrentValue] = useState('');
+export interface CodeEditorHandle {
+  getEditor: () => any;
+}
+
+export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
+  ({ projectId, filePath, onContentChange }, ref) => {
+    const [fileContent, setFileContent] = useState<any>(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [hasChanges, setHasChanges] = useState(false);
+    const [saving, setSaving] = useState(false);
+    const editorRef = useRef<any>(null);
+    const [currentValue, setCurrentValue] = useState('');
+
+    useImperativeHandle(ref, () => ({
+      getEditor: () => editorRef.current,
+    }));
 
   useEffect(() => {
     if (filePath) {
@@ -39,9 +49,15 @@ export function CodeEditor({ projectId, filePath }: CodeEditorProps) {
         params: { path },
       });
 
-      setFileContent(response.data);
-      setCurrentValue(response.data.content || '');
+      const content = (response.data as any)?.content || '';
+      setFileContent(response.data as any);
+      setCurrentValue(content);
       setHasChanges(false);
+
+      // Notify parent of initial content for preview
+      if (onContentChange) {
+        onContentChange(content);
+      }
     } catch (err: any) {
       console.error('Failed to load file:', err);
       setError(err.message || 'Failed to load file');
@@ -50,12 +66,12 @@ export function CodeEditor({ projectId, filePath }: CodeEditorProps) {
     }
   };
 
-  const handleEditorDidMount = (editor: any) => {
+  const handleEditorDidMount = (editor: any, monaco: any) => {
     editorRef.current = editor;
 
     // Ctrl+S to save
     editor.addCommand(
-      window.monaco.KeyMod.CtrlCmd | window.monaco.KeyCode.KeyS,
+      monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS,
       () => handleSave()
     );
   };
@@ -63,6 +79,9 @@ export function CodeEditor({ projectId, filePath }: CodeEditorProps) {
   const handleEditorChange = (value: string | undefined) => {
     setCurrentValue(value || '');
     setHasChanges(value !== fileContent?.content);
+    if (onContentChange) {
+      onContentChange(value || '');
+    }
   };
 
   const handleSave = async () => {
@@ -212,4 +231,4 @@ export function CodeEditor({ projectId, filePath }: CodeEditorProps) {
       </div>
     </div>
   );
-}
+});

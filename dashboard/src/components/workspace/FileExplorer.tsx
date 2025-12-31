@@ -40,7 +40,7 @@ export function FileExplorer({ projectId, onFileSelect, selectedFile }: FileExpl
         params: { include_git_status: true },
       });
 
-      setFileTree(response.data);
+      setFileTree(response.data as FileNode);
       setExpandedDirs(new Set(['/']));
     } catch (err: any) {
       console.error('Failed to load file tree:', err);

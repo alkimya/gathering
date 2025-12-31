@@ -2,7 +2,7 @@
  * Activity Feed Component - Web3 Dark Theme
  */
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Activity, FileEdit, GitCommit, PlayCircle, CheckCircle, Loader2, RefreshCw } from 'lucide-react';
 import api from '../../services/api';
 
@@ -41,7 +41,7 @@ export function ActivityFeed({ projectId }: ActivityFeedProps) {
         params: { limit: 50 },
       });
 
-      setActivities(response.data);
+      setActivities(response.data as ActivityItem[]);
     } catch (err: any) {
       console.error('Failed to load activities:', err);
       setError(err.message || 'Failed to load activities');

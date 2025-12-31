@@ -79,12 +79,12 @@ class TestEmbeddingService:
         )
 
         # Add to cache manually
-        service._cache["test"] = [0.1, 0.2, 0.3]
-        assert len(service._cache) == 1
+        service._memory_cache["test"] = [0.1, 0.2, 0.3]
+        assert len(service._memory_cache) == 1
 
         count = service.clear_cache()
         assert count == 1
-        assert len(service._cache) == 0
+        assert len(service._memory_cache) == 0
 
     def test_cache_stats(self):
         """Test cache statistics."""
@@ -95,8 +95,8 @@ class TestEmbeddingService:
             api_key="test-key",
         )
 
-        service._cache["test1"] = [0.1]
-        service._cache["test2"] = [0.2]
+        service._memory_cache["test1"] = [0.1]
+        service._memory_cache["test2"] = [0.2]
 
         stats = service.cache_stats()
         assert stats["entries"] == 2
@@ -116,7 +116,7 @@ class TestEmbeddingService:
         # Pre-populate cache
         cache_key = service._cache_key("Hello")
         cached_embedding = [0.1, 0.2, 0.3]
-        service._cache[cache_key] = cached_embedding
+        service._memory_cache[cache_key] = cached_embedding
 
         # Should return cached value without API call
         result = await service.embed("Hello", use_cache=True)
@@ -134,7 +134,7 @@ class TestEmbeddingService:
 
         # Pre-populate cache
         cache_key = service._cache_key("Hello")
-        service._cache[cache_key] = [0.1, 0.2, 0.3]
+        service._memory_cache[cache_key] = [0.1, 0.2, 0.3]
 
         # Mock API call
         mock_embedding = [0.4, 0.5, 0.6]
@@ -178,7 +178,7 @@ class TestEmbeddingService:
 
         # Cache one embedding
         cache_key = service._cache_key("cached")
-        service._cache[cache_key] = [0.9, 0.9]
+        service._memory_cache[cache_key] = [0.9, 0.9]
 
         with patch.object(service, "_generate_embeddings", new_callable=AsyncMock) as mock:
             mock.return_value = [[0.1, 0.2], [0.3, 0.4]]

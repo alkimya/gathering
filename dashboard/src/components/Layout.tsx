@@ -29,7 +29,6 @@ import {
   GitBranch,
   Wifi,
   WifiOff,
-  Code2,
 } from 'lucide-react';
 import { useState } from 'react';
 import { useWebSocket } from '../hooks/useWebSocket';

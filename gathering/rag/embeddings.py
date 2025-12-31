@@ -220,8 +220,8 @@ class EmbeddingService:
         if use_cache:
             for i, text in enumerate(texts):
                 cache_key = self._cache_key(text)
-                if cache_key in self._cache:
-                    results[i] = self._cache[cache_key]
+                if cache_key in self._memory_cache:
+                    results[i] = self._memory_cache[cache_key]
                 else:
                     texts_to_embed.append((i, text))
         else:
@@ -236,7 +236,7 @@ class EmbeddingService:
                 results[idx] = embedding
                 if use_cache:
                     cache_key = self._cache_key(texts[idx])
-                    self._cache[cache_key] = embedding
+                    self._memory_cache[cache_key] = embedding
 
         return results  # type: ignore
 
@@ -314,8 +314,8 @@ class EmbeddingService:
         Returns:
             Number of entries cleared.
         """
-        count = len(self._cache)
-        self._cache.clear()
+        count = len(self._memory_cache)
+        self._memory_cache.clear()
         return count
 
     def cache_stats(self) -> Dict[str, Any]:
@@ -326,7 +326,7 @@ class EmbeddingService:
             Dict with cache stats.
         """
         return {
-            "entries": len(self._cache),
+            "entries": len(self._memory_cache),
             "model": self.model,
             "provider": self.provider.value,
         }

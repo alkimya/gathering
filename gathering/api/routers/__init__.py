@@ -18,6 +18,7 @@ from gathering.api.routers.projects import router as projects_router
 from gathering.api.routers.pipelines import pipelines_router
 from gathering.api.routers.websocket import router as websocket_router
 from gathering.api.routers.workspace import router as workspace_router
+from gathering.api.routers.lsp import router as lsp_router
 
 __all__ = [
     "agents_router",
@@ -36,4 +37,5 @@ __all__ = [
     "pipelines_router",
     "websocket_router",
     "workspace_router",
+    "lsp_router",
 ]
