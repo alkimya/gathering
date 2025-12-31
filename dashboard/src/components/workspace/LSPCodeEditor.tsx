@@ -218,7 +218,8 @@ export const LSPCodeEditor = React.forwardRef<CodeEditorHandle, LSPCodeEditorPro
 
   // Expose the editor instance to parent components
   useImperativeHandle(ref, () => ({
-    getEditor: () => editorRef.current?.getEditor() || null
+    getEditor: () => editorRef.current?.getEditor() || null,
+    getMonaco: () => editorRef.current?.getMonaco() || null
   }));
 
   useEffect(() => {
@@ -246,22 +247,28 @@ export const LSPCodeEditor = React.forwardRef<CodeEditorHandle, LSPCodeEditorPro
           `/workspace/${projectId}`
         );
 
-        // Get Monaco instance from window (set by CodeEditor's beforeMount)
-        const monacoInstance = (window as any).__monaco;
-        if (monacoInstance) {
-          // Register providers globally for this language
-          registerLSPProviders(
-            monacoInstance,
-            detectedLanguage,
-            projectId,
-            () => currentFilePathRef.current
-          );
-        } else {
-          console.warn('[LSP] Monaco instance not available in window.__monaco');
-        }
+        // Wait for Monaco to be available from CodeEditor ref
+        const tryRegisterProviders = () => {
+          const monacoInstance = editorRef.current?.getMonaco?.();
+          if (monacoInstance) {
+            console.log('[LSP] Monaco instance retrieved from editor ref');
+            // Register providers globally for this language
+            registerLSPProviders(
+              monacoInstance,
+              detectedLanguage,
+              projectId,
+              () => currentFilePathRef.current
+            );
+            setLspEnabled(true);
+            console.log(`✓ LSP enabled for ${detectedLanguage}`);
+          } else {
+            // Monaco not yet available, retry in 100ms
+            console.log('[LSP] Waiting for Monaco instance...');
+            setTimeout(tryRegisterProviders, 100);
+          }
+        };
 
-        setLspEnabled(true);
-        console.log(`✓ LSP enabled for ${detectedLanguage}`);
+        tryRegisterProviders();
       } catch (error) {
         console.error('LSP initialization failed:', error);
         setLspEnabled(false);

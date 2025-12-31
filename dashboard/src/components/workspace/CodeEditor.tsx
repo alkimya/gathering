@@ -15,6 +15,7 @@ interface CodeEditorProps {
 
 export interface CodeEditorHandle {
   getEditor: () => any;
+  getMonaco: () => any;
 }
 
 export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
@@ -25,10 +26,12 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
     const [hasChanges, setHasChanges] = useState(false);
     const [saving, setSaving] = useState(false);
     const editorRef = useRef<any>(null);
+    const monacoRef = useRef<any>(null);
     const [currentValue, setCurrentValue] = useState('');
 
     useImperativeHandle(ref, () => ({
       getEditor: () => editorRef.current,
+      getMonaco: () => monacoRef.current,
     }));
 
   useEffect(() => {
@@ -67,9 +70,8 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
   };
 
   const handleBeforeMount = (monaco: any) => {
-    // Monaco instance is available here BEFORE editor mounts
-    // This is where we should register language providers
-    // Store monaco reference for parent components
+    // Store Monaco instance for LSP providers
+    monacoRef.current = monaco;
     if (window) {
       (window as any).__monaco = monaco;
     }
@@ -77,6 +79,7 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
 
   const handleEditorDidMount = (editor: any, monaco: any) => {
     editorRef.current = editor;
+    monacoRef.current = monaco;
 
     // Ctrl+S to save
     editor.addCommand(
