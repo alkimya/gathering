@@ -9,13 +9,15 @@ import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, FolderTree, Activity, Terminal as TerminalIcon, Maximize2, Minimize2, GitBranch, Eye, SplitSquareHorizontal, Loader2 } from 'lucide-react';
 import { FileExplorerOptimized as FileExplorer } from '../components/workspace/FileExplorerOptimized';
 import { type CodeEditorHandle } from '../components/workspace/CodeEditor';
-import { GitTimeline } from '../components/workspace/GitTimeline';
 import { ActivityFeed } from '../components/workspace/ActivityFeed';
 import { ResizablePanels } from '../components/workspace/ResizablePanels';
 import api from '../services/api';
 
 // Lazy load heavy Monaco Editor components (only when file is selected)
 const LSPCodeEditor = lazy(() => import('../components/workspace/LSPCodeEditor').then(m => ({ default: m.LSPCodeEditor })));
+
+// Lazy load Git view
+const GitView = lazy(() => import('../components/workspace/GitView').then(m => ({ default: m.GitView })));
 
 // Lazy load preview components (only when needed)
 const Terminal = lazy(() => import('../components/workspace/Terminal').then(m => ({ default: m.Terminal })));
@@ -64,6 +66,7 @@ export function Workspace() {
   // Layout state
   const [showFileExplorer, setShowFileExplorer] = useState(true);
   const [showActivityFeed, setShowActivityFeed] = useState(true);
+  const [showGitView, setShowGitView] = useState(false);
   const [showTerminal, setShowTerminal] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -351,6 +354,19 @@ export function Workspace() {
             <Activity className="w-4 h-4" />
             Activity
           </button>
+          {workspaceInfo?.is_git_repo && (
+            <button
+              onClick={() => setShowGitView(!showGitView)}
+              className={`flex items-center gap-2 px-4 py-2 text-sm rounded-lg transition-all ${
+                showGitView
+                  ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+                  : 'bg-white/5 text-zinc-400 hover:bg-white/10 border border-white/5'
+              }`}
+            >
+              <GitBranch className="w-4 h-4" />
+              Git
+            </button>
+          )}
           <button
             onClick={() => setShowTerminal(!showTerminal)}
             className={`flex items-center gap-2 px-4 py-2 text-sm rounded-lg transition-all ${
@@ -484,17 +500,24 @@ export function Workspace() {
           )}
         </div>
 
-        {/* Right Panel: Activity Feed + Git Timeline - Full height */}
-        {showActivityFeed && (
+        {/* Right Panel: Activity Feed OR Git View - Full height */}
+        {showActivityFeed && !showGitView && (
           <div className="w-96 glass-card border-l border-white/5 flex flex-col">
-            <div className="flex-1 overflow-hidden flex flex-col border-b border-white/5">
+            <div className="flex-1 overflow-hidden flex flex-col">
               <ActivityFeed projectId={parseInt(projectId || '0')} />
             </div>
-            {workspaceInfo?.is_git_repo && (
-              <div className="flex-1 overflow-hidden flex flex-col">
-                <GitTimeline projectId={parseInt(projectId || '0')} />
-              </div>
-            )}
+          </div>
+        )}
+
+        {/* Git View - Full height panel */}
+        {showGitView && workspaceInfo?.is_git_repo && (
+          <div className="w-[600px] glass-card border-l border-white/5 flex flex-col">
+            <Suspense fallback={<ComponentLoader />}>
+              <GitView
+                projectId={parseInt(projectId || '0')}
+                onClose={() => setShowGitView(false)}
+              />
+            </Suspense>
           </div>
         )}
       </div>

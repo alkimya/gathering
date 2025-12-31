@@ -17,15 +17,20 @@ interface Commit {
 
 interface GitTimelineProps {
   projectId: number;
+  onCommitSelect?: (commitHash: string) => void;
+  selectedCommit?: string | null;
 }
 
-export function GitTimeline({ projectId }: GitTimelineProps) {
+export function GitTimeline({ projectId, onCommitSelect, selectedCommit: externalSelectedCommit }: GitTimelineProps) {
   const [commits, setCommits] = useState<Commit[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedCommit, setSelectedCommit] = useState<string | null>(null);
   const [diff, setDiff] = useState<string | null>(null);
   const [loadingDiff, setLoadingDiff] = useState(false);
+
+  // Use external selectedCommit if provided, otherwise use internal state
+  const activeCommit = externalSelectedCommit !== undefined ? externalSelectedCommit : selectedCommit;
 
   useEffect(() => {
     loadCommits();
@@ -64,12 +69,18 @@ export function GitTimeline({ projectId }: GitTimelineProps) {
   };
 
   const handleCommitClick = (hash: string) => {
-    if (selectedCommit === hash) {
-      setSelectedCommit(null);
-      setDiff(null);
+    if (onCommitSelect) {
+      // If using external control, notify parent
+      onCommitSelect(hash);
     } else {
-      setSelectedCommit(hash);
-      loadDiff(hash);
+      // Otherwise use internal state
+      if (selectedCommit === hash) {
+        setSelectedCommit(null);
+        setDiff(null);
+      } else {
+        setSelectedCommit(hash);
+        loadDiff(hash);
+      }
     }
   };
 
@@ -155,7 +166,7 @@ export function GitTimeline({ projectId }: GitTimelineProps) {
             <div
               key={commit.hash}
               className={`p-3 rounded-lg border transition-all cursor-pointer ${
-                selectedCommit === commit.hash
+                activeCommit === commit.hash
                   ? 'bg-cyan-500/10 border-cyan-500/30'
                   : 'bg-white/5 border-white/10 hover:bg-white/10'
               }`}
@@ -186,7 +197,7 @@ export function GitTimeline({ projectId }: GitTimelineProps) {
                     <code className="px-2 py-0.5 bg-white/5 text-cyan-400 rounded font-mono">
                       {commit.hash.substring(0, 7)}
                     </code>
-                    {selectedCommit === commit.hash && (
+                    {activeCommit === commit.hash && !onCommitSelect && (
                       <span className="text-cyan-400 flex items-center gap-1">
                         <Eye className="w-3 h-3" />
                         Viewing diff
@@ -194,7 +205,8 @@ export function GitTimeline({ projectId }: GitTimelineProps) {
                     )}
                   </div>
 
-                  {selectedCommit === commit.hash && (
+                  {/* Only show inline diff if using internal state (not external control) */}
+                  {!onCommitSelect && activeCommit === commit.hash && (
                     <>
                       {loadingDiff ? (
                         <div className="mt-3 flex items-center gap-2 text-zinc-400 text-sm">
