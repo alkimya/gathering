@@ -1,19 +1,35 @@
 """
-Cache - Redis-based caching for performance optimization.
+Cache module for Gathering workspace.
 
-Provides caching for expensive operations:
-- Embeddings (API calls)
-- RAG search results
-- Circle context
-- LLM responses (optional)
+Provides Redis-based caching for:
+- File trees
+- Git data (commits, status, branches)
+- LSP responses
+- File contents
 """
 
-from gathering.cache.redis_manager import (
-    CacheManager,
-    CacheConfig,
+from .redis_cache import (
+    RedisCache,
+    get_cache,
+    cached,
+    cache_file_tree,
+    get_cached_file_tree,
+    cache_git_commits,
+    get_cached_git_commits,
+    cache_git_status,
+    get_cached_git_status,
+    invalidate_workspace_cache,
 )
 
 __all__ = [
-    "CacheManager",
-    "CacheConfig",
+    "RedisCache",
+    "get_cache",
+    "cached",
+    "cache_file_tree",
+    "get_cached_file_tree",
+    "cache_git_commits",
+    "get_cached_git_commits",
+    "cache_git_status",
+    "get_cached_git_status",
+    "invalidate_workspace_cache",
 ]

@@ -11,6 +11,7 @@ from pydantic import BaseModel
 from typing import List, Dict, Any, Optional
 from pathlib import Path
 import mimetypes
+import logging
 
 from gathering.workspace import (
     WorkspaceManager,
@@ -20,6 +21,16 @@ from gathering.workspace import (
     WorkspaceType,
 )
 from gathering.workspace.activity_tracker import ActivityType, activity_tracker
+from gathering.cache import (
+    get_cached_file_tree,
+    cache_file_tree,
+    get_cached_git_commits,
+    cache_git_commits,
+    get_cached_git_status,
+    cache_git_status,
+)
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/workspace", tags=["workspace"])
 
@@ -97,7 +108,14 @@ async def list_files(
     include_git_status: bool = Query(default=True),
     max_depth: int = Query(default=10),
 ):
-    """List all files in the workspace."""
+    """List all files in the workspace with Redis caching."""
+    # Try cache first (only if not including git status for consistency)
+    if not include_git_status:
+        cached = get_cached_file_tree(project_id)
+        if cached is not None:
+            logger.debug(f"Cache HIT: file tree for project {project_id}")
+            return cached
+
     project_path = get_project_path(project_id)
 
     try:
@@ -106,6 +124,12 @@ async def list_files(
             include_git_status=include_git_status,
             max_depth=max_depth,
         )
+
+        # Cache for 1 minute (only if not including git status)
+        if not include_git_status:
+            cache_file_tree(project_id, tree)
+            logger.debug(f"Cache SET: file tree for project {project_id}")
+
         return tree
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -250,7 +274,13 @@ async def delete_file(
 async def get_git_status(
     project_id: int,
 ):
-    """Get git status."""
+    """Get git status with Redis caching."""
+    # Try cache first (30 second TTL for frequently changing data)
+    cached = get_cached_git_status(project_id)
+    if cached is not None:
+        logger.debug(f"Cache HIT: git status for project {project_id}")
+        return {"status": cached}
+
     project_path = get_project_path(project_id)
 
     try:
@@ -258,6 +288,11 @@ async def get_git_status(
             raise HTTPException(status_code=400, detail="Not a git repository")
 
         status = GitManager.get_status(project_path)
+
+        # Cache for 30 seconds (short TTL for frequently changing data)
+        cache_git_status(project_id, status)
+        logger.debug(f"Cache SET: git status for project {project_id}")
+
         return {"status": status}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -270,7 +305,14 @@ async def get_commits(
     branch: Optional[str] = None,
     author: Optional[str] = None,
 ):
-    """Get commit history."""
+    """Get commit history with Redis caching."""
+    # Try cache first (only for default params to keep cache simple)
+    if branch is None and author is None and limit == 50:
+        cached = get_cached_git_commits(project_id)
+        if cached is not None:
+            logger.debug(f"Cache HIT: git commits for project {project_id}")
+            return cached
+
     project_path = get_project_path(project_id)
 
     try:
@@ -280,6 +322,12 @@ async def get_commits(
             branch=branch,
             author=author,
         )
+
+        # Cache for 5 minutes (only default params)
+        if branch is None and author is None and limit == 50:
+            cache_git_commits(project_id, commits)
+            logger.debug(f"Cache SET: git commits for project {project_id}")
+
         return commits
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
