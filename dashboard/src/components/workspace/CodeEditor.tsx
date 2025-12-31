@@ -224,6 +224,11 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
               bracketPairs: true,
               indentation: true,
             },
+            // Hover must be enabled for LSP providers to work, but keep it minimal
+            hover: {
+              enabled: true,
+              delay: 300,
+            },
             // Enable quick suggestions for better autocomplete
             quickSuggestions: {
               other: true,
