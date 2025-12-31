@@ -127,7 +127,10 @@ export function GitCommitDetail({ projectId, commitHash }: GitCommitDetailProps)
         }
       });
 
-      setDiff((response.data as any)?.diff);
+      // Handle nested diff structure: {diff: {diff: "...", commit: "...", file: null}}
+      const diffData = response.data as any;
+      const diffText = diffData?.diff?.diff || diffData?.diff || '';
+      setDiff(diffText);
 
       // Expand file
       const newExpanded = new Set(expandedFiles);
@@ -244,7 +247,7 @@ export function GitCommitDetail({ projectId, commitHash }: GitCommitDetailProps)
           </div>
 
           <div className="flex-1 min-w-0">
-            <h3 className="text-base font-semibold text-white mb-1">
+            <h3 className="text-base font-semibold text-white mb-1 whitespace-pre-wrap break-words">
               {commit.message}
             </h3>
 
