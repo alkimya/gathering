@@ -8,11 +8,12 @@
  */
 
 import { useState } from 'react';
-import { GitBranch, FileText, History, X, Maximize2, Minimize2 } from 'lucide-react';
+import { GitBranch, FileText, History, X, Maximize2, Minimize2, Network } from 'lucide-react';
 import { GitTimeline } from './GitTimeline';
 import { GitCommitDetail } from './GitCommitDetail';
 import { GitStagingArea } from './GitStagingArea';
 import { GitBranchManager } from './GitBranchManager';
+import { GitGraph } from './GitGraph';
 
 interface GitViewProps {
   projectId: number;
@@ -21,14 +22,15 @@ interface GitViewProps {
   isMaximized?: boolean;
 }
 
-type TabType = 'timeline' | 'status' | 'branches';
+type TabType = 'timeline' | 'status' | 'branches' | 'graph';
 
 export function GitView({ projectId, onClose, onToggleMaximize, isMaximized = false }: GitViewProps) {
-  const [activeTab, setActiveTab] = useState<TabType>('timeline');
+  const [activeTab, setActiveTab] = useState<TabType>('graph');
   const [selectedCommit, setSelectedCommit] = useState<string | null>(null);
   const [selectedBranch, setSelectedBranch] = useState<string | null>(null);
 
   const tabs = [
+    { id: 'graph' as TabType, label: 'Graph', icon: Network },
     { id: 'timeline' as TabType, label: 'Timeline', icon: History },
     { id: 'status' as TabType, label: 'Status', icon: FileText },
     { id: 'branches' as TabType, label: 'Branches', icon: GitBranch },
@@ -109,6 +111,28 @@ export function GitView({ projectId, onClose, onToggleMaximize, isMaximized = fa
 
       {/* Tab Content */}
       <div className="flex-1 overflow-hidden">
+        {activeTab === 'graph' && (
+          <div className="h-full flex">
+            {/* Graph View */}
+            <div className={`${selectedCommit ? 'w-1/2' : 'w-full'} border-r border-white/5`}>
+              <GitGraph
+                projectId={projectId}
+                onCommitSelect={handleCommitSelect}
+              />
+            </div>
+
+            {/* Commit Detail Panel */}
+            {selectedCommit && (
+              <div className="w-1/2">
+                <GitCommitDetail
+                  projectId={projectId}
+                  commitHash={selectedCommit}
+                />
+              </div>
+            )}
+          </div>
+        )}
+
         {activeTab === 'timeline' && (
           <div className="h-full flex">
             {/* Timeline List */}

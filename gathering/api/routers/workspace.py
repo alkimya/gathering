@@ -537,3 +537,27 @@ async def run_python_code(
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/{project_id}/git/graph")
+async def get_git_graph(
+    project_id: int,
+    limit: int = Query(default=50, ge=1, le=200),
+    all_branches: bool = Query(default=True),
+):
+    """
+    Get git graph data for visualization (like git log --graph).
+
+    Returns commits with parent relationships and branch/merge information.
+    """
+    project_path = get_project_path(project_id)
+
+    if not GitManager.is_git_repo(project_path):
+        raise HTTPException(status_code=404, detail="Not a git repository")
+
+    graph_data = GitManager.get_graph(project_path, limit=limit, all_branches=all_branches)
+
+    if "error" in graph_data:
+        raise HTTPException(status_code=500, detail=graph_data["error"])
+
+    return graph_data

@@ -474,3 +474,105 @@ class GitManager:
         except Exception as e:
             logger.error(f"Error getting git status: {e}")
             return {"error": str(e)}
+
+    @classmethod
+    def get_graph(
+        cls,
+        project_path: str,
+        limit: int = 50,
+        all_branches: bool = True,
+    ) -> Dict[str, Any]:
+        """
+        Get git graph data for visualization (like git log --graph).
+
+        Args:
+            project_path: Path to project.
+            limit: Maximum number of commits.
+            all_branches: Include all branches (default True).
+
+        Returns:
+            Dict with commits and branch/merge information for graph rendering.
+
+        Example:
+            >>> graph = GitManager.get_graph("/my/project")
+            >>> print(graph["commits"][0])
+        """
+        if not cls.is_git_repo(project_path):
+            return {"error": "Not a git repository"}
+
+        try:
+            # Get commits with parent information for graph
+            cmd = [
+                "git",
+                "log",
+                f"-n{limit}",
+                "--pretty=format:%H|%P|%an|%ae|%at|%s|%D",
+                "--date-order",
+            ]
+
+            if all_branches:
+                cmd.append("--all")
+
+            result = subprocess.run(
+                cmd,
+                cwd=project_path,
+                capture_output=True,
+                text=True,
+                check=True,
+            )
+
+            commits = []
+            for line in result.stdout.strip().split("\n"):
+                if not line:
+                    continue
+
+                parts = line.split("|")
+                if len(parts) < 6:
+                    continue
+
+                commit_hash = parts[0]
+                parents = parts[1].split() if parts[1] else []
+                author_name = parts[2]
+                author_email = parts[3]
+                timestamp = int(parts[4])
+                message = parts[5]
+                refs = parts[6] if len(parts) > 6 else ""
+
+                # Parse refs (branches, tags)
+                branches = []
+                tags = []
+                if refs:
+                    for ref in refs.split(", "):
+                        if ref.startswith("tag: "):
+                            tags.append(ref[5:])
+                        elif ref.startswith("HEAD -> "):
+                            branches.append(ref[8:])
+                        elif ref != "HEAD":
+                            branches.append(ref)
+
+                commits.append({
+                    "hash": commit_hash,
+                    "short_hash": commit_hash[:7],
+                    "parents": parents,
+                    "parent_count": len(parents),
+                    "author_name": author_name,
+                    "author_email": author_email,
+                    "timestamp": timestamp,
+                    "date": datetime.fromtimestamp(timestamp).isoformat(),
+                    "message": message,
+                    "branches": branches,
+                    "tags": tags,
+                    "is_merge": len(parents) > 1,
+                })
+
+            return {
+                "commits": commits,
+                "total": len(commits),
+            }
+
+        except subprocess.CalledProcessError as e:
+            logger.error(f"Git graph command failed: {e.stderr}")
+            return {"error": str(e.stderr)}
+        except Exception as e:
+            logger.error(f"Error getting git graph: {e}")
+            return {"error": str(e)}
