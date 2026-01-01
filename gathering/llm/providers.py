@@ -324,6 +324,29 @@ class AnthropicProvider(BaseLLMProvider):
     Supports Claude 3 models (Opus, Sonnet, Haiku).
     """
 
+    # Mapping from model aliases (display names) to API model names
+    # See: https://docs.anthropic.com/en/docs/about-claude/models
+    # Using short aliases (e.g., "claude-sonnet-4-5") which auto-point to latest snapshot
+    MODEL_ALIAS_MAP = {
+        # Claude 4.5 (latest)
+        "Opus 4.5": "claude-opus-4-5",
+        "Sonnet 4.5": "claude-sonnet-4-5",
+        # Claude 4
+        "Opus 4": "claude-opus-4",
+        "Sonnet 4": "claude-sonnet-4",
+        # Claude 3.5 models
+        "Haiku 3.5": "claude-3-5-haiku-latest",
+        "Sonnet 3.5": "claude-3-5-sonnet-latest",
+        # Claude 3 models (legacy)
+        "Opus 3": "claude-3-opus-latest",
+        "Sonnet 3": "claude-3-sonnet-20240229",
+        "Haiku 3": "claude-3-haiku-20240307",
+        # Common variations
+        "Claude Opus": "claude-opus-4-5",
+        "Claude Sonnet": "claude-sonnet-4-5",
+        "Claude Haiku": "claude-3-5-haiku-latest",
+    }
+
     def __init__(self, name: str, config: Dict[str, Any]):
         super().__init__(name, config)
         self.api_key = config.get("api_key")
@@ -332,6 +355,45 @@ class AnthropicProvider(BaseLLMProvider):
     @classmethod
     def create(cls, provider_name: str, config: Dict[str, Any]) -> "AnthropicProvider":
         return cls(provider_name, config)
+
+    # Mapping for invalid/outdated model names that may be stored in database
+    MODEL_FIX_MAP = {
+        # Fix incorrect model names (e.g., from migration 011)
+        "claude-sonnet-4-5-20250514": "claude-sonnet-4-5",
+        "claude-opus-4-5-20250514": "claude-opus-4-5",
+        # Map dated versions to short aliases
+        "claude-sonnet-4-20250514": "claude-sonnet-4",
+        "claude-opus-4-20250514": "claude-opus-4",
+        "claude-3-5-haiku-20241022": "claude-3-5-haiku-latest",
+        "claude-3-5-sonnet-20241022": "claude-3-5-sonnet-latest",
+    }
+
+    def _resolve_model(self, model: Optional[str] = None) -> str:
+        """
+        Resolve model name from alias or return as-is if it's already an API model name.
+
+        Args:
+            model: Model name or alias to resolve
+
+        Returns:
+            API model name suitable for Anthropic API calls
+        """
+        model_to_resolve = model or self.model or "claude-sonnet-4"
+
+        # Check if it's an alias that needs resolution
+        if model_to_resolve in self.MODEL_ALIAS_MAP:
+            return self.MODEL_ALIAS_MAP[model_to_resolve]
+
+        # Fix known incorrect model names
+        if model_to_resolve in self.MODEL_FIX_MAP:
+            return self.MODEL_FIX_MAP[model_to_resolve]
+
+        # If it already looks like an API model name (starts with "claude-"), use as-is
+        if model_to_resolve.startswith("claude-"):
+            return model_to_resolve
+
+        # Default fallback
+        return "claude-sonnet-4"
 
     def _get_client(self):
         """Lazy initialization of Anthropic client."""
@@ -405,7 +467,7 @@ class AnthropicProvider(BaseLLMProvider):
                     chat_messages.append(msg)
 
             request_kwargs = {
-                "model": self.model or "claude-3-opus-20240229",
+                "model": self._resolve_model(),
                 "messages": chat_messages,
                 "max_tokens": kwargs.get("max_tokens", self.config.get("max_tokens", 4096)),
                 "temperature": kwargs.get("temperature", self.config.get("temperature", 0.7)),
@@ -416,33 +478,44 @@ class AnthropicProvider(BaseLLMProvider):
 
             # Add tools if provided
             if tools:
-                request_kwargs["tools"] = [
-                    {
+                formatted_tools = []
+                for tool in tools:
+                    # Support both 'input_schema' and 'parameters' formats
+                    schema = tool.get("input_schema") or tool.get("parameters", {})
+                    # Ensure schema has required 'type' field
+                    if not schema.get("type"):
+                        schema = {"type": "object", "properties": schema} if schema else {"type": "object", "properties": {}}
+                    formatted_tools.append({
                         "name": tool["name"],
                         "description": tool.get("description", ""),
-                        "input_schema": tool.get("parameters", {}),
-                    }
-                    for tool in tools
-                ]
+                        "input_schema": schema,
+                    })
+                request_kwargs["tools"] = formatted_tools
 
             response = client.messages.create(**request_kwargs)
 
-            # Parse response
+            # Parse response - handle both text and tool_use blocks
+            text_content = ""
+            tool_calls = []
+
+            for block in response.content:
+                if hasattr(block, "type"):
+                    if block.type == "text":
+                        text_content += block.text
+                    elif block.type == "tool_use":
+                        tool_calls.append({
+                            "id": block.id,  # Required for tool_result
+                            "name": block.name,
+                            "arguments": block.input,
+                        })
+
             result = {
                 "role": "assistant",
-                "content": response.content[0].text if response.content else "",
+                "content": text_content,
             }
 
-            # Handle tool use
-            for block in response.content:
-                if hasattr(block, "type") and block.type == "tool_use":
-                    if "tool_calls" not in result:
-                        result["tool_calls"] = []
-                    result["tool_calls"].append({
-                        "id": block.id,  # Required for tool_result
-                        "name": block.name,
-                        "arguments": block.input,
-                    })
+            if tool_calls:
+                result["tool_calls"] = tool_calls
 
             # Cache response
             self._set_cached(messages, result, tools=tools, **kwargs)
@@ -474,7 +547,7 @@ class AnthropicProvider(BaseLLMProvider):
                     chat_messages.append(msg)
 
             request_kwargs = {
-                "model": self.model or "claude-3-opus-20240229",
+                "model": self._resolve_model(),
                 "messages": chat_messages,
                 "max_tokens": kwargs.get("max_tokens", 4096),
                 "stream": True,
@@ -503,13 +576,25 @@ class AnthropicProvider(BaseLLMProvider):
     def get_max_tokens(self) -> int:
         """Get max tokens for the model."""
         model_limits = {
+            # Claude 4.5 models
+            "claude-opus-4-5-20250514": 200000,
+            "claude-sonnet-4-5-20250514": 200000,
+            # Claude 4 models
+            "claude-opus-4-20250514": 200000,
+            "claude-sonnet-4-20250514": 200000,
+            # Claude 3.5 models
+            "claude-3-5-haiku-20241022": 200000,
+            "claude-3-5-sonnet-20241022": 200000,
+            # Claude 3 models
             "claude-3-opus-20240229": 200000,
             "claude-3-sonnet-20240229": 200000,
             "claude-3-haiku-20240307": 200000,
+            # Legacy models
             "claude-2.1": 200000,
             "claude-2.0": 100000,
         }
-        return model_limits.get(self.model or "claude-3-opus-20240229", 200000)
+        resolved_model = self._resolve_model()
+        return model_limits.get(resolved_model, 200000)
 
 
 class OllamaProvider(BaseLLMProvider):

@@ -82,7 +82,7 @@
 
 **Language**: Python 3.11+ (type-safe, async-first)
 **Database**: PostgreSQL 15+ with TimescaleDB & PostGIS (via **picopg**)
-**ORM/DB**: picopg (high-level), SQLAlchemy (complex queries), asyncpg (async services)
+**ORM/DB**: pycopg (high-level), SQLAlchemy (complex queries), asyncpg (async services)
 **Caching**: Redis 7+
 **Testing**: pytest, pytest-asyncio, pytest-cov
 **Monitoring**: Prometheus, structlog
@@ -180,9 +180,9 @@ Example: feat(api): add Jupiter price fetcher with rate limiting
 
 Build a **production-grade**, **fault-tolerant**, **low-latency** market data and ML analysis platform for Solana DeFi tokens.
 
-### picopg - Database API
+### pycopg - Database API
 
-Created **picopg** as the high-level Python API for PostgreSQL/PostGIS/TimescaleDB:
+Created **pycopg** as the high-level Python API for PostgreSQL/PostGIS/TimescaleDB:
 
 ```python
 from picopg import Database
@@ -285,4 +285,4 @@ In french, tutoiement
 
 **Version**: 1.2
 **Last Updated**: 2025-12-20
-**Status**: Active on MarketStream, Ketu, Kala and picopg projects
+**Status**: Active on MarketStream, Ketu, Kala and pycopg projects

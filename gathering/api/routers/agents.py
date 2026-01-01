@@ -3,6 +3,7 @@ Agent management endpoints.
 Authentication is enforced by the AuthenticationMiddleware.
 """
 
+import logging
 from datetime import datetime, timezone
 from typing import List, Optional
 
@@ -34,6 +35,10 @@ from gathering.agents import (
     AgentConfig,
     MemoryService,
 )
+from gathering.llm.providers import LLMProviderFactory
+from gathering.core.config import get_settings
+
+logger = logging.getLogger(__name__)
 
 
 router = APIRouter(prefix="/agents", tags=["agents"])
@@ -160,16 +165,41 @@ async def create_agent(
         temperature=data.config.temperature,
     )
 
-    # Create a mock LLM provider for now
-    # In production, this would be configured separately
-    class MockLLM:
-        async def complete(self, **kwargs) -> str:
-            return "LLM not configured. Please set up an LLM provider."
+    # Create a real LLM provider using the factory
+    settings = get_settings()
+    provider_name = data.config.provider.lower()
+
+    # Get API key for the provider
+    api_key = settings.get_llm_api_key(provider_name)
+
+    if api_key:
+        try:
+            llm = LLMProviderFactory.create(provider_name, {
+                "api_key": api_key,
+                "model": data.config.model,
+                "max_tokens": data.config.max_tokens,
+                "temperature": data.config.temperature,
+            })
+            logger.info(f"Created {provider_name} LLM provider for agent {agent_id}")
+        except Exception as e:
+            logger.warning(f"Failed to create LLM provider: {e}, using mock")
+            # Fallback to mock if provider creation fails
+            class MockLLM:
+                def complete(self, messages, **kwargs):
+                    return {"content": f"LLM provider '{provider_name}' configuration failed: {e}"}
+            llm = MockLLM()
+    else:
+        logger.warning(f"No API key for provider '{provider_name}', using mock LLM")
+        # Use mock LLM if no API key
+        class MockLLM:
+            def complete(self, messages, **kwargs):
+                return {"content": f"LLM not configured. Please set {provider_name.upper()}_API_KEY environment variable."}
+        llm = MockLLM()
 
     agent = AgentWrapper(
         agent_id=agent_id,
         persona=persona,
-        llm=MockLLM(),
+        llm=llm,
         memory=memory,
         config=config,
     )

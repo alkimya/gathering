@@ -6,12 +6,15 @@
 
 import { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, FolderTree, Activity, Terminal as TerminalIcon, Maximize2, Minimize2, GitBranch, Eye, SplitSquareHorizontal, Loader2 } from 'lucide-react';
+import { ArrowLeft, FolderTree, Activity, Terminal as TerminalIcon, Maximize2, Minimize2, GitBranch, Eye, SplitSquareHorizontal, Loader2, Bot } from 'lucide-react';
 import { FileExplorerOptimized as FileExplorer } from '../components/workspace/FileExplorerOptimized';
 import { type CodeEditorHandle } from '../components/workspace/CodeEditor';
 import { ActivityFeed } from '../components/workspace/ActivityFeed';
 import { ResizablePanels } from '../components/workspace/ResizablePanels';
 import api from '../services/api';
+
+// Lazy load Agent Panel
+const WorkspaceAgentPanel = lazy(() => import('../components/workspace/WorkspaceAgentPanel').then(m => ({ default: m.WorkspaceAgentPanel })));
 
 // Lazy load heavy Monaco Editor components (only when file is selected)
 const LSPCodeEditor = lazy(() => import('../components/workspace/LSPCodeEditor').then(m => ({ default: m.LSPCodeEditor })));
@@ -22,8 +25,9 @@ const GitView = lazy(() => import('../components/workspace/GitView').then(m => (
 // Lazy load preview components (only when needed)
 const Terminal = lazy(() => import('../components/workspace/Terminal').then(m => ({ default: m.Terminal })));
 const MarkdownPreview = lazy(() => import('../components/workspace/MarkdownPreview').then(m => ({ default: m.MarkdownPreview })));
+const MarkdownEnhanced = lazy(() => import('../components/workspace/MarkdownEnhanced').then(m => ({ default: m.MarkdownEnhanced })));
 const HTMLPreview = lazy(() => import('../components/workspace/HTMLPreview').then(m => ({ default: m.HTMLPreview })));
-const PythonRunner = lazy(() => import('../components/workspace/PythonRunner').then(m => ({ default: m.PythonRunner })));
+const PythonDevMode = lazy(() => import('../components/workspace/PythonDevMode').then(m => ({ default: m.PythonDevMode })));
 const ImagePreview = lazy(() => import('../components/workspace/ImagePreview').then(m => ({ default: m.ImagePreview })));
 const JSONPreview = lazy(() => import('../components/workspace/JSONPreview').then(m => ({ default: m.JSONPreview })));
 const CSVPreview = lazy(() => import('../components/workspace/CSVPreview').then(m => ({ default: m.CSVPreview })));
@@ -65,12 +69,15 @@ export function Workspace() {
 
   // Layout state
   const [showFileExplorer, setShowFileExplorer] = useState(true);
-  const [showActivityFeed, setShowActivityFeed] = useState(true);
+  const [showActivityFeed, setShowActivityFeed] = useState(false);
   const [showGitView, setShowGitView] = useState(false);
   const [gitViewMaximized, setGitViewMaximized] = useState(false);
   const [showTerminal, setShowTerminal] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showAgentPanel, setShowAgentPanel] = useState(false);
+  const [agentPanelMaximized, setAgentPanelMaximized] = useState(false);
+  const [selectedCode, setSelectedCode] = useState<string>('');
 
   // Refs for scroll sync
   const codeEditorRef = useRef<CodeEditorHandle>(null);
@@ -394,6 +401,25 @@ export function Workspace() {
             </button>
           )}
 
+          <button
+            onClick={() => {
+              setShowAgentPanel(!showAgentPanel);
+              // Close activity feed when opening agent panel
+              if (!showAgentPanel) {
+                setShowActivityFeed(false);
+                setShowGitView(false);
+              }
+            }}
+            className={`flex items-center gap-2 px-4 py-2 text-sm rounded-lg transition-all ${
+              showAgentPanel
+                ? 'bg-pink-500/20 text-pink-300 border border-pink-500/30 glow-purple'
+                : 'bg-white/5 text-zinc-400 hover:bg-white/10 border border-white/5'
+            }`}
+          >
+            <Bot className="w-4 h-4" />
+            Agents
+          </button>
+
           <div className="h-8 w-px bg-white/10"></div>
 
           <button
@@ -439,16 +465,24 @@ export function Workspace() {
                         projectId={parseInt(projectId || '0')}
                         filePath={selectedFile}
                         onContentChange={handleFileContentChange}
+                        onSelectionChange={setSelectedCode}
                       />
                     </Suspense>
                   )
                 }
                 right={
                   <Suspense fallback={<ComponentLoader />}>
-                    {isMarkdownFile && <MarkdownPreview ref={markdownPreviewRef} content={fileContent} />}
+                    {isMarkdownFile && (
+                      // Use Enhanced preview if content has mermaid diagrams or math
+                      fileContent.includes('```mermaid') || fileContent.includes('$$') ? (
+                        <MarkdownEnhanced content={fileContent} />
+                      ) : (
+                        <MarkdownPreview ref={markdownPreviewRef} content={fileContent} />
+                      )
+                    )}
                     {isHTMLFile && <HTMLPreview content={fileContent} />}
                     {isPythonFile && (
-                      <PythonRunner
+                      <PythonDevMode
                         projectId={parseInt(projectId || '0')}
                         filePath={selectedFile}
                         content={fileContent}
@@ -483,9 +517,11 @@ export function Workspace() {
             ) : (
               <Suspense fallback={<ComponentLoader />}>
                 <LSPCodeEditor
+                  ref={codeEditorRef}
                   projectId={parseInt(projectId || '0')}
                   filePath={selectedFile}
                   onContentChange={handleFileContentChange}
+                  onSelectionChange={setSelectedCode}
                 />
               </Suspense>
             )}
@@ -525,6 +561,45 @@ export function Workspace() {
                 onClose={() => setShowGitView(false)}
                 onToggleMaximize={() => setGitViewMaximized(!gitViewMaximized)}
                 isMaximized={gitViewMaximized}
+              />
+            </Suspense>
+          </div>
+        )}
+
+        {/* Agent Panel - Multi-agent conversation with workspace context */}
+        {showAgentPanel && (
+          <div
+            className={`glass-card border-l border-white/5 flex flex-col transition-all ${
+              agentPanelMaximized
+                ? 'absolute inset-0 z-50 w-full'
+                : 'w-[450px]'
+            }`}
+          >
+            <Suspense fallback={<ComponentLoader />}>
+              <WorkspaceAgentPanel
+                context={{
+                  projectId: parseInt(projectId || '0'),
+                  projectName: workspaceInfo?.name || 'Project',
+                  currentFile: selectedFile || undefined,
+                  selectedCode: selectedCode || undefined,
+                  fileLanguage: selectedFile?.split('.').pop() || undefined,
+                }}
+                onClose={() => setShowAgentPanel(false)}
+                onToggleMaximize={() => setAgentPanelMaximized(!agentPanelMaximized)}
+                isMaximized={agentPanelMaximized}
+                onInsertCode={(code) => {
+                  // Insert code at cursor position in editor
+                  const editor = codeEditorRef.current?.getEditor();
+                  if (editor) {
+                    const selection = editor.getSelection();
+                    if (selection) {
+                      editor.executeEdits('agent-insert', [{
+                        range: selection,
+                        text: code,
+                      }]);
+                    }
+                  }
+                }}
               />
             </Suspense>
           </div>

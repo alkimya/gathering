@@ -31,51 +31,6 @@ import {
 import { agents, models, providers, personas } from '../services/api';
 import type { Agent, ChatMessage } from '../types';
 
-// Demo chat messages organized by agent name
-const demoChatByAgent: Record<string, ChatMessage[]> = {
-  'Sophie': [
-    { role: 'user', content: 'Bonjour Sophie ! Peux-tu me donner un aperçu de l\'architecture du projet ?', timestamp: new Date(Date.now() - 3600000).toISOString() },
-    { role: 'assistant', content: 'Bonjour ! Bien sûr, je serais ravie de vous expliquer l\'architecture.\n\nLe projet GatheRing est structuré en plusieurs couches :\n\n1. **API Layer** (`gathering/api/`) - Endpoints FastAPI pour l\'interface REST\n2. **Core Layer** (`gathering/core/`) - Logique métier, schémas et configurations\n3. **Agents Layer** (`gathering/agents/`) - Gestion des personas et conversations\n4. **LLM Layer** (`gathering/llm/`) - Intégration avec les providers LLM\n5. **Orchestration** (`gathering/orchestration/`) - Coordination des cercles et tâches\n\nChaque couche a des responsabilités bien définies pour maintenir une séparation claire des préoccupations.', timestamp: new Date(Date.now() - 3500000).toISOString() },
-    { role: 'user', content: 'Comment les agents communiquent-ils entre eux dans les cercles ?', timestamp: new Date(Date.now() - 3400000).toISOString() },
-    { role: 'assistant', content: 'Excellente question ! La communication inter-agents se fait via le système de **Conversations**.\n\nQuand un cercle est actif :\n- Les agents partagent un contexte commun via `ConversationManager`\n- Chaque message est enrichi avec les mentions (`@agent_name`)\n- Le système maintient un historique complet pour le contexte\n- Les conflits sont résolus par vote ou escalade vers un reviewer\n\nLe tout est orchestré par `CircleOrchestrator` qui gère le tour de parole et les priorités des tâches.', timestamp: new Date(Date.now() - 3300000).toISOString() },
-    { role: 'user', content: 'Merci ! C\'est très clair.', timestamp: new Date(Date.now() - 3200000).toISOString() },
-    { role: 'assistant', content: 'Je vous en prie ! N\'hésitez pas si vous avez d\'autres questions sur l\'architecture ou si vous souhaitez approfondir un aspect particulier du système. Je suis là pour vous aider ! 🚀', timestamp: new Date(Date.now() - 3100000).toISOString() },
-  ],
-  'Olivia': [
-    { role: 'user', content: 'Olivia, j\'ai besoin de ton aide pour optimiser une requête SQL.', timestamp: new Date(Date.now() - 7200000).toISOString() },
-    { role: 'assistant', content: 'Bien sûr ! Je suis experte en bases de données. Montrez-moi la requête que vous souhaitez optimiser, et je vous proposerai des améliorations.\n\nQuelques informations utiles :\n- Quelle est la taille des tables concernées ?\n- Y a-t-il des index existants ?\n- Quel est le temps d\'exécution actuel ?', timestamp: new Date(Date.now() - 7100000).toISOString() },
-    { role: 'user', content: 'La requête joint 3 tables avec environ 100k lignes chacune et prend 5 secondes.', timestamp: new Date(Date.now() - 7000000).toISOString() },
-    { role: 'assistant', content: 'Avec 100k lignes par table et 5 secondes d\'exécution, il y a certainement de l\'optimisation à faire. Voici mes recommandations :\n\n**1. Vérifier les index**\n```sql\nCREATE INDEX idx_table1_fk ON table1(foreign_key_column);\nCREATE INDEX idx_table2_fk ON table2(foreign_key_column);\n```\n\n**2. Utiliser EXPLAIN ANALYZE**\n```sql\nEXPLAIN ANALYZE SELECT ...\n```\n\n**3. Considérer la pagination**\nSi vous n\'avez pas besoin de tous les résultats.\n\n**4. Matérialized views**\nPour les requêtes fréquentes sur des données stables.\n\nEnvoyez-moi la requête exacte et je ferai une analyse détaillée !', timestamp: new Date(Date.now() - 6900000).toISOString() },
-    { role: 'user', content: 'Super conseils ! Je vais appliquer ça.', timestamp: new Date(Date.now() - 6800000).toISOString() },
-    { role: 'assistant', content: 'Parfait ! N\'oubliez pas de tester les performances avant et après avec `EXPLAIN ANALYZE`. Si la requête est toujours lente après les index, envoyez-moi le plan d\'exécution et je vous aiderai à identifier les goulots d\'étranglement. Bonne optimisation ! 📊', timestamp: new Date(Date.now() - 6700000).toISOString() },
-  ],
-};
-
-// Helper to normalize agent name for demo data lookup
-const normalizeAgentName = (name: string): string => {
-  const normalized = name.toLowerCase().trim();
-  if (normalized.includes('sophie')) return 'Sophie';
-  if (normalized.includes('olivia')) return 'Olivia';
-  return name; // Return original if no match
-};
-
-// Get demo chat messages for an agent
-const getDemoChatForAgent = (agentName: string): ChatMessage[] => {
-  const normalizedName = normalizeAgentName(agentName);
-  return demoChatByAgent[normalizedName] || demoChatByAgent['Sophie'];
-};
-
-// Demo stats for agents (memories and messages)
-const demoAgentStats: Record<string, { memories: number; messages: number }> = {
-  'Sophie': { memories: 24, messages: 156 },
-  'Olivia': { memories: 18, messages: 89 },
-};
-
-const getDemoStatsForAgent = (agentName: string) => {
-  const normalizedName = normalizeAgentName(agentName);
-  return demoAgentStats[normalizedName] || { memories: 12, messages: 45 };
-};
-
 function AgentCard({
   agent,
   isSelected,
@@ -150,28 +105,14 @@ function AgentCard({
       </div>
 
       <div className="mt-3 flex items-center gap-4 text-xs text-zinc-500">
-        {(() => {
-          const demoStats = getDemoStatsForAgent(agent.name);
-          // Use demo stats when API returns 0 or undefined
-          const memories = (agent.memory_count !== undefined && agent.memory_count > 0)
-            ? agent.memory_count
-            : demoStats.memories;
-          const messages = (agent.message_count !== undefined && agent.message_count > 0)
-            ? agent.message_count
-            : demoStats.messages;
-          return (
-            <>
-              <div className="flex items-center gap-1.5">
-                <Brain className="w-3.5 h-3.5 text-purple-400" />
-                <span>{memories} memories</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <MessageSquare className="w-3.5 h-3.5 text-cyan-400" />
-                <span>{messages} messages</span>
-              </div>
-            </>
-          );
-        })()}
+        <div className="flex items-center gap-1.5">
+          <Brain className="w-3.5 h-3.5 text-purple-400" />
+          <span>{agent.memory_count ?? 0} memories</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <MessageSquare className="w-3.5 h-3.5 text-cyan-400" />
+          <span>{agent.message_count ?? 0} messages</span>
+        </div>
       </div>
 
       <div className="mt-3">
@@ -194,16 +135,9 @@ function ChatPanel({ agent }: { agent: Agent }) {
     queryKey: ['agent-history', agent.id],
     queryFn: () => agents.getHistory(agent.id),
     refetchOnWindowFocus: false,
-    retry: false, // Don't retry on 404 errors
   });
 
-  // Check if this is a 404 error (agent doesn't exist in backend) - use demo mode silently
-  const is404Error = !!(historyError && (historyError as Error)?.message?.includes('Not Found'));
-
-  // Use demo data when API returns empty or 404 - check both length AND actual content
-  const apiMessages = history?.messages;
-  const hasApiMessages = apiMessages && apiMessages.length > 0;
-  const displayMessages = hasApiMessages ? apiMessages : getDemoChatForAgent(agent.name);
+  const displayMessages = history?.messages || [];
 
   const chatMutation = useMutation({
     mutationFn: async (msg: string) => {
@@ -261,28 +195,20 @@ function ChatPanel({ agent }: { agent: Agent }) {
         </div>
       </div>
 
-      {/* Demo mode notice - shown when 404 error (agent doesn't exist in backend) */}
-      {is404Error && (
-        <div className="mx-5 mt-4 p-3 rounded-xl bg-zinc-500/20 border border-zinc-500/30 flex items-center gap-2">
-          <AlertCircle className="w-4 h-4 text-zinc-400" />
-          <span className="text-sm text-zinc-400">Demo mode - Create this agent to enable chat</span>
-        </div>
-      )}
-
-      {/* Error banner - only show non-404 errors */}
-      {((historyError && !is404Error) || chatMutation.error) && (
+      {/* Error banner */}
+      {(historyError || chatMutation.error) && (
         <div className="mx-5 mt-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30 flex items-center gap-3">
           <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
           <div className="flex-1">
             <p className="text-sm text-red-400">
-              {historyError && !is404Error ? 'Erreur de chargement de l\'historique' : 'Erreur lors de l\'envoi du message'}
+              {historyError ? 'Erreur de chargement de l\'historique' : 'Erreur lors de l\'envoi du message'}
             </p>
             <p className="text-xs text-red-400/70 mt-0.5">
-              {(historyError && !is404Error) ? (historyError as Error)?.message : (chatMutation.error as Error)?.message}
+              {historyError ? (historyError as Error)?.message : (chatMutation.error as Error)?.message}
             </p>
           </div>
           <button
-            onClick={() => (historyError && !is404Error) ? refetch() : chatMutation.reset()}
+            onClick={() => historyError ? refetch() : chatMutation.reset()}
             className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors"
           >
             <RefreshCw className="w-4 h-4" />
@@ -300,6 +226,14 @@ function ChatPanel({ agent }: { agent: Agent }) {
               <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce [animation-delay:0.2s]" />
             </div>
             <p className="text-sm text-zinc-500">Chargement de l'historique...</p>
+          </div>
+        ) : displayMessages.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-12 gap-3">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-zinc-700 to-zinc-800 flex items-center justify-center">
+              <MessageSquare className="w-7 h-7 text-zinc-500" />
+            </div>
+            <p className="text-sm text-zinc-500">Aucun message</p>
+            <p className="text-xs text-zinc-600">Commencez la conversation ci-dessous</p>
           </div>
         ) : (
           displayMessages.map((msg: ChatMessage, i: number) => (
@@ -361,13 +295,13 @@ function ChatPanel({ agent }: { agent: Agent }) {
             type="text"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            placeholder={is404Error ? "Demo mode - Create agent to chat" : chatMutation.isPending ? `${agent.name} répond...` : "Type a message..."}
-            disabled={chatMutation.isPending || is404Error}
+            placeholder={chatMutation.isPending ? `${agent.name} répond...` : "Type a message..."}
+            disabled={chatMutation.isPending}
             className="flex-1 px-5 py-3.5 input-glass rounded-xl disabled:opacity-50"
           />
           <button
             type="submit"
-            disabled={chatMutation.isPending || !message.trim() || is404Error}
+            disabled={chatMutation.isPending || !message.trim()}
             className="btn-gradient px-5 py-3.5 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
           >
             {chatMutation.isPending ? (
@@ -927,21 +861,30 @@ function EditAgentModal({
   // Initialize form when agent details load
   useEffect(() => {
     if (agentDetails && isOpen) {
-      // Support flat structure from DB
+      // Support flat structure from DB (agent.agents_full view)
       const agentAny = agentDetails as any;
       setName(agentAny.persona_name || agentAny.name || '');
       setRole(agentAny.persona_role || agentAny.role || '');
-      setBasePrompt(agentAny.base_prompt || '');
+      // Use system_prompt from agents_full view (COALESCE of full_prompt and base_prompt)
+      setBasePrompt(agentAny.system_prompt || agentAny.base_prompt || '');
       setTraits(Array.isArray(agentAny.traits) ? agentAny.traits.join(', ') : '');
-      setSpecializations(Array.isArray(agentAny.competencies) ? agentAny.competencies.join(', ') : '');
+      setSpecializations(Array.isArray(agentAny.specializations) ? agentAny.specializations.join(', ') : '');
       setCommunicationStyle(agentAny.communication_style || 'balanced');
       setLanguages(Array.isArray(agentAny.languages) ? agentAny.languages.join(', ') : '');
       setMotto(agentAny.motto || '');
 
-      // Find model/provider from agent
-      if (agentAny.model) {
+      // Find model/provider from agent - use model_id directly or search by model_alias
+      if (agentAny.model_id) {
+        setSelectedModelId(agentAny.model_id);
+        // Find provider from model
+        const model = modelsData?.models.find(m => m.id === agentAny.model_id);
+        if (model) {
+          setSelectedProviderId(model.provider_id);
+        }
+      } else if (agentAny.model_alias || agentAny.model) {
+        const modelName = agentAny.model_alias || agentAny.model;
         const model = modelsData?.models.find(m =>
-          m.model_name === agentAny.model || m.model_alias === agentAny.model
+          m.model_name === modelName || m.model_alias === modelName
         );
         if (model) {
           setSelectedModelId(model.id);

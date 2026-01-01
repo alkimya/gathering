@@ -11,13 +11,9 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional, List, Dict, Any
 
-# Add picopg to path
-import sys
-from pathlib import Path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent / "picopg"))
-
+# Import pycopg (local PostgreSQL wrapper)
 try:
-    from picopg import Database
+    from pycopg import Database
 except ImportError:
     Database = None
 
@@ -102,7 +98,7 @@ class VectorStore:
             Configured VectorStore.
         """
         if Database is None:
-            raise ImportError("picopg is required for VectorStore")
+            raise ImportError("pycopg is required for VectorStore")
 
         db = Database.from_env(dotenv_path)
         return cls(db)
@@ -119,7 +115,7 @@ class VectorStore:
             Configured VectorStore.
         """
         if Database is None:
-            raise ImportError("picopg is required for VectorStore")
+            raise ImportError("pycopg is required for VectorStore")
 
         db = Database.from_url(url)
         return cls(db)

@@ -71,6 +71,11 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({ detail: 'Unknown error' }));
+    // Handle Pydantic validation errors (422)
+    if (response.status === 422 && error.detail && Array.isArray(error.detail)) {
+      const messages = error.detail.map((e: any) => `${e.loc?.join('.')}: ${e.msg}`).join('; ');
+      throw new Error(`Validation error: ${messages}`);
+    }
     throw new Error(error.detail || `HTTP ${response.status}`);
   }
 

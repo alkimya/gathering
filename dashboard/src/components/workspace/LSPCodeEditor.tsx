@@ -21,6 +21,7 @@ interface LSPCodeEditorProps {
   projectId: number;
   filePath: string | null;
   onContentChange?: (content: string) => void;
+  onSelectionChange?: (selectedText: string) => void;
 }
 
 /**
@@ -206,11 +207,12 @@ export function registerLSPProviders(
 }
 
 export const LSPCodeEditor = React.forwardRef<CodeEditorHandle, LSPCodeEditorProps>(
-  ({ projectId, filePath, onContentChange }, ref) => {
+  ({ projectId, filePath, onContentChange, onSelectionChange }, ref) => {
   const editorRef = useRef<CodeEditorHandle>(null);
   const [lspEnabled, setLspEnabled] = useState(false);
   const [language, setLanguage] = useState<string | null>(null);
   const debounceTimer = useRef<number | null>(null);
+  const selectionDebounceTimer = useRef<number | null>(null);
   const currentFilePathRef = useRef<string | null>(null);
 
   // Keep track of current file path for provider callbacks
@@ -221,6 +223,61 @@ export const LSPCodeEditor = React.forwardRef<CodeEditorHandle, LSPCodeEditorPro
     getEditor: () => editorRef.current?.getEditor() || null,
     getMonaco: () => editorRef.current?.getMonaco() || null
   }));
+
+  // Listen for selection changes
+  useEffect(() => {
+    if (!onSelectionChange) return;
+
+    const editor = editorRef.current?.getEditor();
+    if (!editor) {
+      // Editor not ready yet, retry after mount
+      const retryTimer = setTimeout(() => {
+        const ed = editorRef.current?.getEditor();
+        if (ed && onSelectionChange) {
+          const disposable = ed.onDidChangeCursorSelection(() => {
+            // Debounce selection change notifications
+            if (selectionDebounceTimer.current) {
+              clearTimeout(selectionDebounceTimer.current);
+            }
+            selectionDebounceTimer.current = window.setTimeout(() => {
+              const selection = ed.getSelection();
+              if (selection && !selection.isEmpty()) {
+                const selectedText = ed.getModel()?.getValueInRange(selection) || '';
+                onSelectionChange(selectedText);
+              } else {
+                onSelectionChange('');
+              }
+            }, 150);
+          });
+          return () => disposable.dispose();
+        }
+      }, 500);
+      return () => clearTimeout(retryTimer);
+    }
+
+    const disposable = editor.onDidChangeCursorSelection(() => {
+      // Debounce selection change notifications
+      if (selectionDebounceTimer.current) {
+        clearTimeout(selectionDebounceTimer.current);
+      }
+      selectionDebounceTimer.current = window.setTimeout(() => {
+        const selection = editor.getSelection();
+        if (selection && !selection.isEmpty()) {
+          const selectedText = editor.getModel()?.getValueInRange(selection) || '';
+          onSelectionChange(selectedText);
+        } else {
+          onSelectionChange('');
+        }
+      }, 150);
+    });
+
+    return () => {
+      disposable.dispose();
+      if (selectionDebounceTimer.current) {
+        clearTimeout(selectionDebounceTimer.current);
+      }
+    };
+  }, [onSelectionChange, filePath]);
 
   useEffect(() => {
     if (!filePath) {
@@ -238,6 +295,11 @@ export const LSPCodeEditor = React.forwardRef<CodeEditorHandle, LSPCodeEditorPro
       return;
     }
 
+    let mounted = true;
+    let retryCount = 0;
+    const MAX_RETRIES = 50; // Max 5 seconds of waiting (50 * 100ms)
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+
     // Initialize LSP server AND register providers globally
     const initLSP = async () => {
       try {
@@ -249,6 +311,8 @@ export const LSPCodeEditor = React.forwardRef<CodeEditorHandle, LSPCodeEditorPro
 
         // Wait for Monaco to be available from CodeEditor ref
         const tryRegisterProviders = () => {
+          if (!mounted) return; // Component unmounted, stop retrying
+
           const monacoInstance = editorRef.current?.getMonaco?.();
           if (monacoInstance) {
             console.log('[LSP] Monaco instance retrieved from editor ref');
@@ -261,10 +325,16 @@ export const LSPCodeEditor = React.forwardRef<CodeEditorHandle, LSPCodeEditorPro
             );
             setLspEnabled(true);
             console.log(`✓ LSP enabled for ${detectedLanguage}`);
-          } else {
+          } else if (retryCount < MAX_RETRIES) {
             // Monaco not yet available, retry in 100ms
-            console.log('[LSP] Waiting for Monaco instance...');
-            setTimeout(tryRegisterProviders, 100);
+            retryCount++;
+            if (retryCount % 10 === 0) {
+              console.log(`[LSP] Waiting for Monaco instance... (${retryCount}/${MAX_RETRIES})`);
+            }
+            timeoutId = setTimeout(tryRegisterProviders, 100);
+          } else {
+            console.warn('[LSP] Max retries reached, Monaco instance not available');
+            setLspEnabled(false);
           }
         };
 
@@ -276,6 +346,13 @@ export const LSPCodeEditor = React.forwardRef<CodeEditorHandle, LSPCodeEditorPro
     };
 
     initLSP();
+
+    return () => {
+      mounted = false;
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
   }, [projectId, filePath]);
 
   useEffect(() => {

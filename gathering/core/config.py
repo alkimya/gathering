@@ -95,6 +95,9 @@ class Settings(BaseSettings):
     anthropic_api_key: Optional[SecretStr] = None
     anthropic_default_model: str = "claude-3-opus-20240229"
 
+    deepseek_api_key: Optional[SecretStr] = None
+    deepseek_default_model: str = "deepseek-chat"
+
     ollama_base_url: str = "http://localhost:11434"
     ollama_default_model: str = "llama2"
 
@@ -193,6 +196,8 @@ class Settings(BaseSettings):
             return self.openai_api_key.get_secret_value()
         elif provider == "anthropic" and self.anthropic_api_key:
             return self.anthropic_api_key.get_secret_value()
+        elif provider == "deepseek" and self.deepseek_api_key:
+            return self.deepseek_api_key.get_secret_value()
         return None
 
     def validate_for_production(self) -> list[str]:

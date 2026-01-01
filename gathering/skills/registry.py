@@ -62,6 +62,13 @@ class SkillRegistry:
         # Media processing skills
         "image": "gathering.skills.image:ImageSkill",
         "pdf": "gathering.skills.pdf:PDFSkill",
+        # GatheRing system skills
+        "goals": "gathering.skills.gathering:GoalsSkill",
+        "pipelines": "gathering.skills.gathering:PipelinesSkill",
+        "tasks": "gathering.skills.gathering:BackgroundTasksSkill",
+        "schedules": "gathering.skills.gathering:SchedulesSkill",
+        "circles": "gathering.skills.gathering:CirclesSkill",
+        "projects": "gathering.skills.gathering:ProjectsSkill",
     }
 
     @classmethod

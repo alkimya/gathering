@@ -5,14 +5,14 @@
  * Similar to GitFlow diagram with branches flowing left to right
  */
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   GitBranch,
   Loader2,
   RefreshCw,
   AlertCircle
 } from 'lucide-react';
-import api from '../../services/api';
+import { useGitGraph } from '../../hooks/useGitCache';
 
 interface GraphCommit {
   hash: string;
@@ -35,42 +35,13 @@ interface GitGraphProps {
 }
 
 export function GitGraph({ projectId, onCommitSelect }: GitGraphProps) {
-  const [commits, setCommits] = useState<GraphCommit[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [refreshing, setRefreshing] = useState(false);
+  const { graph, loading, error, reload } = useGitGraph(projectId, 100);
   const [selectedCommit, setSelectedCommit] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadGraph();
-  }, [projectId]);
-
-  const loadGraph = async (isRefresh = false) => {
-    try {
-      if (isRefresh) {
-        setRefreshing(true);
-      } else {
-        setLoading(true);
-      }
-      setError(null);
-
-      const response = await api.get(`/workspace/${projectId}/git/graph`, {
-        params: { limit: 100, all_branches: true }
-      });
-
-      const data = response.data as any;
-      setCommits(data.commits || []);
-    } catch (err: any) {
-      console.error('Failed to load git graph:', err);
-      setError(err.message || 'Failed to load git graph');
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  };
+  const commits: GraphCommit[] = graph?.commits || [];
 
   const handleRefresh = () => {
-    loadGraph(true);
+    reload(true);
   };
 
   const handleCommitClick = (commitHash: string) => {
@@ -235,12 +206,12 @@ export function GitGraph({ projectId, onCommitSelect }: GitGraphProps) {
           </h3>
           <button
             onClick={handleRefresh}
-            disabled={refreshing}
+            disabled={loading}
             className="p-1.5 hover:bg-white/10 rounded transition-colors disabled:opacity-50"
             title="Refresh graph"
           >
             <RefreshCw
-              className={`w-4 h-4 text-zinc-400 ${refreshing ? 'animate-spin' : ''}`}
+              className={`w-4 h-4 text-zinc-400 ${loading ? 'animate-spin' : ''}`}
             />
           </button>
         </div>

@@ -16,25 +16,6 @@ import {
 import { health, agents, circles, conversations } from '../services/api';
 import { Link } from 'react-router-dom';
 
-// Demo data for when API returns empty
-const demoCircles = [
-  { id: 'c1', name: 'Development Team', status: 'running', agent_count: 2, active_tasks: 5 },
-  { id: 'c2', name: 'Code Review', status: 'running', agent_count: 2, active_tasks: 2 },
-  { id: 'c3', name: 'Documentation', status: 'stopped', agent_count: 1, active_tasks: 0 },
-];
-
-const demoConversations = [
-  { id: 'conv1', title: 'Architecture Discussion', participants: ['Sophie', 'Olivia'], message_count: 24 },
-  { id: 'conv2', title: 'Code Review Session', participants: ['Sophie', 'Olivia'], message_count: 18 },
-  { id: 'conv3', title: 'Sprint Planning', participants: ['Sophie', 'Olivia'], message_count: 12 },
-];
-
-const demoStats = {
-  active_tasks: 7,
-  goals_in_progress: 3,
-  scheduled_actions: 5,
-};
-
 function StatCard({
   title,
   value,
@@ -185,12 +166,11 @@ export function Dashboard() {
     refetchOnWindowFocus: false,
   });
 
-  // Use demo data when API returns empty or zero
-  const displayCircles = circlesData?.circles?.length ? circlesData.circles : demoCircles;
+  // Use real API data only
+  const displayCircles = circlesData?.circles || [];
   const runningCircles = displayCircles.filter(c => c.status === 'running').length;
-  // Calculate active tasks from circles if API doesn't provide it
-  const activeTasks = healthData?.active_tasks || displayCircles.reduce((sum, c) => sum + (c.active_tasks || 0), 0) || demoStats.active_tasks;
-  const totalConversations = conversationsData?.total || demoConversations.length;
+  const activeTasks = healthData?.active_tasks || displayCircles.reduce((sum, c) => sum + (c.active_tasks || 0), 0);
+  const totalConversations = conversationsData?.total || 0;
 
   return (
     <div className="space-y-8">
@@ -290,9 +270,16 @@ export function Dashboard() {
             </Link>
           </div>
           <div className="p-4 space-y-3">
-            {displayCircles.slice(0, 5).map(circle => (
-              <CircleCard key={circle.id} circle={circle} />
-            ))}
+            {displayCircles.length === 0 ? (
+              <div className="empty-state p-8 text-center">
+                <Circle className="w-10 h-10 text-zinc-600 mx-auto mb-3" />
+                <p className="text-zinc-500">No circles yet</p>
+              </div>
+            ) : (
+              displayCircles.slice(0, 5).map(circle => (
+                <CircleCard key={circle.id} circle={circle} />
+              ))
+            )}
           </div>
         </div>
       </div>

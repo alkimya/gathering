@@ -1,6 +1,6 @@
 """
 Database connection and management for GatheRing framework.
-Extends PicoPG with GatheRing-specific functionality.
+Extends Pycopg with GatheRing-specific functionality.
 """
 
 import os
@@ -8,15 +8,11 @@ from typing import Optional, List, Dict, Any
 from functools import lru_cache
 from contextlib import contextmanager
 
-# Import PicoPG from sibling project
-import sys
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'picopg'))
-
 try:
-    from picopg import Database as PicoPGDatabase, Config
+    from pycopg import Database as PycopgDatabase, Config
 except ImportError:
-    # Fallback if picopg not available - use basic psycopg
-    PicoPGDatabase = None
+    # Fallback if pycopg not available - use basic psycopg
+    PycopgDatabase = None
     Config = None
 
 from sqlalchemy import create_engine, text
@@ -34,7 +30,7 @@ from gathering.db.models import Base
 class Database:
     """
     Database wrapper for GatheRing.
-    Provides both PicoPG convenience methods and SQLAlchemy ORM access.
+    Provides both Pycopg convenience methods and SQLAlchemy ORM access.
     """
 
     SCHEMA = "gathering"
@@ -54,7 +50,7 @@ class Database:
         self._connection_string = connection_string or self._build_connection_string(config)
         self._engine = None
         self._session_factory = None
-        self._picopg = None
+        self._pycopg = None
 
     @classmethod
     def from_env(cls, env_file: Optional[str] = None) -> "Database":
@@ -158,19 +154,19 @@ class Database:
             session.close()
 
     # =========================================================================
-    # PicoPG Access (if available)
+    # Pycopg Access (if available)
     # =========================================================================
 
     @property
-    def picopg(self) -> Optional["PicoPGDatabase"]:
-        """Get PicoPG database instance for advanced operations."""
-        if PicoPGDatabase is None:
+    def pycopg(self) -> Optional["PycopgDatabase"]:
+        """Get Pycopg database instance for advanced operations."""
+        if PycopgDatabase is None:
             return None
 
-        if self._picopg is None:
-            self._picopg = PicoPGDatabase.from_url(self._connection_string)
+        if self._pycopg is None:
+            self._pycopg = PycopgDatabase.from_url(self._connection_string)
 
-        return self._picopg
+        return self._pycopg
 
     # =========================================================================
     # Schema & Initialization
@@ -384,9 +380,9 @@ class Database:
         if self._engine:
             self._engine.dispose()
             self._engine = None
-        if self._picopg:
-            # PicoPG handles its own cleanup
-            self._picopg = None
+        if self._pycopg:
+            # Pycopg handles its own cleanup
+            self._pycopg = None
 
     def __enter__(self) -> "Database":
         return self

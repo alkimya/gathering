@@ -2,18 +2,10 @@
  * Git Timeline Component - Web3 Dark Theme
  */
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { GitCommit, GitBranch, User, Calendar, Loader2, Eye } from 'lucide-react';
 import api from '../../services/api';
-
-interface Commit {
-  hash: string;
-  author_name: string;
-  author_email: string;
-  date: string;
-  message: string;
-  files?: string[];
-}
+import { useGitCommits } from '../../hooks/useGitCache';
 
 interface GitTimelineProps {
   projectId: number;
@@ -22,37 +14,13 @@ interface GitTimelineProps {
 }
 
 export function GitTimeline({ projectId, onCommitSelect, selectedCommit: externalSelectedCommit }: GitTimelineProps) {
-  const [commits, setCommits] = useState<Commit[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { commits, loading, error } = useGitCommits(projectId, 50);
   const [selectedCommit, setSelectedCommit] = useState<string | null>(null);
   const [diff, setDiff] = useState<string | null>(null);
   const [loadingDiff, setLoadingDiff] = useState(false);
 
   // Use external selectedCommit if provided, otherwise use internal state
   const activeCommit = externalSelectedCommit !== undefined ? externalSelectedCommit : selectedCommit;
-
-  useEffect(() => {
-    loadCommits();
-  }, [projectId]);
-
-  const loadCommits = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const response = await api.get(`/workspace/${projectId}/git/commits`, {
-        params: { limit: 50 },
-      });
-
-      setCommits(response.data as Commit[]);
-    } catch (err: any) {
-      console.error('Failed to load commits:', err);
-      setError(err.message || 'Failed to load commits');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const loadDiff = async (commitHash: string) => {
     try {

@@ -42,7 +42,7 @@ class AISkill(BaseSkill):
         },
         "anthropic": {
             "base_url": "https://api.anthropic.com/v1",
-            "models": ["claude-3-opus-20240229", "claude-3-sonnet-20240229", "claude-3-haiku-20240307", "claude-3-5-sonnet-20241022"],
+            "models": ["claude-sonnet-4-5", "claude-haiku-4-5", "claude-opus-4-5"],
             "env_key": "ANTHROPIC_API_KEY",
         },
         "deepseek": {
@@ -92,10 +92,10 @@ class AISkill(BaseSkill):
                         "model": {"type": "string", "description": "Model name"},
                         "temperature": {"type": "number", "description": "Temperature (0-2)", "default": 0.7},
                         "max_tokens": {"type": "integer", "description": "Max tokens to generate", "default": 1000},
-                        "json_mode": {"type": "boolean", "description": "Request JSON output", "default": False}
+                        "json_mode": {"type": "boolean", "description": "Request JSON output", "default": False},
                     },
-                    "required": ["prompt"]
-                }
+                    "required": ["prompt"],
+                },
             },
             {
                 "name": "ai_chat",
@@ -109,18 +109,18 @@ class AISkill(BaseSkill):
                                 "type": "object",
                                 "properties": {
                                     "role": {"type": "string", "enum": ["system", "user", "assistant"]},
-                                    "content": {"type": "string"}
-                                }
+                                    "content": {"type": "string"},
+                                },
                             },
-                            "description": "Conversation messages"
+                            "description": "Conversation messages",
                         },
                         "provider": {"type": "string", "enum": list(self.PROVIDERS.keys())},
                         "model": {"type": "string"},
                         "temperature": {"type": "number", "default": 0.7},
-                        "max_tokens": {"type": "integer", "default": 1000}
+                        "max_tokens": {"type": "integer", "default": 1000},
                     },
-                    "required": ["messages"]
-                }
+                    "required": ["messages"],
+                },
             },
             {
                 "name": "ai_embed",
@@ -132,17 +132,17 @@ class AISkill(BaseSkill):
                         "texts": {
                             "type": "array",
                             "items": {"type": "string"},
-                            "description": "Multiple texts to embed (batch)"
+                            "description": "Multiple texts to embed (batch)",
                         },
                         "model": {
                             "type": "string",
                             "description": "Embedding model",
-                            "default": "text-embedding-3-small"
+                            "default": "text-embedding-3-small",
                         },
-                        "provider": {"type": "string", "default": "openai"}
+                        "provider": {"type": "string", "default": "openai"},
                     },
-                    "required": []
-                }
+                    "required": [],
+                },
             },
             {
                 "name": "ai_vision",
@@ -155,10 +155,10 @@ class AISkill(BaseSkill):
                         "image_base64": {"type": "string", "description": "Base64 encoded image"},
                         "prompt": {"type": "string", "description": "What to analyze/ask about the image"},
                         "provider": {"type": "string", "enum": ["openai", "anthropic"], "default": "openai"},
-                        "model": {"type": "string", "description": "Vision model to use"}
+                        "model": {"type": "string", "description": "Vision model to use"},
                     },
-                    "required": ["prompt"]
-                }
+                    "required": ["prompt"],
+                },
             },
             {
                 "name": "ai_transcribe",
@@ -169,10 +169,10 @@ class AISkill(BaseSkill):
                         "audio_path": {"type": "string", "description": "Path to audio file"},
                         "language": {"type": "string", "description": "Language code (e.g., 'en', 'fr')"},
                         "model": {"type": "string", "default": "whisper-1"},
-                        "timestamps": {"type": "boolean", "description": "Include word timestamps", "default": False}
+                        "timestamps": {"type": "boolean", "description": "Include word timestamps", "default": False},
                     },
-                    "required": ["audio_path"]
-                }
+                    "required": ["audio_path"],
+                },
             },
             {
                 "name": "ai_speak",
@@ -186,12 +186,12 @@ class AISkill(BaseSkill):
                             "type": "string",
                             "enum": ["alloy", "echo", "fable", "onyx", "nova", "shimmer"],
                             "description": "Voice to use",
-                            "default": "alloy"
+                            "default": "alloy",
                         },
-                        "model": {"type": "string", "default": "tts-1"}
+                        "model": {"type": "string", "default": "tts-1"},
                     },
-                    "required": ["text", "output_path"]
-                }
+                    "required": ["text", "output_path"],
+                },
             },
             {
                 "name": "ai_summarize",
@@ -200,18 +200,22 @@ class AISkill(BaseSkill):
                     "type": "object",
                     "properties": {
                         "text": {"type": "string", "description": "Text to summarize"},
-                        "max_length": {"type": "integer", "description": "Max summary length in words", "default": 200},
+                        "max_length": {
+                            "type": "integer",
+                            "description": "Max summary length in words",
+                            "default": 200,
+                        },
                         "style": {
                             "type": "string",
                             "enum": ["brief", "detailed", "bullets", "executive"],
                             "description": "Summary style",
-                            "default": "brief"
+                            "default": "brief",
                         },
                         "provider": {"type": "string"},
-                        "model": {"type": "string"}
+                        "model": {"type": "string"},
                     },
-                    "required": ["text"]
-                }
+                    "required": ["text"],
+                },
             },
             {
                 "name": "ai_translate",
@@ -220,13 +224,19 @@ class AISkill(BaseSkill):
                     "type": "object",
                     "properties": {
                         "text": {"type": "string", "description": "Text to translate"},
-                        "target_language": {"type": "string", "description": "Target language (e.g., 'French', 'es', 'Japanese')"},
-                        "source_language": {"type": "string", "description": "Source language (auto-detect if not specified)"},
+                        "target_language": {
+                            "type": "string",
+                            "description": "Target language (e.g., 'French', 'es', 'Japanese')",
+                        },
+                        "source_language": {
+                            "type": "string",
+                            "description": "Source language (auto-detect if not specified)",
+                        },
                         "provider": {"type": "string"},
-                        "model": {"type": "string"}
+                        "model": {"type": "string"},
                     },
-                    "required": ["text", "target_language"]
-                }
+                    "required": ["text", "target_language"],
+                },
             },
             {
                 "name": "ai_extract",
@@ -235,20 +245,17 @@ class AISkill(BaseSkill):
                     "type": "object",
                     "properties": {
                         "text": {"type": "string", "description": "Text to extract from"},
-                        "schema": {
-                            "type": "object",
-                            "description": "JSON schema of data to extract"
-                        },
+                        "schema": {"type": "object", "description": "JSON schema of data to extract"},
                         "fields": {
                             "type": "array",
                             "items": {"type": "string"},
-                            "description": "Simple list of fields to extract"
+                            "description": "Simple list of fields to extract",
                         },
                         "provider": {"type": "string"},
-                        "model": {"type": "string"}
+                        "model": {"type": "string"},
                     },
-                    "required": ["text"]
-                }
+                    "required": ["text"],
+                },
             },
             {
                 "name": "ai_compare",
@@ -262,22 +269,20 @@ class AISkill(BaseSkill):
                             "type": "string",
                             "enum": ["embedding", "llm"],
                             "description": "Comparison method",
-                            "default": "embedding"
-                        }
+                            "default": "embedding",
+                        },
                     },
-                    "required": ["text1", "text2"]
-                }
+                    "required": ["text1", "text2"],
+                },
             },
             {
                 "name": "ai_models",
                 "description": "List available models for a provider",
                 "input_schema": {
                     "type": "object",
-                    "properties": {
-                        "provider": {"type": "string", "description": "Provider name (or 'all')"}
-                    },
-                    "required": []
-                }
+                    "properties": {"provider": {"type": "string", "description": "Provider name (or 'all')"}},
+                    "required": [],
+                },
             },
         ]
 
@@ -352,7 +357,7 @@ class AISkill(BaseSkill):
             return SkillResponse(
                 success=False,
                 message=f"Prompt too long: {len(prompt)} chars (max {self.MAX_PROMPT_LENGTH})",
-                error="prompt_too_long"
+                error="prompt_too_long",
             )
 
         # Check provider
@@ -361,7 +366,7 @@ class AISkill(BaseSkill):
                 success=False,
                 message=f"Unknown provider: {provider}",
                 error="unknown_provider",
-                data={"available_providers": list(self.PROVIDERS.keys())}
+                data={"available_providers": list(self.PROVIDERS.keys())},
             )
 
         # Get API key
@@ -372,7 +377,7 @@ class AISkill(BaseSkill):
             return SkillResponse(
                 success=False,
                 message=f"No API key for {provider}. Set {provider_info.get('env_key', 'API_KEY')}",
-                error="no_api_key"
+                error="no_api_key",
             )
 
         # Default model
@@ -387,14 +392,19 @@ class AISkill(BaseSkill):
         else:
             # OpenAI-compatible (openai, deepseek, groq)
             return self._call_openai_compatible(
-                prompt, system, model, temperature, max_tokens,
-                api_key, provider_info["base_url"], json_mode
+                prompt, system, model, temperature, max_tokens, api_key, provider_info["base_url"], json_mode
             )
 
     def _call_openai_compatible(
-        self, prompt: str, system: Optional[str], model: str,
-        temperature: float, max_tokens: int, api_key: str,
-        base_url: str, json_mode: bool = False
+        self,
+        prompt: str,
+        system: Optional[str],
+        model: str,
+        temperature: float,
+        max_tokens: int,
+        api_key: str,
+        base_url: str,
+        json_mode: bool = False,
     ) -> SkillResponse:
         """Call OpenAI-compatible API."""
         import urllib.request
@@ -421,12 +431,7 @@ class AISkill(BaseSkill):
             "Authorization": f"Bearer {api_key}",
         }
 
-        request = urllib.request.Request(
-            f"{base_url}/chat/completions",
-            data=data,
-            headers=headers,
-            method="POST"
-        )
+        request = urllib.request.Request(f"{base_url}/chat/completions", data=data, headers=headers, method="POST")
 
         try:
             with urllib.request.urlopen(request, timeout=120) as response:
@@ -443,20 +448,15 @@ class AISkill(BaseSkill):
                     "model": model,
                     "usage": usage,
                     "finish_reason": result["choices"][0].get("finish_reason"),
-                }
+                },
             )
 
         except urllib.error.HTTPError as e:
             error_body = e.read().decode("utf-8") if e.fp else str(e)
-            return SkillResponse(
-                success=False,
-                message=f"API error: {e.code}",
-                error=error_body
-            )
+            return SkillResponse(success=False, message=f"API error: {e.code}", error=error_body)
 
     def _call_anthropic(
-        self, prompt: str, system: Optional[str], model: str,
-        temperature: float, max_tokens: int, api_key: str
+        self, prompt: str, system: Optional[str], model: str, temperature: float, max_tokens: int, api_key: str
     ) -> SkillResponse:
         """Call Anthropic API."""
         import urllib.request
@@ -480,10 +480,7 @@ class AISkill(BaseSkill):
         }
 
         request = urllib.request.Request(
-            "https://api.anthropic.com/v1/messages",
-            data=data,
-            headers=headers,
-            method="POST"
+            "https://api.anthropic.com/v1/messages", data=data, headers=headers, method="POST"
         )
 
         try:
@@ -501,20 +498,15 @@ class AISkill(BaseSkill):
                     "model": model,
                     "usage": usage,
                     "stop_reason": result.get("stop_reason"),
-                }
+                },
             )
 
         except urllib.error.HTTPError as e:
             error_body = e.read().decode("utf-8") if e.fp else str(e)
-            return SkillResponse(
-                success=False,
-                message=f"API error: {e.code}",
-                error=error_body
-            )
+            return SkillResponse(success=False, message=f"API error: {e.code}", error=error_body)
 
     def _call_ollama(
-        self, prompt: str, system: Optional[str], model: str,
-        temperature: float, max_tokens: int
+        self, prompt: str, system: Optional[str], model: str, temperature: float, max_tokens: int
     ) -> SkillResponse:
         """Call Ollama local API."""
         import urllib.request
@@ -527,7 +519,7 @@ class AISkill(BaseSkill):
             "options": {
                 "temperature": temperature,
                 "num_predict": max_tokens,
-            }
+            },
         }
 
         if system:
@@ -537,10 +529,7 @@ class AISkill(BaseSkill):
         headers = {"Content-Type": "application/json"}
 
         request = urllib.request.Request(
-            "http://localhost:11434/api/generate",
-            data=data,
-            headers=headers,
-            method="POST"
+            "http://localhost:11434/api/generate", data=data, headers=headers, method="POST"
         )
 
         try:
@@ -557,15 +546,11 @@ class AISkill(BaseSkill):
                     "model": model,
                     "eval_count": result.get("eval_count"),
                     "eval_duration": result.get("eval_duration"),
-                }
+                },
             )
 
         except urllib.error.URLError as e:
-            return SkillResponse(
-                success=False,
-                message="Ollama not running. Start with: ollama serve",
-                error=str(e)
-            )
+            return SkillResponse(success=False, message="Ollama not running. Start with: ollama serve", error=str(e))
 
     def _ai_chat(self, tool_input: Dict[str, Any]) -> SkillResponse:
         """Multi-turn chat."""
@@ -579,11 +564,7 @@ class AISkill(BaseSkill):
         provider_info = self.PROVIDERS.get(provider, {})
 
         if not api_key and not provider_info.get("local"):
-            return SkillResponse(
-                success=False,
-                message=f"No API key for {provider}",
-                error="no_api_key"
-            )
+            return SkillResponse(success=False, message=f"No API key for {provider}", error="no_api_key")
 
         if not model:
             model = provider_info.get("models", ["gpt-4o"])[0]
@@ -651,7 +632,7 @@ class AISkill(BaseSkill):
                     "content": content,
                     "model": model,
                     "messages_count": len(messages),
-                }
+                },
             )
 
         except Exception as e:
@@ -668,19 +649,11 @@ class AISkill(BaseSkill):
             texts = [text]
 
         if not texts:
-            return SkillResponse(
-                success=False,
-                message="No text provided for embedding",
-                error="no_text"
-            )
+            return SkillResponse(success=False, message="No text provided for embedding", error="no_text")
 
         api_key = self._get_api_key(provider)
         if not api_key:
-            return SkillResponse(
-                success=False,
-                message=f"No API key for {provider}",
-                error="no_api_key"
-            )
+            return SkillResponse(success=False, message=f"No API key for {provider}", error="no_api_key")
 
         # Check cache
         embeddings = []
@@ -713,12 +686,7 @@ class AISkill(BaseSkill):
                 "Authorization": f"Bearer {api_key}",
             }
 
-            request = urllib.request.Request(
-                f"{base_url}/embeddings",
-                data=data,
-                headers=headers,
-                method="POST"
-            )
+            request = urllib.request.Request(f"{base_url}/embeddings", data=data, headers=headers, method="POST")
 
             try:
                 with urllib.request.urlopen(request, timeout=60) as response:
@@ -743,7 +711,7 @@ class AISkill(BaseSkill):
                 "model": model,
                 "dimensions": len(embeddings[0]) if embeddings else 0,
                 "count": len(embeddings),
-            }
+            },
         )
 
     def _ai_vision(self, tool_input: Dict[str, Any]) -> SkillResponse:
@@ -766,7 +734,13 @@ class AISkill(BaseSkill):
 
             # Detect mime type
             suffix = path.suffix.lower()
-            mime_types = {".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png", ".gif": "image/gif", ".webp": "image/webp"}
+            mime_types = {
+                ".jpg": "image/jpeg",
+                ".jpeg": "image/jpeg",
+                ".png": "image/png",
+                ".gif": "image/gif",
+                ".webp": "image/webp",
+            }
             mime_type = mime_types.get(suffix, "image/jpeg")
             image_content = f"data:{mime_type};base64,{image_data}"
 
@@ -778,7 +752,7 @@ class AISkill(BaseSkill):
             return SkillResponse(
                 success=False,
                 message="No image provided (use image_path, image_url, or image_base64)",
-                error="no_image"
+                error="no_image",
             )
 
         api_key = self._get_api_key(provider)
@@ -798,28 +772,28 @@ class AISkill(BaseSkill):
             else:
                 # URL - need to fetch
                 return SkillResponse(
-                    success=False,
-                    message="Anthropic requires base64 image, not URL",
-                    error="url_not_supported"
+                    success=False, message="Anthropic requires base64 image, not URL", error="url_not_supported"
                 )
 
             payload = {
                 "model": model,
                 "max_tokens": 1024,
-                "messages": [{
-                    "role": "user",
-                    "content": [
-                        {
-                            "type": "image",
-                            "source": {
-                                "type": "base64",
-                                "media_type": media_type,
-                                "data": data_b64,
-                            }
-                        },
-                        {"type": "text", "text": prompt}
-                    ]
-                }]
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": [
+                            {
+                                "type": "image",
+                                "source": {
+                                    "type": "base64",
+                                    "media_type": media_type,
+                                    "data": data_b64,
+                                },
+                            },
+                            {"type": "text", "text": prompt},
+                        ],
+                    }
+                ],
             }
 
             headers = {
@@ -832,7 +806,7 @@ class AISkill(BaseSkill):
                 "https://api.anthropic.com/v1/messages",
                 data=json.dumps(payload).encode("utf-8"),
                 headers=headers,
-                method="POST"
+                method="POST",
             )
 
         else:  # OpenAI
@@ -840,13 +814,15 @@ class AISkill(BaseSkill):
 
             payload = {
                 "model": model,
-                "messages": [{
-                    "role": "user",
-                    "content": [
-                        {"type": "text", "text": prompt},
-                        {"type": "image_url", "image_url": {"url": image_content}}
-                    ]
-                }],
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": [
+                            {"type": "text", "text": prompt},
+                            {"type": "image_url", "image_url": {"url": image_content}},
+                        ],
+                    }
+                ],
                 "max_tokens": 1024,
             }
 
@@ -859,7 +835,7 @@ class AISkill(BaseSkill):
                 "https://api.openai.com/v1/chat/completions",
                 data=json.dumps(payload).encode("utf-8"),
                 headers=headers,
-                method="POST"
+                method="POST",
             )
 
         try:
@@ -878,7 +854,7 @@ class AISkill(BaseSkill):
                     "analysis": content,
                     "model": model,
                     "provider": provider,
-                }
+                },
             )
 
         except Exception as e:
@@ -946,10 +922,7 @@ class AISkill(BaseSkill):
         }
 
         request = urllib.request.Request(
-            "https://api.openai.com/v1/audio/transcriptions",
-            data=body,
-            headers=headers,
-            method="POST"
+            "https://api.openai.com/v1/audio/transcriptions", data=body, headers=headers, method="POST"
         )
 
         try:
@@ -965,15 +938,11 @@ class AISkill(BaseSkill):
                         "segments": result.get("segments", []),
                         "language": result.get("language"),
                         "duration": result.get("duration"),
-                    }
+                    },
                 )
             else:
                 text = result.get("text", result) if isinstance(result, dict) else result
-                return SkillResponse(
-                    success=True,
-                    message=f"Transcribed audio",
-                    data={"text": text}
-                )
+                return SkillResponse(success=True, message=f"Transcribed audio", data={"text": text})
 
         except Exception as e:
             return SkillResponse(success=False, message=str(e), error=str(e))
@@ -1006,7 +975,7 @@ class AISkill(BaseSkill):
             "https://api.openai.com/v1/audio/speech",
             data=json.dumps(payload).encode("utf-8"),
             headers=headers,
-            method="POST"
+            method="POST",
         )
 
         try:
@@ -1027,7 +996,7 @@ class AISkill(BaseSkill):
                     "size_bytes": len(audio_data),
                     "voice": voice,
                     "model": model,
-                }
+                },
             )
 
         except Exception as e:
@@ -1050,13 +1019,15 @@ class AISkill(BaseSkill):
 
         prompt = f"{style_prompts[style]}\n\nText:\n{text}"
 
-        return self._ai_complete({
-            "prompt": prompt,
-            "provider": provider,
-            "model": model,
-            "temperature": 0.3,
-            "max_tokens": max_length * 2,
-        })
+        return self._ai_complete(
+            {
+                "prompt": prompt,
+                "provider": provider,
+                "model": model,
+                "temperature": 0.3,
+                "max_tokens": max_length * 2,
+            }
+        )
 
     def _ai_translate(self, tool_input: Dict[str, Any]) -> SkillResponse:
         """Translate text."""
@@ -1068,13 +1039,15 @@ class AISkill(BaseSkill):
 
         prompt = f"Translate the following text to {target_language}. Only output the translation, nothing else.\n\nText:\n{text}"
 
-        result = self._ai_complete({
-            "prompt": prompt,
-            "provider": provider,
-            "model": model,
-            "temperature": 0.1,
-            "max_tokens": len(text) * 2,
-        })
+        result = self._ai_complete(
+            {
+                "prompt": prompt,
+                "provider": provider,
+                "model": model,
+                "temperature": 0.1,
+                "max_tokens": len(text) * 2,
+            }
+        )
 
         if result.success and result.data:
             result.data["source_language"] = source_language
@@ -1113,14 +1086,16 @@ Output as JSON with these exact field names."""
 
 {text}"""
 
-        result = self._ai_complete({
-            "prompt": prompt,
-            "provider": provider,
-            "model": model,
-            "temperature": 0.1,
-            "max_tokens": 2000,
-            "json_mode": provider == "openai",
-        })
+        result = self._ai_complete(
+            {
+                "prompt": prompt,
+                "provider": provider,
+                "model": model,
+                "temperature": 0.1,
+                "max_tokens": 2000,
+                "json_mode": provider == "openai",
+            }
+        )
 
         if result.success and result.data:
             content = result.data.get("content", "")
@@ -1131,7 +1106,8 @@ Output as JSON with these exact field names."""
             except json.JSONDecodeError:
                 # Try to find JSON in response
                 import re
-                json_match = re.search(r'\{[^{}]*\}', content, re.DOTALL)
+
+                json_match = re.search(r"\{[^{}]*\}", content, re.DOTALL)
                 if json_match:
                     try:
                         result.data["extracted"] = json.loads(json_match.group())
@@ -1173,12 +1149,20 @@ Output as JSON with these exact field names."""
                 data={
                     "similarity": similarity,
                     "method": "cosine_similarity",
-                    "interpretation": "identical" if similarity > 0.95 else
-                                     "very similar" if similarity > 0.8 else
-                                     "similar" if similarity > 0.6 else
-                                     "somewhat similar" if similarity > 0.4 else
-                                     "different",
-                }
+                    "interpretation": (
+                        "identical"
+                        if similarity > 0.95
+                        else (
+                            "very similar"
+                            if similarity > 0.8
+                            else (
+                                "similar"
+                                if similarity > 0.6
+                                else "somewhat similar" if similarity > 0.4 else "different"
+                            )
+                        )
+                    ),
+                },
             )
 
         else:  # LLM comparison
@@ -1191,11 +1175,13 @@ Text 1:
 Text 2:
 {text2}"""
 
-            return self._ai_complete({
-                "prompt": prompt,
-                "temperature": 0.3,
-                "max_tokens": 500,
-            })
+            return self._ai_complete(
+                {
+                    "prompt": prompt,
+                    "temperature": 0.3,
+                    "max_tokens": 500,
+                }
+            )
 
     def _ai_models(self, tool_input: Dict[str, Any]) -> SkillResponse:
         """List available models."""
@@ -1211,17 +1197,11 @@ Text 2:
                     "has_api_key": bool(self._get_api_key(p)),
                 }
             return SkillResponse(
-                success=True,
-                message=f"Available providers: {len(self.PROVIDERS)}",
-                data={"providers": models}
+                success=True, message=f"Available providers: {len(self.PROVIDERS)}", data={"providers": models}
             )
 
         if provider not in self.PROVIDERS:
-            return SkillResponse(
-                success=False,
-                message=f"Unknown provider: {provider}",
-                error="unknown_provider"
-            )
+            return SkillResponse(success=False, message=f"Unknown provider: {provider}", error="unknown_provider")
 
         info = self.PROVIDERS[provider]
         return SkillResponse(
@@ -1233,5 +1213,5 @@ Text 2:
                 "embedding_models": info.get("embedding_models", []),
                 "local": info.get("local", False),
                 "has_api_key": bool(self._get_api_key(provider)),
-            }
+            },
         )

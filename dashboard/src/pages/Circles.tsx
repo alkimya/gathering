@@ -23,46 +23,6 @@ import {
 import { circles, agents as agentsApi } from '../services/api';
 import type { Circle as CircleType, Task, TaskStatus } from '../types';
 
-// Demo data for when API returns empty
-const demoCircles = [
-  { id: 'c1', name: 'dev-team', status: 'running' as const, agent_count: 2, active_tasks: 5, task_count: 10, require_review: true, auto_route: true, created_at: new Date().toISOString(), started_at: new Date().toISOString() },
-  { id: 'c2', name: 'code-review', status: 'running' as const, agent_count: 2, active_tasks: 3, task_count: 8, require_review: true, auto_route: false, created_at: new Date().toISOString(), started_at: new Date().toISOString() },
-  { id: 'c3', name: 'documentation', status: 'stopped' as const, agent_count: 1, active_tasks: 0, task_count: 3, require_review: false, auto_route: true, created_at: new Date().toISOString(), started_at: null },
-] as CircleType[];
-
-// Demo tasks organized by circle
-const demoTasksByCircle: Record<string, Task[]> = {
-  'dev-team': [
-    { id: 1, title: 'Implement user authentication', description: 'Add JWT-based auth to the API', status: 'in_progress' as const, priority: 'high' as const, assigned_agent_id: 1, assigned_agent_name: 'Sophie', reviewer_id: null, reviewer_name: null, created_at: new Date().toISOString(), started_at: new Date().toISOString(), completed_at: null, result: null },
-    { id: 2, title: 'Build dashboard widgets', description: 'Create reusable widget components', status: 'in_progress' as const, priority: 'medium' as const, assigned_agent_id: 2, assigned_agent_name: 'Olivia', reviewer_id: null, reviewer_name: null, created_at: new Date().toISOString(), started_at: new Date().toISOString(), completed_at: null, result: null },
-    { id: 3, title: 'Write unit tests', description: 'Add tests for the API endpoints', status: 'pending' as const, priority: 'medium' as const, assigned_agent_id: 1, assigned_agent_name: 'Sophie', reviewer_id: null, reviewer_name: null, created_at: new Date().toISOString(), started_at: null, completed_at: null, result: null },
-    { id: 4, title: 'Set up CI/CD pipeline', description: 'Configure GitHub Actions for automated deployments', status: 'assigned' as const, priority: 'high' as const, assigned_agent_id: 2, assigned_agent_name: 'Olivia', reviewer_id: null, reviewer_name: null, created_at: new Date().toISOString(), started_at: null, completed_at: null, result: null },
-    { id: 5, title: 'Implement WebSocket connection', description: 'Real-time updates for dashboard', status: 'completed' as const, priority: 'high' as const, assigned_agent_id: 1, assigned_agent_name: 'Sophie', reviewer_id: 2, reviewer_name: 'Olivia', created_at: new Date().toISOString(), started_at: new Date().toISOString(), completed_at: new Date().toISOString(), result: 'WebSocket implemented successfully' },
-  ] as Task[],
-  'code-review': [
-    { id: 6, title: 'Review PR #42 - Dashboard', description: 'Code review for the new dashboard features', status: 'in_review' as const, priority: 'high' as const, assigned_agent_id: 2, assigned_agent_name: 'Olivia', reviewer_id: 1, reviewer_name: 'Sophie', created_at: new Date().toISOString(), started_at: new Date().toISOString(), completed_at: null, result: null },
-    { id: 7, title: 'Review PR #43 - Auth', description: 'Security review for authentication module', status: 'in_review' as const, priority: 'critical' as const, assigned_agent_id: 1, assigned_agent_name: 'Sophie', reviewer_id: 2, reviewer_name: 'Olivia', created_at: new Date().toISOString(), started_at: new Date().toISOString(), completed_at: null, result: null },
-    { id: 8, title: 'Review PR #41 - API', description: 'Review REST API endpoints', status: 'completed' as const, priority: 'medium' as const, assigned_agent_id: 2, assigned_agent_name: 'Olivia', reviewer_id: 1, reviewer_name: 'Sophie', created_at: new Date().toISOString(), started_at: new Date().toISOString(), completed_at: new Date().toISOString(), result: 'Approved with minor suggestions' },
-  ] as Task[],
-  'documentation': [
-    { id: 9, title: 'Update API documentation', description: 'Document new endpoints and schemas', status: 'pending' as const, priority: 'low' as const, assigned_agent_id: 1, assigned_agent_name: 'Sophie', reviewer_id: null, reviewer_name: null, created_at: new Date().toISOString(), started_at: null, completed_at: null, result: null },
-    { id: 10, title: 'Write getting started guide', description: 'Create onboarding documentation', status: 'pending' as const, priority: 'medium' as const, assigned_agent_id: 2, assigned_agent_name: 'Olivia', reviewer_id: null, reviewer_name: null, created_at: new Date().toISOString(), started_at: null, completed_at: null, result: null },
-    { id: 11, title: 'Document architecture', description: 'Create architecture diagrams and documentation', status: 'pending' as const, priority: 'low' as const, assigned_agent_id: 1, assigned_agent_name: 'Sophie', reviewer_id: null, reviewer_name: null, created_at: new Date().toISOString(), started_at: null, completed_at: null, result: null },
-  ] as Task[],
-};
-
-// Get demo tasks for a specific circle
-const getDemoTasksForCircle = (circleName: string): Task[] => {
-  return demoTasksByCircle[circleName] || demoTasksByCircle['dev-team'];
-};
-
-const demoMetrics = {
-  tasks_completed: 12,
-  tasks_in_progress: 3,
-  conflicts_resolved: 2,
-  uptime_seconds: 7200,
-};
-
 const statusConfig: Record<TaskStatus, { bg: string; text: string; glow?: string }> = {
   pending: { bg: 'bg-zinc-500/20', text: 'text-zinc-400' },
   assigned: { bg: 'bg-blue-500/20', text: 'text-blue-400' },
@@ -237,9 +197,6 @@ const commonCompetencies = [
   'code_review', 'documentation', 'security', 'database', 'devops'
 ];
 
-// Check if a circle is a demo circle (not in the backend)
-const isDemoCircle = (circleId: string) => circleId.startsWith('c') && circleId.length === 2;
-
 function CircleDetail({ circle }: { circle: CircleType }) {
   const [newTaskTitle, setNewTaskTitle] = useState('');
   const [newTaskDesc, setNewTaskDesc] = useState('');
@@ -249,26 +206,21 @@ function CircleDetail({ circle }: { circle: CircleType }) {
   const [lastCreatedTask, setLastCreatedTask] = useState<Task | null>(null);
   const queryClient = useQueryClient();
 
-  // Don't make API calls for demo circles
-  const isDemo = isDemoCircle(circle.id);
-
   const { data: tasksData, isLoading } = useQuery({
     queryKey: ['circle-tasks', circle.name],
     queryFn: () => circles.getTasks(circle.name),
     refetchInterval: 30000,
-    enabled: !isDemo, // Skip API call for demo circles
   });
 
   const { data: metricsData } = useQuery({
     queryKey: ['circle-metrics', circle.name],
     queryFn: () => circles.getMetrics(circle.name),
     refetchInterval: 30000,
-    enabled: !isDemo, // Skip API call for demo circles
   });
 
-  // Use demo data for demo circles, or when API returns empty
-  const displayTasks = isDemo ? getDemoTasksForCircle(circle.name) : (tasksData?.tasks?.length ? tasksData.tasks : getDemoTasksForCircle(circle.name));
-  const displayMetrics = isDemo ? demoMetrics : (metricsData || demoMetrics);
+  // Display real data from API
+  const displayTasks = tasksData?.tasks || [];
+  const displayMetrics = metricsData || { tasks_completed: 0, tasks_in_progress: 0, conflicts_resolved: 0, uptime_seconds: 0 };
 
   const createTaskMutation = useMutation({
     mutationFn: () =>
@@ -335,16 +287,6 @@ function CircleDetail({ circle }: { circle: CircleType }) {
 
       {/* Create task form */}
       <div className="p-5 border-b border-white/5">
-        {/* Demo mode notice */}
-        {isDemo && (
-          <div className="mb-4 p-3 rounded-xl bg-zinc-500/20 border border-zinc-500/30">
-            <div className="flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 text-zinc-400" />
-              <span className="text-sm text-zinc-400">Demo circle - Create a real circle to add tasks</span>
-            </div>
-          </div>
-        )}
-
         {/* Success feedback */}
         {lastCreatedTask && (
           <div className="mb-4 p-3 rounded-xl bg-emerald-500/20 border border-emerald-500/30">
@@ -371,7 +313,7 @@ function CircleDetail({ circle }: { circle: CircleType }) {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            if (newTaskTitle.trim() && !isDemo) {
+            if (newTaskTitle.trim()) {
               createTaskMutation.mutate();
             }
           }}
@@ -383,13 +325,11 @@ function CircleDetail({ circle }: { circle: CircleType }) {
               value={newTaskTitle}
               onChange={(e) => setNewTaskTitle(e.target.value)}
               placeholder="Task title..."
-              disabled={isDemo}
               className="flex-1 px-4 py-3 input-glass rounded-xl text-sm disabled:opacity-50"
             />
             <select
               value={newTaskPriority}
               onChange={(e) => setNewTaskPriority(e.target.value)}
-              disabled={isDemo}
               className="px-4 py-3 input-glass rounded-xl text-sm appearance-none cursor-pointer disabled:opacity-50"
             >
               <option value="low">Low</option>
@@ -399,7 +339,7 @@ function CircleDetail({ circle }: { circle: CircleType }) {
             </select>
             <button
               type="submit"
-              disabled={createTaskMutation.isPending || !newTaskTitle.trim() || isDemo}
+              disabled={createTaskMutation.isPending || !newTaskTitle.trim()}
               className="p-3 btn-gradient rounded-xl disabled:opacity-50"
             >
               <Plus className="w-5 h-5" />
@@ -411,12 +351,10 @@ function CircleDetail({ circle }: { circle: CircleType }) {
             value={newTaskDesc}
             onChange={(e) => setNewTaskDesc(e.target.value)}
             placeholder="Description (optional)"
-            disabled={isDemo}
             className="w-full px-4 py-3 input-glass rounded-xl text-sm disabled:opacity-50"
           />
 
           {/* Required competencies */}
-          {!isDemo && (
           <div>
             <button
               type="button"
@@ -461,7 +399,6 @@ function CircleDetail({ circle }: { circle: CircleType }) {
               </div>
             )}
           </div>
-          )}
         </form>
       </div>
 
@@ -721,8 +658,8 @@ export function Circles() {
     refetchOnWindowFocus: false,
   });
 
-  // Use demo data when API returns empty
-  const displayCircles = data?.circles?.length ? data.circles : demoCircles;
+  // Display real data from API
+  const displayCircles = data?.circles || [];
 
   const startMutation = useMutation({
     mutationFn: circles.start,
@@ -770,6 +707,12 @@ export function Circles() {
                 <div className="w-2 h-2 bg-emerald-500 rounded-full animate-bounce [animation-delay:0.2s]" />
               </div>
             </div>
+          ) : displayCircles.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-zinc-500">
+              <Circle className="w-10 h-10 mb-3 opacity-50" />
+              <p className="text-sm">No circles yet</p>
+              <p className="text-xs mt-1">Click + to create one</p>
+            </div>
           ) : (
             displayCircles.map((circle) => (
               <CircleCard
@@ -777,9 +720,9 @@ export function Circles() {
                 circle={circle}
                 isSelected={selectedCircle?.id === circle.id}
                 onSelect={() => setSelectedCircle(circle)}
-                onStart={() => !isDemoCircle(circle.id) && startMutation.mutate(circle.name)}
-                onStop={() => !isDemoCircle(circle.id) && stopMutation.mutate(circle.name)}
-                onDelete={() => !isDemoCircle(circle.id) && deleteMutation.mutate(circle.name)}
+                onStart={() => startMutation.mutate(circle.name)}
+                onStop={() => stopMutation.mutate(circle.name)}
+                onDelete={() => deleteMutation.mutate(circle.name)}
               />
             ))
           )}

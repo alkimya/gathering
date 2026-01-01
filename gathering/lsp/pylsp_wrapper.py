@@ -246,18 +246,22 @@ class PylspWrapper:
             # Use ruff if available (faster and better)
             if use_ruff:
                 try:
-                    ruff_diags = ruff_plugin.pylsp_lint(self.config, self.workspace, doc)
+                    # pylsp_ruff uses (workspace, document) signature
+                    ruff_diags = ruff_plugin.pylsp_lint(self.workspace, doc)
                     if ruff_diags:
                         diagnostics.extend(ruff_diags)
+                        logger.debug(f"Ruff returned {len(ruff_diags)} diagnostics")
                 except Exception as e:
                     logger.debug(f"Ruff diagnostics error: {e}")
 
             # Fallback to pyflakes
             if not diagnostics:
                 try:
-                    pyflakes_diags = pyflakes_lint.pylsp_lint(self.config, self.workspace, doc)
+                    # pyflakes_lint uses (workspace, document) signature
+                    pyflakes_diags = pyflakes_lint.pylsp_lint(self.workspace, doc)
                     if pyflakes_diags:
                         diagnostics.extend(pyflakes_diags)
+                        logger.debug(f"Pyflakes returned {len(pyflakes_diags)} diagnostics")
                 except Exception as e:
                     logger.debug(f"Pyflakes diagnostics error: {e}")
 

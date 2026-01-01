@@ -80,7 +80,7 @@
 
 **Language**: Rust (performance-critical), TypeScript (tooling), Python (data/scripts)
 **Blockchain**: Solana, Ethereum (Foundry)
-**Database**: PostgreSQL (via picopg), TimescaleDB, PostGIS, RocksDB, Redis
+**Database**: PostgreSQL (via pycopg), TimescaleDB, PostGIS, RocksDB, Redis
 **Profiling**: perf, flamegraph, valgrind, heaptrack
 **Testing**: cargo test, proptest, criterion (benchmarks), pytest
 **Build**: cargo, just, Nix
@@ -230,7 +230,7 @@ Olivia and Sophie have complementary expertise:
 |--------|--------|--------|
 | Language | Python | Rust, Python |
 | Focus | Data pipelines, ML | Systems performance |
-| Database | PostgreSQL (picopg) | RocksDB, PostgreSQL |
+| Database | PostgreSQL (pycopg) | RocksDB, PostgreSQL |
 | Blockchain | API integration | Protocol development |
 | Level | Architecture | Implementation |
 
@@ -238,11 +238,11 @@ Olivia and Sophie have complementary expertise:
 
 - Olivia builds high-performance Solana programs
 - Sophie integrates data into MarketStream
-- Both use **picopg** for database operations (PostgreSQL/PostGIS/TimescaleDB)
+- Both use **pycopg** for database operations (PostgreSQL/PostGIS/TimescaleDB)
 - Both collaborate on protocol design decisions
 
 ---
 
 **Version**: 1.1
 **Last Updated**: 2025-12-20
-**Status**: Available for Solana/Rust systems work, active on MarketStream, Ketu, Kala and picopg projects
+**Status**: Available for Solana/Rust systems work, active on MarketStream, Ketu, Kala and pycopg projects

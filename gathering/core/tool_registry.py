@@ -328,12 +328,12 @@ class ToolRegistry:
         """
         return [tool for tool in self._tools.values() if tool.plugin_id == plugin_id]
 
-    def execute(self, name: str, **kwargs) -> Any:
+    def execute(self, tool_name: str, **kwargs) -> Any:
         """
         Execute a tool.
 
         Args:
-            name: Tool name.
+            tool_name: Tool name to execute.
             **kwargs: Tool arguments.
 
         Returns:
@@ -346,9 +346,9 @@ class ToolRegistry:
         Example:
             >>> result = tool_registry.execute("my_tool", arg1="value")
         """
-        tool = self.get(name)
+        tool = self.get(tool_name)
         if not tool:
-            raise ValueError(f"Tool '{name}' not found in registry")
+            raise ValueError(f"Tool '{tool_name}' not found in registry")
 
         # Execute function
         # TODO: Add parameter validation against JSON schema
@@ -357,7 +357,7 @@ class ToolRegistry:
             return tool.function(**kwargs)
         except Exception as e:
             raise Exception(
-                f"Error executing tool '{name}': {e}"
+                f"Error executing tool '{tool_name}': {e}"
             ) from e
 
     def get_categories(self) -> List[ToolCategory]:
@@ -443,6 +443,6 @@ def get_tool(name: str) -> Optional[ToolDefinition]:
     return tool_registry.get(name)
 
 
-def execute_tool(name: str, **kwargs) -> Any:
+def execute_tool(tool_name: str, **kwargs) -> Any:
     """Execute tool from global registry."""
-    return tool_registry.execute(name, **kwargs)
+    return tool_registry.execute(tool_name, **kwargs)

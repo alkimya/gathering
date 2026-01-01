@@ -181,6 +181,7 @@ class Agent(Base):
     # Competencies and skills
     competencies = Column(ARRAY(String), default=[])
     specializations = Column(ARRAY(String), default=[])
+    skill_names = Column(ARRAY(String), default=[])  # Skills available to the agent
 
     # Review capabilities
     can_review = Column(ARRAY(String), default=[])

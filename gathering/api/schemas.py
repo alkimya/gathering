@@ -260,8 +260,8 @@ class TaskResultSubmit(BaseModel):
 class ConversationCreate(BaseModel):
     """Request to start a conversation."""
     topic: str = Field(..., min_length=1, description="Conversation topic")
-    agent_ids: List[int] = Field(..., min_length=2, description="Participating agents")
-    max_turns: int = Field(default=10, ge=2, le=50, description="Max conversation turns")
+    agent_ids: List[int] = Field(..., min_length=1, description="Participating agents (1+ for user-agent chat, 2+ for multi-agent)")
+    max_turns: int = Field(default=10, ge=1, le=50, description="Max conversation turns")
     initial_prompt: str = Field(default="", description="Initial prompt/instructions")
     turn_strategy: str = Field(
         default="round_robin",

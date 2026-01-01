@@ -8,7 +8,6 @@
  * - Staged changes visualization
  */
 
-import { useState, useEffect } from 'react';
 import {
   GitBranch,
   Loader2,
@@ -17,7 +16,7 @@ import {
   ArrowDown,
   AlertCircle
 } from 'lucide-react';
-import api from '../../services/api';
+import { useGitStatus } from '../../hooks/useGitCache';
 import { GitActions } from './GitActions';
 
 interface GitStatus {
@@ -40,51 +39,21 @@ interface GitStagingAreaProps {
 }
 
 export function GitStagingArea({ projectId }: GitStagingAreaProps) {
-  const [status, setStatus] = useState<GitStatus | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [refreshing, setRefreshing] = useState(false);
+  const { status: rawStatus, loading, error, reload } = useGitStatus(projectId);
 
-  useEffect(() => {
-    loadStatus();
-  }, [projectId]);
-
-  const loadStatus = async (isRefresh = false) => {
-    try {
-      if (isRefresh) {
-        setRefreshing(true);
-      } else {
-        setLoading(true);
-      }
-      setError(null);
-
-      const response = await api.get(`/workspace/${projectId}/git/status`);
-      const data = response.data as any;
-
-      // Handle nested status structure
-      const statusData = data.status || data;
-
-      // Ensure staged object exists (might not be in backend response)
-      if (!statusData.staged) {
-        statusData.staged = {
-          modified: [],
-          added: [],
-          deleted: []
-        };
-      }
-
-      setStatus(statusData as GitStatus);
-    } catch (err: any) {
-      console.error('Failed to load git status:', err);
-      setError(err.message || 'Failed to load git status');
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
+  // Normalize status structure
+  const statusData = rawStatus?.status || rawStatus;
+  const status: GitStatus | null = statusData ? {
+    ...statusData,
+    staged: statusData.staged || {
+      modified: [],
+      added: [],
+      deleted: []
     }
-  };
+  } : null;
 
   const handleRefresh = () => {
-    loadStatus(true);
+    reload(true);
   };
 
   if (loading) {
@@ -130,12 +99,12 @@ export function GitStagingArea({ projectId }: GitStagingAreaProps) {
           </h3>
           <button
             onClick={handleRefresh}
-            disabled={refreshing}
+            disabled={loading}
             className="p-1.5 hover:bg-white/10 rounded transition-colors disabled:opacity-50"
             title="Refresh status"
           >
             <RefreshCw
-              className={`w-4 h-4 text-zinc-400 ${refreshing ? 'animate-spin' : ''}`}
+              className={`w-4 h-4 text-zinc-400 ${loading ? 'animate-spin' : ''}`}
             />
           </button>
         </div>
@@ -173,7 +142,7 @@ export function GitStagingArea({ projectId }: GitStagingAreaProps) {
         <GitActions
           projectId={projectId}
           status={status}
-          onRefresh={() => loadStatus(true)}
+          onRefresh={handleRefresh}
         />
       </div>
     </div>

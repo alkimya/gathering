@@ -268,7 +268,7 @@ class ProjectContext:
                 "anthropic": "llm_provider",
                 "openai": "llm_provider",
                 "psycopg": "database_driver",
-                "picopg": "database",
+                "pycopg": "database",
             }
 
             for pattern, category in tool_patterns.items():
@@ -325,43 +325,179 @@ class ProjectContext:
             pass
 
 
-# Pre-configured context for the Gathering project
-GATHERING_PROJECT = ProjectContext(
-    name="Gathering",
-    path="/home/loc/workspace/gathering",
-    venv_path="/home/loc/workspace/gathering/venv",
-    python_version="3.13",
-    tools={
-        "database": "picopg",
-        "testing": "pytest",
-        "orm": "sqlalchemy",
-        "validation": "pydantic",
-        "llm_claude": "anthropic",
-        "llm_deepseek": "openai-compatible",
-    },
-    conventions={
-        "primary_keys": "BIGINT GENERATED ALWAYS AS IDENTITY",
-        "imports": "absolute",
-        "docstrings": "google style",
-        "db_schema": "gathering",
-    },
-    key_files={
-        "models": "gathering/db/models.py",
-        "config": "gathering/core/config.py",
-        "orchestration": "gathering/orchestration/",
-        "skills": "gathering/skills/",
-        "agents": "gathering/agents/",
-    },
-    commands={
-        "test": "source venv/bin/activate && pytest tests/ -v",
-        "test_orch": "source venv/bin/activate && pytest tests/test_orchestration.py -v",
-    },
-    notes=[
-        "Toujours utiliser picopg pour les connexions DB",
-        "Les tests doivent passer avant commit",
-        "Review obligatoire par un autre agent",
-        "Clés primaires en IDENTITY, pas UUID",
-    ],
-    git_branch="develop",
-    git_remote="https://github.com/alkimya/gathering.git",
-)
+def load_project_from_db(project_id: Optional[int] = None, project_name: Optional[str] = None) -> Optional[ProjectContext]:
+    """
+    Load project context from database.
+
+    Args:
+        project_id: Project ID to load
+        project_name: Project name to load (alternative to ID)
+
+    Returns:
+        ProjectContext if found, None otherwise
+    """
+    try:
+        from pycopg import Database
+
+        db = Database.from_env()
+
+        if project_id:
+            row = db.fetch_one(
+                "SELECT * FROM project.projects WHERE id = %s",
+                [project_id]
+            )
+        elif project_name:
+            row = db.fetch_one(
+                "SELECT * FROM project.projects WHERE name = %s",
+                [project_name]
+            )
+        else:
+            return None
+
+        if not row:
+            return None
+
+        # Build venv_path
+        venv_path = None
+        if row.get("venv_path") and row.get("local_path"):
+            venv = row["venv_path"]
+            if not venv.startswith("/"):
+                venv_path = str(Path(row["local_path"]) / venv)
+            else:
+                venv_path = venv
+
+        context = ProjectContext(
+            id=row.get("id"),
+            name=row.get("name", ""),
+            path=row.get("local_path", ""),
+            venv_path=venv_path,
+            python_version=row.get("python_version", "3.11"),
+            tools=row.get("tools") or {},
+            conventions=row.get("conventions") or {},
+            key_files=row.get("key_files") or {},
+            commands=row.get("commands") or {},
+            notes=row.get("notes") or [],
+            git_branch=row.get("branch"),
+            git_remote=row.get("repository_url"),
+            created_at=row.get("created_at"),
+            updated_at=row.get("updated_at"),
+        )
+
+        return context
+
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).warning(f"Failed to load project from DB: {e}")
+        return None
+
+
+def load_project_from_yaml(project_path: str) -> Optional[ProjectContext]:
+    """
+    Load project context from .gathering/project.yaml file.
+
+    Args:
+        project_path: Path to the project directory
+
+    Returns:
+        ProjectContext if YAML exists, None otherwise
+    """
+    yaml_path = Path(project_path) / ".gathering" / "project.yaml"
+
+    if not yaml_path.exists():
+        return None
+
+    try:
+        import yaml
+        with open(yaml_path, "r") as f:
+            data = yaml.safe_load(f)
+
+        context = ProjectContext(
+            name=data.get("name", ""),
+            path=data.get("path", project_path),
+        )
+
+        # Python environment
+        python_config = data.get("python", {})
+        if isinstance(python_config, dict):
+            context.python_version = python_config.get("version", "3.11")
+            venv = python_config.get("venv")
+            if venv:
+                context.venv_path = str(Path(project_path) / venv)
+
+        # Simple mappings
+        context.tools = data.get("tools", {})
+        context.conventions = data.get("conventions", {})
+        context.key_files = data.get("key_files", {})
+        context.commands = data.get("commands", {})
+        context.notes = data.get("notes", [])
+
+        # Git
+        git_config = data.get("git", {})
+        if isinstance(git_config, dict):
+            context.git_branch = git_config.get("branch")
+            context.git_remote = git_config.get("remote")
+
+        return context
+
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).warning(f"Failed to load project.yaml: {e}")
+        return None
+
+
+def load_project_context(
+    project_id: Optional[int] = None,
+    project_name: Optional[str] = None,
+    project_path: Optional[str] = None,
+) -> ProjectContext:
+    """
+    Load project context with fallback chain:
+    1. Database (by ID or name)
+    2. YAML file (.gathering/project.yaml)
+    3. Auto-detection from path
+
+    Args:
+        project_id: Project ID to load from DB
+        project_name: Project name to load from DB
+        project_path: Path for YAML/auto-detection fallback
+
+    Returns:
+        ProjectContext from best available source
+    """
+    # Try database first
+    if project_id or project_name:
+        context = load_project_from_db(project_id, project_name)
+        if context:
+            return context
+
+    # Try YAML if path provided
+    if project_path:
+        context = load_project_from_yaml(project_path)
+        if context:
+            return context
+
+        # Fallback to auto-detection
+        return ProjectContext.from_path(project_path)
+
+    # Default: try gathering from DB, then from path
+    context = load_project_from_db(project_name="gathering")
+    if context:
+        return context
+
+    return ProjectContext.from_path("/home/loc/workspace/gathering")
+
+
+# Lazy-loaded project context
+_gathering_project: Optional[ProjectContext] = None
+
+
+def get_gathering_project() -> ProjectContext:
+    """Get the Gathering project context (lazy-loaded)."""
+    global _gathering_project
+    if _gathering_project is None:
+        _gathering_project = load_project_context()
+    return _gathering_project
+
+
+# For backwards compatibility - now loads from YAML
+GATHERING_PROJECT = load_project_context()

@@ -52,12 +52,24 @@ Example:
 """
 
 from gathering.plugins.base import Plugin, PluginMetadata, PluginStatus
-from gathering.plugins.manager import PluginManager, plugin_manager
+from gathering.plugins.manager import (
+    PluginManager,
+    plugin_manager,
+    load_plugin,
+    unload_plugin,
+    get_plugin,
+)
 
 __all__ = [
+    # Base classes
     "Plugin",
     "PluginMetadata",
     "PluginStatus",
+    # Manager
     "PluginManager",
     "plugin_manager",
+    # Convenience functions
+    "load_plugin",
+    "unload_plugin",
+    "get_plugin",
 ]

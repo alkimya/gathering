@@ -243,6 +243,7 @@ async def start_circle(
         return {"status": "already_running"}
 
     await circle.start()
+    registry.update_status(name, "running")
     return {"status": "started"}
 
 
@@ -263,6 +264,7 @@ async def stop_circle(
         return {"status": "already_stopped"}
 
     await circle.stop()
+    registry.update_status(name, "stopped")
     return {"status": "stopped"}
 
 
@@ -281,6 +283,7 @@ async def add_agent_to_circle(
     competencies: str = "",  # Comma-separated
     can_review: str = "",  # Comma-separated
     registry: CircleRegistry = Depends(get_circle_registry),
+    agent_registry: AgentRegistry = Depends(get_agent_registry),
 ):
     """Add an agent to a circle."""
     circle = registry.get(name)
@@ -299,6 +302,88 @@ async def add_agent_to_circle(
     comp_list = [c.strip() for c in competencies.split(",") if c.strip()]
     review_list = [r.strip() for r in can_review.split(",") if r.strip()]
 
+    # Try to get the AgentWrapper to create a process_message callback
+    process_message_callback = None
+    agent_wrapper = agent_registry.get(agent_id)
+
+    if agent_wrapper:
+        # Use existing AgentWrapper
+        async def make_process_message_from_wrapper(wrapper):
+            """Create a process_message callback from AgentWrapper."""
+            async def process_message(prompt: str) -> str:
+                response = await wrapper.chat(prompt, include_memories=True, allow_tools=False)
+                return response.content
+            return process_message
+
+        process_message_callback = await make_process_message_from_wrapper(agent_wrapper)
+    else:
+        # Create a callback directly from the LLM provider with project context and memory
+        from gathering.core.config import get_settings
+        from gathering.llm.providers import LLMProviderFactory
+        from gathering.agents.project_context import GATHERING_PROJECT
+        from gathering.api.dependencies import get_database_service, build_agent_memory_context
+        import logging
+
+        settings = get_settings()
+        provider_name = provider.lower()
+        api_key = settings.get_llm_api_key(provider_name)
+
+        if api_key:
+            try:
+                llm_provider = LLMProviderFactory.create(provider_name, {
+                    "api_key": api_key,
+                    "model": model,
+                    "max_tokens": 4096,
+                    "temperature": 0.7,
+                })
+
+                # Load agent system prompt from DB
+                db = get_database_service()
+                agent_data = db.get_agent(agent_id)
+                system_prompt = None
+                if agent_data:
+                    system_prompt = agent_data.get('system_prompt') or agent_data.get('base_prompt')
+
+                # Build full system prompt with project context
+                project_context = GATHERING_PROJECT.to_prompt()
+
+                # Get agent's memory/activity context
+                agent_activity = db.get_agent_recent_activity(agent_id)
+                memory_context = build_agent_memory_context(agent_activity)
+
+                if system_prompt:
+                    full_system_prompt = f"{system_prompt}\n\n## Contexte Projet\n{project_context}\n\n{memory_context}"
+                else:
+                    full_system_prompt = f"""Tu es {agent_name}, un assistant IA expert.
+
+## Contexte Projet
+{project_context}
+
+{memory_context}
+
+Réponds de manière concise et constructive. Tu as accès au contexte du projet ci-dessus.
+Tu peux référencer les fichiers, la structure, et les conventions du projet.
+Tu peux aussi te référer à tes conversations et tâches passées dans ta mémoire."""
+
+                async def make_process_message_from_llm(llm, sys_prompt):
+                    """Create a process_message callback from LLM provider with project context and memory."""
+                    async def process_message(prompt: str) -> str:
+                        messages = [
+                            {"role": "system", "content": sys_prompt},
+                            {"role": "user", "content": prompt},
+                        ]
+                        response = llm.complete(messages)
+                        return response.get("content", "No response generated")
+                    return process_message
+
+                process_message_callback = await make_process_message_from_llm(llm_provider, full_system_prompt)
+                logging.info(f"Created LLM callback for agent {agent_id} ({agent_name}) using {provider_name}/{model} with project context and memory")
+            except Exception as e:
+                logging.warning(f"Failed to create LLM for agent {agent_id}: {e}")
+        else:
+            import logging
+            logging.warning(f"No API key for provider '{provider_name}', agent {agent_id} will not have LLM callback")
+
     handle = AgentHandle(
         id=agent_id,
         name=agent_name,
@@ -306,9 +391,14 @@ async def add_agent_to_circle(
         model=model,
         competencies=comp_list,
         can_review=review_list,
+        process_message=process_message_callback,
     )
 
     circle.add_agent(handle)
+
+    # Persist to database
+    registry.add_member(name, agent_id, comp_list, review_list)
+
     return {"status": "added", "agent_id": agent_id}
 
 
@@ -333,6 +423,10 @@ async def remove_agent_from_circle(
         )
 
     circle.remove_agent(agent_id)
+
+    # Persist to database
+    registry.remove_member(name, agent_id)
+
     return {"status": "removed", "agent_id": agent_id}
 
 

@@ -11,9 +11,8 @@ import asyncio
 from typing import Dict, List, Optional, Any
 from datetime import datetime, timezone
 
-# Import picopg
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'picopg'))
-from picopg import Database, Config
+# Import pycopg (local PostgreSQL wrapper)
+from pycopg import Database, Config
 
 # Import event bus
 from gathering.events import event_bus, Event, EventType

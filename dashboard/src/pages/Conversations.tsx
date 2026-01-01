@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import {
   MessageSquare,
   Plus,
@@ -12,88 +14,13 @@ import {
   X,
   Sparkles,
   Users,
+  User,
+  CircleDot,
+  AlertCircle,
+  Send,
 } from 'lucide-react';
-import { conversations, agents } from '../services/api';
+import { conversations, agents, circles } from '../services/api';
 import type { Conversation, ConversationMessage } from '../types';
-
-// Demo data for when API returns empty
-const demoConversations = [
-  {
-    id: 'conv1',
-    topic: 'Architecture Discussion: Dashboard Analytics',
-    status: 'active' as const,
-    participant_count: 2,
-    participant_names: ['Sophie', 'Olivia'],
-    participants: ['Sophie', 'Olivia'],
-    message_count: 24,
-    turns_taken: 24,
-    max_turns: 50,
-    created_at: new Date(Date.now() - 3600000).toISOString(),
-    started_at: new Date(Date.now() - 3600000).toISOString(),
-    completed_at: null,
-  },
-  {
-    id: 'conv2',
-    topic: 'Code Review: Authentication Module',
-    status: 'completed' as const,
-    participant_count: 2,
-    participant_names: ['Sophie', 'Olivia'],
-    participants: ['Sophie', 'Olivia'],
-    message_count: 18,
-    turns_taken: 18,
-    max_turns: 30,
-    created_at: new Date(Date.now() - 86400000).toISOString(),
-    started_at: new Date(Date.now() - 86400000).toISOString(),
-    completed_at: new Date(Date.now() - 82800000).toISOString(),
-  },
-  {
-    id: 'conv3',
-    topic: 'Sprint Planning: Q1 Features',
-    status: 'active' as const,
-    participant_count: 2,
-    participant_names: ['Sophie', 'Olivia'],
-    participants: ['Sophie', 'Olivia'],
-    message_count: 12,
-    turns_taken: 12,
-    max_turns: 40,
-    created_at: new Date(Date.now() - 172800000).toISOString(),
-    started_at: new Date(Date.now() - 172800000).toISOString(),
-    completed_at: null,
-  },
-] as Conversation[];
-
-// Demo messages organized by conversation
-const demoMessagesByConversation: Record<string, ConversationMessage[]> = {
-  'conv1': [
-    { agent_id: 0, agent_name: 'System', content: 'Conversation started: Architecture Discussion', mentions: [], timestamp: new Date(Date.now() - 3600000).toISOString() },
-    { agent_id: 1, agent_name: 'Sophie', content: 'I\'ve been reviewing the dashboard analytics requirements. I think we should use WebSocket for real-time updates instead of polling. This will reduce server load and provide instant data updates to users.', mentions: [], timestamp: new Date(Date.now() - 3500000).toISOString() },
-    { agent_id: 2, agent_name: 'Olivia', content: 'I agree with the WebSocket approach. From a database perspective, I can set up change data capture (CDC) to push updates to the WebSocket server. We should also consider implementing caching with Redis for frequently accessed metrics.', mentions: [1], timestamp: new Date(Date.now() - 3400000).toISOString() },
-    { agent_id: 1, agent_name: 'Sophie', content: 'Good idea! For the frontend, I\'ll use React Query with WebSocket integration. This will handle connection state, automatic reconnection, and caching seamlessly.', mentions: [], timestamp: new Date(Date.now() - 3300000).toISOString() },
-    { agent_id: 2, agent_name: 'Olivia', content: 'I\'ll design the API to support both modes. The endpoints will return data in the same format whether polled or pushed via WebSocket. I estimate we can reduce database queries by 70% with proper caching.', mentions: [], timestamp: new Date(Date.now() - 3200000).toISOString() },
-    { agent_id: 1, agent_name: 'Sophie', content: 'Perfect! Let me also suggest using Server-Sent Events (SSE) as a simpler alternative for one-way data streaming.', mentions: [2], timestamp: new Date(Date.now() - 3100000).toISOString() },
-  ] as ConversationMessage[],
-  'conv2': [
-    { agent_id: 0, agent_name: 'System', content: 'Conversation started: Code Review - Authentication Module', mentions: [], timestamp: new Date(Date.now() - 86400000).toISOString() },
-    { agent_id: 2, agent_name: 'Olivia', content: 'I\'ve reviewed the authentication module. Overall, the implementation looks solid. I noticed a few things we should discuss regarding token refresh handling.', mentions: [], timestamp: new Date(Date.now() - 86300000).toISOString() },
-    { agent_id: 1, agent_name: 'Sophie', content: 'Thanks for the review! What concerns do you have about the token refresh?', mentions: [2], timestamp: new Date(Date.now() - 86200000).toISOString() },
-    { agent_id: 2, agent_name: 'Olivia', content: 'The current implementation refreshes tokens synchronously, which could cause race conditions if multiple requests happen simultaneously. I suggest implementing a token refresh queue.', mentions: [], timestamp: new Date(Date.now() - 86100000).toISOString() },
-    { agent_id: 1, agent_name: 'Sophie', content: 'Good catch! I\'ll implement a mutex-like pattern to ensure only one refresh happens at a time. Other requests can wait for the new token.', mentions: [], timestamp: new Date(Date.now() - 86000000).toISOString() },
-    { agent_id: 2, agent_name: 'Olivia', content: 'That sounds perfect. Also, consider adding a small buffer before token expiry to prevent edge cases where the token expires during the request.', mentions: [1], timestamp: new Date(Date.now() - 85900000).toISOString() },
-  ] as ConversationMessage[],
-  'conv3': [
-    { agent_id: 0, agent_name: 'System', content: 'Conversation started: Sprint Planning - Q1 Features', mentions: [], timestamp: new Date(Date.now() - 172800000).toISOString() },
-    { agent_id: 1, agent_name: 'Sophie', content: 'Let\'s prioritize the features for Q1. I think we should focus on completing the dashboard first, then move to the RAG pipeline.', mentions: [], timestamp: new Date(Date.now() - 172700000).toISOString() },
-    { agent_id: 2, agent_name: 'Olivia', content: 'Agreed. The dashboard is almost done. I can start preparing the database schema for the RAG pipeline while you finish the UI components.', mentions: [1], timestamp: new Date(Date.now() - 172600000).toISOString() },
-    { agent_id: 1, agent_name: 'Sophie', content: 'That works well. For the RAG pipeline, we\'ll need vector storage. Have you looked into pgvector vs dedicated vector databases?', mentions: [], timestamp: new Date(Date.now() - 172500000).toISOString() },
-    { agent_id: 2, agent_name: 'Olivia', content: 'I\'ve done some research. pgvector would be simpler since we\'re already using PostgreSQL. For our scale, it should perform well. We can always migrate later if needed.', mentions: [], timestamp: new Date(Date.now() - 172400000).toISOString() },
-    { agent_id: 1, agent_name: 'Sophie', content: 'Sounds good. Let\'s also add the calendar integration to Q1. It\'s a smaller feature but users have been requesting it.', mentions: [2], timestamp: new Date(Date.now() - 172300000).toISOString() },
-  ] as ConversationMessage[],
-};
-
-// Get demo messages for a specific conversation
-const getDemoMessagesForConversation = (conversationId: string): ConversationMessage[] => {
-  return demoMessagesByConversation[conversationId] || demoMessagesByConversation['conv1'];
-};
 
 function ConversationCard({
   conversation,
@@ -174,33 +101,65 @@ function ConversationCard({
 }
 
 function MessageBubble({ message }: { message: ConversationMessage }) {
-  const isSystem = message.agent_id === 0 || message.agent_name === 'System';
+  const isSystem = message.agent_name === 'System';
+  const isUser = message.agent_id === 0 && message.agent_name !== 'System';
 
-  return (
-    <div className={`flex ${isSystem ? 'justify-center' : 'justify-start'}`}>
-      {isSystem ? (
+  // System messages (centered, minimal)
+  if (isSystem) {
+    return (
+      <div className="flex justify-center">
         <div className="text-xs text-zinc-500 bg-zinc-800/50 px-4 py-2 rounded-full border border-white/5">
           {message.content}
         </div>
-      ) : (
+      </div>
+    );
+  }
+
+  // User messages (right-aligned, cyan theme)
+  if (isUser) {
+    return (
+      <div className="flex justify-end">
         <div className="max-w-[80%]">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center">
-              <Bot className="w-4 h-4 text-white" />
-            </div>
-            <span className="text-sm font-medium text-white">{message.agent_name}</span>
+          <div className="flex items-center justify-end gap-2 mb-2">
             <span className="text-xs text-zinc-500 flex items-center gap-1">
               <Clock className="w-3 h-3" />
               {new Date(message.timestamp).toLocaleTimeString()}
             </span>
+            <span className="text-sm font-medium text-white">{message.agent_name || 'You'}</span>
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center">
+              <User className="w-4 h-4 text-white" />
+            </div>
           </div>
-          <div className="ml-9 glass-card rounded-2xl rounded-tl-none p-4">
-            <p className="text-sm text-zinc-300 whitespace-pre-wrap leading-relaxed">
-              {message.content}
-            </p>
+          <div className="mr-9 bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 rounded-2xl rounded-tr-none p-4">
+            <div className="text-sm text-zinc-200 leading-relaxed prose prose-invert prose-sm max-w-none prose-p:my-2 prose-pre:bg-zinc-800 prose-pre:border prose-pre:border-white/10 prose-code:text-cyan-300 prose-code:bg-zinc-800 prose-code:px-1 prose-code:rounded prose-headings:text-white prose-strong:text-white prose-ul:my-2 prose-li:my-0 prose-table:border-collapse prose-th:border prose-th:border-white/20 prose-th:bg-zinc-800 prose-th:px-3 prose-th:py-2 prose-td:border prose-td:border-white/10 prose-td:px-3 prose-td:py-2">
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown>
+            </div>
           </div>
         </div>
-      )}
+      </div>
+    );
+  }
+
+  // Agent messages (left-aligned, purple theme)
+  return (
+    <div className="flex justify-start">
+      <div className="max-w-[80%]">
+        <div className="flex items-center gap-2 mb-2">
+          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center">
+            <Bot className="w-4 h-4 text-white" />
+          </div>
+          <span className="text-sm font-medium text-white">{message.agent_name}</span>
+          <span className="text-xs text-zinc-500 flex items-center gap-1">
+            <Clock className="w-3 h-3" />
+            {new Date(message.timestamp).toLocaleTimeString()}
+          </span>
+        </div>
+        <div className="ml-9 glass-card rounded-2xl rounded-tl-none p-4">
+          <div className="text-sm text-zinc-300 leading-relaxed prose prose-invert prose-sm max-w-none prose-p:my-2 prose-pre:bg-zinc-800 prose-pre:border prose-pre:border-white/10 prose-code:text-purple-300 prose-code:bg-zinc-800 prose-code:px-1 prose-code:rounded prose-headings:text-white prose-strong:text-white prose-ul:my-2 prose-li:my-0 prose-table:border-collapse prose-th:border prose-th:border-white/20 prose-th:bg-zinc-800 prose-th:px-3 prose-th:py-2 prose-td:border prose-td:border-white/10 prose-td:px-3 prose-td:py-2">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -217,8 +176,8 @@ function ConversationDetail({ conversation }: { conversation: Conversation }) {
     refetchOnWindowFocus: false,
   });
 
-  // Use demo data when API returns empty - use conversation-specific demo messages
-  const displayMessages = messagesData?.messages?.length ? messagesData.messages : getDemoMessagesForConversation(conversation.id);
+  // Display real messages from API (no more demo data fallback)
+  const displayMessages = messagesData?.messages || [];
 
   const advanceMutation = useMutation({
     mutationFn: (p?: string) => conversations.advance(conversation.id, p),
@@ -285,6 +244,12 @@ function ConversationDetail({ conversation }: { conversation: Conversation }) {
               <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce [animation-delay:0.2s]" />
             </div>
           </div>
+        ) : displayMessages.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-12 text-zinc-500">
+            <MessageSquare className="w-12 h-12 mb-3 opacity-50" />
+            <p>No messages yet</p>
+            <p className="text-xs mt-1">Click "Advance" to continue the conversation</p>
+          </div>
         ) : (
           <>
             {displayMessages.map((msg, i: number) => (
@@ -349,36 +314,72 @@ function CreateConversationModal({
   onClose: () => void;
 }) {
   const [topic, setTopic] = useState('');
+  const [initialPrompt, setInitialPrompt] = useState('');
+  const [selectedCircle, setSelectedCircle] = useState<string | null>(null);
   const [selectedAgents, setSelectedAgents] = useState<number[]>([]);
   const [maxTurns, setMaxTurns] = useState(10);
   const [turnStrategy, setTurnStrategy] = useState<TurnStrategy>('round_robin');
   const [facilitatorId, setFacilitatorId] = useState<number | null>(null);
   const queryClient = useQueryClient();
 
+  // Fetch circles
+  const { data: circlesData } = useQuery({
+    queryKey: ['circles'],
+    queryFn: circles.list,
+    enabled: isOpen,
+  });
+
+  // Only show running circles
+  const runningCircles = circlesData?.circles.filter(c => c.status === 'running') || [];
+
   const { data: agentsData } = useQuery({
     queryKey: ['agents'],
     queryFn: agents.list,
+    enabled: isOpen,
   });
 
+  // Get agents that are in the selected circle
+  const { data: circleDetail } = useQuery({
+    queryKey: ['circle-detail', selectedCircle],
+    queryFn: () => selectedCircle ? circles.get(selectedCircle) : null,
+    enabled: !!selectedCircle,
+  });
+
+  // Filter agents to only those in the selected circle
+  const availableAgents = selectedCircle && circleDetail?.agents
+    ? agentsData?.agents.filter(a => circleDetail.agents.some((ca: any) => ca.id === a.id)) || []
+    : agentsData?.agents || [];
+
   const createMutation = useMutation({
-    mutationFn: () =>
-      conversations.create({
+    mutationFn: () => {
+      if (!selectedCircle) throw new Error('Please select a circle');
+      return conversations.create({
         topic,
         agent_ids: selectedAgents,
         max_turns: maxTurns,
         turn_strategy: turnStrategy,
+        initial_prompt: initialPrompt || undefined,
         ...(turnStrategy === 'facilitator_led' && facilitatorId ? { facilitator_id: facilitatorId } : {}),
-      }),
+      }, selectedCircle);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['conversations'] });
       onClose();
       setTopic('');
+      setInitialPrompt('');
+      setSelectedCircle(null);
       setSelectedAgents([]);
       setMaxTurns(10);
       setTurnStrategy('round_robin');
       setFacilitatorId(null);
     },
   });
+
+  // Reset agents when circle changes
+  useEffect(() => {
+    setSelectedAgents([]);
+    setFacilitatorId(null);
+  }, [selectedCircle]);
 
   // Reset facilitator when strategy changes or selected agents change
   const handleStrategyChange = (newStrategy: TurnStrategy) => {
@@ -388,8 +389,8 @@ function CreateConversationModal({
     }
   };
 
-  // Get selected agents for facilitator dropdown
-  const selectedAgentsList = agentsData?.agents.filter(a => selectedAgents.includes(a.id)) || [];
+  // Get selected agents for facilitator dropdown (from available agents in the circle)
+  const selectedAgentsList = availableAgents.filter(a => selectedAgents.includes(a.id));
 
   const toggleAgent = (id: number) => {
     setSelectedAgents((prev) => {
@@ -433,6 +434,51 @@ function CreateConversationModal({
           }}
           className="space-y-5"
         >
+          {/* Circle Selection - Required */}
+          <div>
+            <label className="block text-sm font-medium text-zinc-300 mb-2">
+              <CircleDot className="w-4 h-4 inline mr-2" />
+              Circle (required)
+            </label>
+            {runningCircles.length === 0 ? (
+              <div className="p-4 glass-card rounded-xl text-center">
+                <AlertCircle className="w-8 h-8 text-amber-400 mx-auto mb-2" />
+                <p className="text-sm text-zinc-400">No running circles available</p>
+                <p className="text-xs text-zinc-500 mt-1">
+                  Go to Circles page and start a circle first
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {runningCircles.map((circle) => (
+                  <label
+                    key={circle.name}
+                    className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all ${
+                      selectedCircle === circle.name
+                        ? 'bg-emerald-500/20 border border-emerald-500/30'
+                        : 'glass-card hover:bg-white/5 border border-transparent'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="circle"
+                      checked={selectedCircle === circle.name}
+                      onChange={() => setSelectedCircle(circle.name)}
+                      className="w-4 h-4 text-emerald-500 bg-zinc-800 border-zinc-600 focus:ring-emerald-500 focus:ring-offset-0"
+                    />
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
+                        <CircleDot className="w-3 h-3 text-white" />
+                      </div>
+                      <span className="text-sm text-white">{(circle as any).display_name || circle.name}</span>
+                      <span className="text-xs text-zinc-500">({circle.agent_count} agents)</span>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            )}
+          </div>
+
           <div>
             <label className="block text-sm font-medium text-zinc-300 mb-2">
               Topic
@@ -444,6 +490,20 @@ function CreateConversationModal({
               placeholder="What should agents discuss?"
               required
               className="w-full px-4 py-3 input-glass rounded-xl"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-zinc-300 mb-2">
+              <Send className="w-4 h-4 inline mr-2" />
+              Initial Prompt (optional)
+            </label>
+            <textarea
+              value={initialPrompt}
+              onChange={(e) => setInitialPrompt(e.target.value)}
+              placeholder="Optional: provide context or a question to start the conversation..."
+              rows={3}
+              className="w-full px-4 py-3 input-glass rounded-xl resize-none"
             />
           </div>
 
@@ -530,39 +590,54 @@ function CreateConversationModal({
           <div>
             <label className="block text-sm font-medium text-zinc-300 mb-2">
               Participants ({selectedAgents.length} selected)
+              {selectedCircle && <span className="text-zinc-500 ml-2">from selected circle</span>}
             </label>
-            <div className="max-h-48 overflow-y-auto space-y-2 glass-card rounded-xl p-3">
-              {agentsData?.agents.map((agent) => (
-                <label
-                  key={agent.id}
-                  className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all ${
-                    selectedAgents.includes(agent.id)
-                      ? 'bg-purple-500/20 border border-purple-500/30'
-                      : 'hover:bg-white/5 border border-transparent'
-                  }`}
-                >
-                  <input
-                    type="checkbox"
-                    checked={selectedAgents.includes(agent.id)}
-                    onChange={() => toggleAgent(agent.id)}
-                    className="w-4 h-4 text-purple-500 bg-zinc-800 border-zinc-600 rounded focus:ring-purple-500 focus:ring-offset-0"
-                  />
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center">
-                      <Bot className="w-3 h-3 text-white" />
+            {!selectedCircle ? (
+              <div className="p-4 glass-card rounded-xl text-center text-zinc-500">
+                <p className="text-sm">Select a circle first to see available agents</p>
+              </div>
+            ) : (
+              <div className="max-h-48 overflow-y-auto space-y-2 glass-card rounded-xl p-3">
+                {availableAgents.map((agent) => (
+                  <label
+                    key={agent.id}
+                    className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all ${
+                      selectedAgents.includes(agent.id)
+                        ? 'bg-purple-500/20 border border-purple-500/30'
+                        : 'hover:bg-white/5 border border-transparent'
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedAgents.includes(agent.id)}
+                      onChange={() => toggleAgent(agent.id)}
+                      className="w-4 h-4 text-purple-500 bg-zinc-800 border-zinc-600 rounded focus:ring-purple-500 focus:ring-offset-0"
+                    />
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center">
+                        <Bot className="w-3 h-3 text-white" />
+                      </div>
+                      <span className="text-sm text-white">{agent.name}</span>
+                      <span className="text-xs text-zinc-500">({agent.role})</span>
                     </div>
-                    <span className="text-sm text-white">{agent.name}</span>
-                    <span className="text-xs text-zinc-500">({agent.role})</span>
-                  </div>
-                </label>
-              ))}
-              {agentsData?.agents.length === 0 && (
-                <p className="text-sm text-zinc-500 text-center py-6">
-                  No agents available. Create some first!
-                </p>
-              )}
-            </div>
+                  </label>
+                ))}
+                {availableAgents.length === 0 && (
+                  <p className="text-sm text-zinc-500 text-center py-6">
+                    No agents in this circle. Add agents first!
+                  </p>
+                )}
+              </div>
+            )}
           </div>
+
+          {/* Error display */}
+          {createMutation.isError && (
+            <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 flex items-center gap-3">
+              <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
+              <p className="text-sm text-red-400">{(createMutation.error as Error)?.message || 'Failed to create conversation'}</p>
+            </div>
+          )}
 
           <div className="flex gap-3 pt-4 border-t border-white/5">
             <button
@@ -576,6 +651,7 @@ function CreateConversationModal({
               type="submit"
               disabled={
                 createMutation.isPending ||
+                !selectedCircle ||
                 selectedAgents.length < 2 ||
                 (turnStrategy === 'facilitator_led' && !facilitatorId)
               }
@@ -602,8 +678,8 @@ export function Conversations() {
     refetchOnWindowFocus: false,
   });
 
-  // Use demo data when API returns empty
-  const displayConversations = data?.conversations?.length ? data.conversations : demoConversations;
+  // Display real conversations from API (no more demo data fallback)
+  const displayConversations = data?.conversations || [];
 
   const deleteMutation = useMutation({
     mutationFn: conversations.delete,
@@ -640,6 +716,12 @@ export function Conversations() {
                 <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce [animation-delay:0.1s]" />
                 <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce [animation-delay:0.2s]" />
               </div>
+            </div>
+          ) : displayConversations.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-zinc-500">
+              <MessageSquare className="w-10 h-10 mb-3 opacity-50" />
+              <p className="text-sm">No conversations yet</p>
+              <p className="text-xs mt-1">Click + to start one</p>
             </div>
           ) : (
             displayConversations.map((conv) => (

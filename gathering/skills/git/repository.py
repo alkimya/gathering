@@ -456,7 +456,7 @@ class GitSkill(BaseSkill):
         )
 
     def _git_commit(self, tool_input: Dict[str, Any]) -> SkillResponse:
-        """Create a commit."""
+        """Create a commit with agent trailers for traceability."""
         repo_path = self._get_repo_path(tool_input)
         message = tool_input.get("message")
 
@@ -467,7 +467,22 @@ class GitSkill(BaseSkill):
                 error="no_message"
             )
 
-        args = ["commit", "-m", message]
+        # Add agent trailers if context is available
+        agent_name = None
+        agent_id = None
+        if hasattr(self, "context") and self.context:
+            agent_name = self.context.get("agent_name")
+            agent_id = self.context.get("agent_id")
+
+        # Build commit message with trailers
+        if agent_name:
+            full_message = f"{message}\n\nAgent: {agent_name}"
+            if agent_id:
+                full_message += f"\nAgent-ID: {agent_id}"
+        else:
+            full_message = message
+
+        args = ["commit", "-m", full_message]
 
         if tool_input.get("author"):
             args.extend(["--author", tool_input["author"]])
@@ -481,7 +496,12 @@ class GitSkill(BaseSkill):
         return SkillResponse(
             success=True,
             message="Commit created successfully",
-            data={"hash": commit_hash, "message": message}
+            data={
+                "hash": commit_hash,
+                "message": message,
+                "agent": agent_name,
+                "agent_id": agent_id,
+            }
         )
 
     def _git_push(self, tool_input: Dict[str, Any]) -> SkillResponse:

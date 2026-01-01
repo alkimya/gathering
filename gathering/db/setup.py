@@ -2,7 +2,7 @@
 """
 GatheRing Database Setup Script.
 
-Creates the database, schemas, and applies migrations using PicoPG.
+Creates the database, schemas, and applies migrations using Pycopg.
 
 Usage:
     # From environment variables
@@ -22,13 +22,10 @@ import argparse
 import sys
 from pathlib import Path
 
-# Add picopg to path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent / "picopg"))
-
 try:
-    from picopg import Database
+    from pycopg import Database
 except ImportError:
-    print("Error: picopg not found. Make sure it's in the project directory.")
+    print("Error: pycopg not found. Install it with: pip install pycopg")
     sys.exit(1)
 
 
@@ -219,7 +216,7 @@ Examples:
     try:
         if args.host or args.user:
             # Build connection from args
-            from picopg.config import Config
+            from pycopg.config import Config
             config = Config(
                 host=args.host or "localhost",
                 port=args.port or 5432,
@@ -257,7 +254,7 @@ Examples:
     # Connect to the gathering database
     print(f"\n  Connecting to '{db_name}'...")
     if args.host or args.user:
-        from picopg.config import Config
+        from pycopg.config import Config
         config = Config(
             host=args.host or "localhost",
             port=args.port or 5432,
