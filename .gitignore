@@ -46,3 +46,6 @@ site/
 
 # Testing
 .benchmarks/
+
+# pycopg
+pycopg/
