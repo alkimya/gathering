@@ -31,105 +31,6 @@ import type {
   Agent,
 } from '../types';
 
-// Demo data for when API returns empty
-const demoActions = [
-  {
-    id: 1,
-    agent_id: 1,
-    agent_name: 'Sophie',
-    name: 'Daily Code Review',
-    description: 'Automated code review of recent commits',
-    goal: 'Review all commits from the last 24 hours, check for code quality issues, security vulnerabilities, and suggest improvements.',
-    schedule_type: 'cron' as const,
-    cron_expression: '0 9 * * MON-FRI',
-    status: 'active' as const,
-    max_steps: 50,
-    timeout_seconds: 3600,
-    retry_on_failure: true,
-    max_retries: 3,
-    retry_delay_seconds: 300,
-    allow_concurrent: false,
-    tags: ['code-review', 'daily'],
-    next_run_at: new Date(Date.now() + 43200000).toISOString(),
-    last_run_at: new Date(Date.now() - 86400000).toISOString(),
-    execution_count: 15,
-    successful_runs: 14,
-    failed_runs: 1,
-    created_at: new Date(Date.now() - 1296000000).toISOString(),
-  },
-  {
-    id: 2,
-    agent_id: 2,
-    agent_name: 'Olivia',
-    name: 'Database Health Check',
-    description: 'Monitor database performance metrics',
-    goal: 'Check database connection health, query performance, and disk usage. Alert if any metrics are outside normal ranges.',
-    schedule_type: 'interval' as const,
-    interval_seconds: 3600,
-    status: 'active' as const,
-    max_steps: 20,
-    timeout_seconds: 600,
-    retry_on_failure: true,
-    max_retries: 2,
-    retry_delay_seconds: 60,
-    allow_concurrent: false,
-    tags: ['database', 'monitoring'],
-    next_run_at: new Date(Date.now() + 1800000).toISOString(),
-    last_run_at: new Date(Date.now() - 1800000).toISOString(),
-    execution_count: 48,
-    successful_runs: 48,
-    failed_runs: 0,
-    created_at: new Date(Date.now() - 172800000).toISOString(),
-  },
-  {
-    id: 3,
-    agent_id: 1,
-    agent_name: 'Sophie',
-    name: 'Weekly Report Generation',
-    description: 'Generate weekly development progress report',
-    goal: 'Compile a comprehensive report of development activities, completed tasks, and sprint progress for the past week.',
-    schedule_type: 'cron' as const,
-    cron_expression: '0 18 * * FRI',
-    status: 'active' as const,
-    max_steps: 100,
-    timeout_seconds: 7200,
-    retry_on_failure: false,
-    max_retries: 0,
-    retry_delay_seconds: 0,
-    allow_concurrent: false,
-    tags: ['reporting', 'weekly'],
-    next_run_at: new Date(Date.now() + 345600000).toISOString(),
-    last_run_at: new Date(Date.now() - 259200000).toISOString(),
-    execution_count: 4,
-    successful_runs: 4,
-    failed_runs: 0,
-    created_at: new Date(Date.now() - 2592000000).toISOString(),
-  },
-  {
-    id: 4,
-    agent_id: 2,
-    agent_name: 'Olivia',
-    name: 'Security Audit',
-    description: 'Monthly security vulnerability scan',
-    goal: 'Scan codebase for security vulnerabilities, check dependencies for known CVEs, and generate security report.',
-    schedule_type: 'cron' as const,
-    cron_expression: '0 2 1 * *',
-    status: 'paused' as const,
-    max_steps: 200,
-    timeout_seconds: 14400,
-    retry_on_failure: true,
-    max_retries: 2,
-    retry_delay_seconds: 600,
-    allow_concurrent: false,
-    tags: ['security', 'monthly'],
-    next_run_at: new Date(Date.now() + 604800000).toISOString(),
-    execution_count: 2,
-    successful_runs: 2,
-    failed_runs: 0,
-    created_at: new Date(Date.now() - 5184000000).toISOString(),
-  },
-] as ScheduledAction[];
-
 // Status badge component
 function StatusBadge({ status }: { status: ScheduledActionStatus }) {
   const config = {
@@ -682,8 +583,8 @@ export function ScheduledActions() {
     refetchInterval: 30000,
   });
 
-  // Use demo data when API returns empty
-  const displayActions = actions?.length ? actions : demoActions;
+  // Use API data
+  const displayActions = actions || [];
 
   // Fetch agents for the create modal
   const { data: agentsData } = useQuery({

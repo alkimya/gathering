@@ -1,6 +1,5 @@
 // Agent Dashboard - Personal workspace for a single agent
 
-import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -66,286 +65,6 @@ interface AgentStats {
   tokens_used: number;
   messages_sent: number;
 }
-
-// Helper to normalize agent name for demo data lookup
-const normalizeAgentName = (name: string): string => {
-  const normalized = name.toLowerCase().trim();
-  if (normalized.includes('sophie')) return 'Sophie';
-  if (normalized.includes('olivia')) return 'Olivia';
-  return name; // Return original if no match
-};
-
-// Demo data by agent
-const demoTasksByAgent: Record<string, AgentTask[]> = {
-  'Sophie': [
-    {
-      id: '1',
-      title: 'Refactor authentication module',
-      status: 'in_progress',
-      priority: 'high',
-      due_date: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(),
-      project_name: 'GatheRing',
-    },
-    {
-      id: '2',
-      title: 'Design API architecture for v2',
-      status: 'in_progress',
-      priority: 'high',
-      project_name: 'GatheRing',
-    },
-    {
-      id: '3',
-      title: 'Review code quality standards',
-      status: 'pending',
-      priority: 'medium',
-      due_date: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-      project_name: 'GatheRing',
-    },
-    {
-      id: '4',
-      title: 'Write architecture documentation',
-      status: 'pending',
-      priority: 'medium',
-      due_date: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
-    },
-    {
-      id: '5',
-      title: 'Setup CI/CD pipeline',
-      status: 'completed',
-      priority: 'high',
-      project_name: 'GatheRing',
-    },
-  ],
-  'Olivia': [
-    {
-      id: '1',
-      title: 'Optimize database queries',
-      status: 'in_progress',
-      priority: 'critical',
-      due_date: new Date(Date.now() + 4 * 60 * 60 * 1000).toISOString(),
-      project_name: 'GatheRing',
-    },
-    {
-      id: '2',
-      title: 'Implement caching layer',
-      status: 'in_progress',
-      priority: 'high',
-      project_name: 'GatheRing',
-    },
-    {
-      id: '3',
-      title: 'Add database migrations',
-      status: 'pending',
-      priority: 'medium',
-      due_date: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(),
-      project_name: 'GatheRing',
-    },
-    {
-      id: '4',
-      title: 'Performance benchmarking',
-      status: 'pending',
-      priority: 'low',
-      due_date: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
-    },
-    {
-      id: '5',
-      title: 'Index optimization analysis',
-      status: 'completed',
-      priority: 'high',
-      project_name: 'GatheRing',
-    },
-  ],
-};
-
-// Demo data generators
-const generateDemoTasks = (agentName: string): AgentTask[] => {
-  const normalizedName = normalizeAgentName(agentName);
-  return demoTasksByAgent[normalizedName] || demoTasksByAgent['Sophie'];
-};
-
-const demoGoalsByAgent: Record<string, AgentGoal[]> = {
-  'Sophie': [
-    {
-      id: '1',
-      title: 'Architecture Design v2.0',
-      progress: 85,
-      status: 'active',
-      subgoals_count: 10,
-      subgoals_completed: 8,
-    },
-    {
-      id: '2',
-      title: 'Code Quality Standards',
-      progress: 100,
-      status: 'completed',
-      subgoals_count: 6,
-      subgoals_completed: 6,
-    },
-    {
-      id: '3',
-      title: 'API Documentation',
-      progress: 45,
-      status: 'active',
-      subgoals_count: 8,
-      subgoals_completed: 3,
-    },
-  ],
-  'Olivia': [
-    {
-      id: '1',
-      title: 'Database Performance Optimization',
-      progress: 60,
-      status: 'active',
-      subgoals_count: 12,
-      subgoals_completed: 7,
-    },
-    {
-      id: '2',
-      title: 'Query Analysis Complete',
-      progress: 100,
-      status: 'completed',
-      subgoals_count: 5,
-      subgoals_completed: 5,
-    },
-    {
-      id: '3',
-      title: 'Caching Strategy Implementation',
-      progress: 25,
-      status: 'active',
-      subgoals_count: 8,
-      subgoals_completed: 2,
-    },
-  ],
-};
-
-const generateDemoGoals = (agentName: string): AgentGoal[] => {
-  const normalizedName = normalizeAgentName(agentName);
-  return demoGoalsByAgent[normalizedName] || demoGoalsByAgent['Sophie'];
-};
-
-const demoMemoriesByAgent: Record<string, AgentMemory[]> = {
-  'Sophie': [
-    {
-      id: '1',
-      type: 'preference',
-      content: 'Prefers modular architecture with clear separation of concerns',
-      created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-    },
-    {
-      id: '2',
-      type: 'decision',
-      content: 'Chose FastAPI over Flask for REST API implementation',
-      created_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-    },
-    {
-      id: '3',
-      type: 'context',
-      content: 'GatheRing uses pytest with coverage for testing',
-      created_at: new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString(),
-    },
-    {
-      id: '4',
-      type: 'fact',
-      content: 'Project follows PEP 8 style guidelines',
-      created_at: new Date(Date.now() - 72 * 60 * 60 * 1000).toISOString(),
-    },
-  ],
-  'Olivia': [
-    {
-      id: '1',
-      type: 'preference',
-      content: 'Always uses EXPLAIN ANALYZE before optimizing queries',
-      created_at: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
-    },
-    {
-      id: '2',
-      type: 'decision',
-      content: 'Implemented Redis caching for frequently accessed data',
-      created_at: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
-    },
-    {
-      id: '3',
-      type: 'context',
-      content: 'Database uses PostgreSQL with pgvector for embeddings',
-      created_at: new Date(Date.now() - 36 * 60 * 60 * 1000).toISOString(),
-    },
-    {
-      id: '4',
-      type: 'fact',
-      content: 'Connection pooling configured with max 20 connections',
-      created_at: new Date(Date.now() - 60 * 60 * 60 * 1000).toISOString(),
-    },
-  ],
-};
-
-const generateDemoMemories = (agentName: string): AgentMemory[] => {
-  const normalizedName = normalizeAgentName(agentName);
-  return demoMemoriesByAgent[normalizedName] || demoMemoriesByAgent['Sophie'];
-};
-
-const demoConversationsByAgent: Record<string, AgentConversation[]> = {
-  'Sophie': [
-    {
-      id: '1',
-      title: 'Architecture Discussion',
-      participants: ['Sophie', 'Olivia'],
-      last_message: 'I agree, let\'s use the repository pattern.',
-      last_activity: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
-    },
-    {
-      id: '2',
-      title: 'Code Review #47',
-      participants: ['Sophie', 'Claude'],
-      last_message: 'LGTM! Approved the changes.',
-      last_activity: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
-    },
-  ],
-  'Olivia': [
-    {
-      id: '1',
-      title: 'Database Optimization',
-      participants: ['Olivia', 'Sophie'],
-      last_message: 'The new indexes improved performance by 40%.',
-      last_activity: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
-    },
-    {
-      id: '2',
-      title: 'Query Debugging',
-      participants: ['Olivia', 'Claude'],
-      last_message: 'Found the N+1 query issue in the users endpoint.',
-      last_activity: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
-    },
-  ],
-};
-
-const generateDemoConversations = (agentName: string): AgentConversation[] => {
-  const normalizedName = normalizeAgentName(agentName);
-  return demoConversationsByAgent[normalizedName] || demoConversationsByAgent['Sophie'];
-};
-
-const demoStatsByAgent: Record<string, AgentStats> = {
-  'Sophie': {
-    tasks_today: 5,
-    tasks_completed: 3,
-    tasks_in_progress: 2,
-    reviews_pending: 2,
-    tokens_used: 52340,
-    messages_sent: 156,
-  },
-  'Olivia': {
-    tasks_today: 4,
-    tasks_completed: 2,
-    tasks_in_progress: 2,
-    reviews_pending: 1,
-    tokens_used: 38750,
-    messages_sent: 89,
-  },
-};
-
-const generateDemoStats = (agentName: string): AgentStats => {
-  const normalizedName = normalizeAgentName(agentName);
-  return demoStatsByAgent[normalizedName] || demoStatsByAgent['Sophie'];
-};
 
 // Priority config
 const priorityConfig = {
@@ -483,11 +202,6 @@ function GoalItem({ goal }: { goal: AgentGoal }) {
 
 export function AgentDashboard() {
   const { agentId } = useParams<{ agentId: string }>();
-  const [tasks, setTasks] = useState<AgentTask[]>([]);
-  const [goals, setGoals] = useState<AgentGoal[]>([]);
-  const [memories, setMemories] = useState<AgentMemory[]>([]);
-  const [conversations, setConversations] = useState<AgentConversation[]>([]);
-  const [stats, setStats] = useState<AgentStats | null>(null);
 
   // Fetch agent from API
   const { data: agent, isLoading, error } = useQuery<AgentDetail>({
@@ -496,19 +210,20 @@ export function AgentDashboard() {
     enabled: !!agentId,
   });
 
-  // Load demo data
-  useEffect(() => {
-    if (agent) {
-      // Support both nested persona object and flat persona_name field
-      const agentData = agent as AgentDetail & { persona_name?: string };
-      const name = agentData.persona?.name || agentData.persona_name || agentData.name || 'Agent';
-      setTasks(generateDemoTasks(name));
-      setGoals(generateDemoGoals(name));
-      setMemories(generateDemoMemories(name));
-      setConversations(generateDemoConversations(name));
-      setStats(generateDemoStats(name));
-    }
-  }, [agent]);
+  // TODO: Fetch real data from API when endpoints are available
+  // For now, initialize with empty arrays
+  const tasks: AgentTask[] = [];
+  const goals: AgentGoal[] = [];
+  const memories: AgentMemory[] = [];
+  const conversations: AgentConversation[] = [];
+  const stats: AgentStats = {
+    tasks_today: 0,
+    tasks_completed: 0,
+    tasks_in_progress: 0,
+    reviews_pending: 0,
+    tokens_used: 0,
+    messages_sent: agent?.session?.message_count || agent?.message_count || 0,
+  };
 
   if (isLoading) {
     return (
@@ -680,9 +395,13 @@ export function AgentDashboard() {
               </Link>
             </div>
             <div className="space-y-3">
-              {goals.filter(g => g.status === 'active').map((goal) => (
-                <GoalItem key={goal.id} goal={goal} />
-              ))}
+              {goals.filter(g => g.status === 'active').length === 0 ? (
+                <p className="text-center py-8 text-zinc-500">No active goals</p>
+              ) : (
+                goals.filter(g => g.status === 'active').map((goal) => (
+                  <GoalItem key={goal.id} goal={goal} />
+                ))
+              )}
             </div>
           </div>
         </div>
@@ -704,22 +423,26 @@ export function AgentDashboard() {
               </Link>
             </div>
             <div className="space-y-3">
-              {conversations.map((conv) => (
-                <div key={conv.id} className="p-3 rounded-xl hover:bg-white/5 transition-colors cursor-pointer">
-                  <div className="flex items-center justify-between mb-1">
-                    <p className="font-medium text-zinc-200 text-sm">{conv.title}</p>
-                    <span className="text-xs text-zinc-500">{formatRelativeTime(conv.last_activity)}</span>
+              {conversations.length === 0 ? (
+                <p className="text-center py-8 text-zinc-500">No conversations yet</p>
+              ) : (
+                conversations.map((conv) => (
+                  <div key={conv.id} className="p-3 rounded-xl hover:bg-white/5 transition-colors cursor-pointer">
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="font-medium text-zinc-200 text-sm">{conv.title}</p>
+                      <span className="text-xs text-zinc-500">{formatRelativeTime(conv.last_activity)}</span>
+                    </div>
+                    <p className="text-xs text-zinc-500 truncate">{conv.last_message}</p>
+                    <div className="flex items-center gap-1 mt-2">
+                      {conv.participants.map((p, i) => (
+                        <span key={i} className="px-2 py-0.5 text-xs rounded-full bg-zinc-700/50 text-zinc-400">
+                          {p}
+                        </span>
+                      ))}
+                    </div>
                   </div>
-                  <p className="text-xs text-zinc-500 truncate">{conv.last_message}</p>
-                  <div className="flex items-center gap-1 mt-2">
-                    {conv.participants.map((p, i) => (
-                      <span key={i} className="px-2 py-0.5 text-xs rounded-full bg-zinc-700/50 text-zinc-400">
-                        {p}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </div>
 
@@ -738,20 +461,24 @@ export function AgentDashboard() {
               </Link>
             </div>
             <div className="space-y-3">
-              {memories.slice(0, 4).map((memory) => {
-                const typeConfig = memoryTypeConfig[memory.type];
-                return (
-                  <div key={memory.id} className="p-3 rounded-xl bg-zinc-800/30">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className={`px-2 py-0.5 text-xs rounded-full ${typeConfig.bg} ${typeConfig.color}`}>
-                        {typeConfig.label}
-                      </span>
-                      <span className="text-xs text-zinc-600">{formatRelativeTime(memory.created_at)}</span>
+              {memories.length === 0 ? (
+                <p className="text-center py-8 text-zinc-500">No memories stored</p>
+              ) : (
+                memories.slice(0, 4).map((memory) => {
+                  const typeConfig = memoryTypeConfig[memory.type];
+                  return (
+                    <div key={memory.id} className="p-3 rounded-xl bg-zinc-800/30">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className={`px-2 py-0.5 text-xs rounded-full ${typeConfig.bg} ${typeConfig.color}`}>
+                          {typeConfig.label}
+                        </span>
+                        <span className="text-xs text-zinc-600">{formatRelativeTime(memory.created_at)}</span>
+                      </div>
+                      <p className="text-sm text-zinc-300">{memory.content}</p>
                     </div>
-                    <p className="text-sm text-zinc-300">{memory.content}</p>
-                  </div>
-                );
-              })}
+                  );
+                })
+              )}
             </div>
           </div>
 
@@ -770,26 +497,7 @@ export function AgentDashboard() {
               </Link>
             </div>
             <div className="space-y-3">
-              <div className="flex items-center gap-3 p-3 rounded-xl bg-zinc-800/30">
-                <div className="p-2 rounded-lg bg-blue-500/20">
-                  <Clock className="w-4 h-4 text-blue-400" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm text-zinc-200">Daily Report</p>
-                  <p className="text-xs text-zinc-500">Every day at 9:00 AM</p>
-                </div>
-                <span className="text-xs text-emerald-400">Active</span>
-              </div>
-              <div className="flex items-center gap-3 p-3 rounded-xl bg-zinc-800/30">
-                <div className="p-2 rounded-lg bg-purple-500/20">
-                  <RefreshCw className="w-4 h-4 text-purple-400" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm text-zinc-200">Sync with GitHub</p>
-                  <p className="text-xs text-zinc-500">Every 30 minutes</p>
-                </div>
-                <span className="text-xs text-emerald-400">Active</span>
-              </div>
+              <p className="text-center py-8 text-zinc-500">No scheduled actions</p>
             </div>
           </div>
         </div>

@@ -1,6 +1,6 @@
 // Activity Feed page - Real-time activity stream
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   Bell,
   CheckCircle,
@@ -81,84 +81,6 @@ const activityConfig: Record<ActivityType, { icon: React.ReactNode; color: strin
   conflict_resolved: { icon: <CheckCircle className="w-4 h-4" />, color: 'text-emerald-400', bgColor: 'bg-emerald-500/20' },
   scheduled_triggered: { icon: <Clock className="w-4 h-4" />, color: 'text-purple-400', bgColor: 'bg-purple-500/20' },
   system_event: { icon: <Zap className="w-4 h-4" />, color: 'text-zinc-400', bgColor: 'bg-zinc-500/20' },
-};
-
-// Données de démo (sera remplacé par l'API)
-const generateDemoEvents = (): ActivityEvent[] => {
-  const now = new Date();
-  return [
-    {
-      id: '1',
-      type: 'task_completed',
-      timestamp: new Date(now.getTime() - 2 * 60000).toISOString(),
-      actor: { id: 'a1', name: 'Sophie', type: 'agent' },
-      subject: { type: 'task', id: 't1', name: 'Implement PDF skill' },
-      message: 'Sophie a terminé la tâche "Implement PDF skill"',
-      metadata: { files_modified: 3, duration_minutes: 45 },
-    },
-    {
-      id: '2',
-      type: 'task_assigned',
-      timestamp: new Date(now.getTime() - 15 * 60000).toISOString(),
-      actor: { id: 'u1', name: 'Loc', type: 'user' },
-      subject: { type: 'task', id: 't2', name: 'Review API changes' },
-      message: 'Loc a assigné "Review API changes" à Olivia',
-      metadata: { assignee: 'Olivia', priority: 'high' },
-    },
-    {
-      id: '3',
-      type: 'conflict_detected',
-      timestamp: new Date(now.getTime() - 60 * 60000).toISOString(),
-      actor: { id: 'sys', name: 'System', type: 'system' },
-      subject: { type: 'file', id: 'f1', name: 'api.py' },
-      message: 'Conflit détecté: Sophie et Olivia modifient api.py',
-      metadata: { agents: ['Sophie', 'Olivia'], file: 'api.py' },
-      circle_id: 'c1',
-    },
-    {
-      id: '4',
-      type: 'goal_completed',
-      timestamp: new Date(now.getTime() - 2 * 60 * 60000).toISOString(),
-      actor: { id: 'a1', name: 'Sophie', type: 'agent' },
-      subject: { type: 'goal', id: 'g1', name: 'Extended Skills Implementation' },
-      message: 'Objectif "Extended Skills" complété à 100%',
-      metadata: { progress: 100, subgoals_completed: 8 },
-    },
-    {
-      id: '5',
-      type: 'agent_joined',
-      timestamp: new Date(now.getTime() - 3 * 60 * 60000).toISOString(),
-      actor: { id: 'a3', name: 'Claude', type: 'agent' },
-      subject: { type: 'circle', id: 'c1', name: 'Development' },
-      message: 'Claude a rejoint le circle "Development"',
-    },
-    {
-      id: '6',
-      type: 'scheduled_triggered',
-      timestamp: new Date(now.getTime() - 4 * 60 * 60000).toISOString(),
-      actor: { id: 'sys', name: 'System', type: 'system' },
-      subject: { type: 'schedule', id: 's1', name: 'Daily Backup' },
-      message: 'Action planifiée "Daily Backup" exécutée',
-      metadata: { status: 'success', duration_seconds: 12 },
-    },
-    {
-      id: '7',
-      type: 'review_approved',
-      timestamp: new Date(now.getTime() - 5 * 60 * 60000).toISOString(),
-      actor: { id: 'a2', name: 'Olivia', type: 'agent' },
-      subject: { type: 'task', id: 't3', name: 'Add email skill' },
-      message: 'Olivia a approuvé la review de "Add email skill"',
-      metadata: { comments: 'LGTM! Good implementation.' },
-    },
-    {
-      id: '8',
-      type: 'task_started',
-      timestamp: new Date(now.getTime() - 6 * 60 * 60000).toISOString(),
-      actor: { id: 'a1', name: 'Sophie', type: 'agent' },
-      subject: { type: 'task', id: 't4', name: 'Implement cloud skill' },
-      message: 'Sophie a commencé "Implement cloud skill"',
-    },
-  ];
 };
 
 function formatRelativeTime(timestamp: string): string {
@@ -273,10 +195,8 @@ export function Activity() {
     },
   });
 
-  // Charger les événements initiaux (démo pour l'instant)
-  useEffect(() => {
-    setEvents(generateDemoEvents());
-  }, []);
+  // Les événements arrivent via WebSocket en temps réel
+  // Plus besoin de charger des données démo
 
   // Filtrer les événements
   const filteredEvents = events.filter(event => {
@@ -324,8 +244,9 @@ export function Activity() {
 
           {/* Refresh */}
           <button
-            onClick={() => setEvents(generateDemoEvents())}
+            onClick={() => setEvents([])}
             className="p-2 glass-card rounded-xl text-zinc-400 hover:text-white transition-colors"
+            title="Clear events"
           >
             <RefreshCw className="w-5 h-5" />
           </button>

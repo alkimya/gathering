@@ -23,103 +23,6 @@ import {
 import { goals, agents } from '../services/api';
 import type { Goal, GoalCreate, GoalStatus, GoalPriority, Agent, GoalActivity } from '../types';
 
-// Demo data for when API returns empty
-const demoGoals = [
-  {
-    id: 1,
-    agent_id: 1,
-    agent_name: 'Sophie',
-    title: 'Implement Real-time Dashboard Analytics',
-    description: 'Create a comprehensive analytics system with WebSocket-based real-time updates, interactive charts, and customizable widgets.',
-    status: 'active' as const,
-    priority: 'high' as const,
-    progress_percent: 65,
-    status_message: 'Working on chart components...',
-    is_decomposed: true,
-    subgoal_count: 4,
-    completed_subgoals: 2,
-    blocking_count: 0,
-    attempts: 3,
-    max_attempts: 10,
-    estimated_hours: 16,
-    actual_hours: 10,
-    depth: 0,
-    artifacts: [],
-    tags: ['frontend', 'analytics', 'real-time'],
-    created_at: new Date(Date.now() - 172800000).toISOString(),
-  },
-  {
-    id: 2,
-    agent_id: 2,
-    agent_name: 'Olivia',
-    title: 'Optimize Database Query Performance',
-    description: 'Analyze and optimize slow database queries, add proper indexing, and implement query caching where appropriate.',
-    status: 'completed' as const,
-    priority: 'high' as const,
-    progress_percent: 100,
-    status_message: 'All queries optimized successfully',
-    result_summary: 'Reduced average query time by 60%. Added 12 new indexes. Implemented Redis caching for frequently accessed data.',
-    is_decomposed: false,
-    subgoal_count: 0,
-    completed_subgoals: 0,
-    blocking_count: 0,
-    attempts: 2,
-    max_attempts: 5,
-    estimated_hours: 8,
-    actual_hours: 6,
-    depth: 0,
-    artifacts: [],
-    tags: ['database', 'performance', 'optimization'],
-    created_at: new Date(Date.now() - 604800000).toISOString(),
-    completed_at: new Date(Date.now() - 86400000).toISOString(),
-  },
-  {
-    id: 3,
-    agent_id: 1,
-    agent_name: 'Sophie',
-    title: 'Write Unit Tests for Authentication Module',
-    description: 'Create comprehensive unit tests covering login, logout, password reset, and session management flows.',
-    status: 'pending' as const,
-    priority: 'medium' as const,
-    progress_percent: 0,
-    is_decomposed: false,
-    subgoal_count: 0,
-    completed_subgoals: 0,
-    blocking_count: 1,
-    attempts: 0,
-    max_attempts: 5,
-    estimated_hours: 6,
-    actual_hours: 0,
-    depth: 0,
-    artifacts: [],
-    tags: ['testing', 'auth'],
-    created_at: new Date(Date.now() - 86400000).toISOString(),
-  },
-  {
-    id: 4,
-    agent_id: 2,
-    agent_name: 'Olivia',
-    title: 'Implement RAG Pipeline for Knowledge Base',
-    description: 'Set up a retrieval-augmented generation pipeline for the knowledge base with vector embeddings and semantic search.',
-    status: 'active' as const,
-    priority: 'critical' as const,
-    progress_percent: 35,
-    status_message: 'Configuring vector database...',
-    is_decomposed: true,
-    subgoal_count: 5,
-    completed_subgoals: 1,
-    blocking_count: 0,
-    attempts: 1,
-    max_attempts: 8,
-    estimated_hours: 20,
-    actual_hours: 7,
-    depth: 0,
-    artifacts: [],
-    tags: ['rag', 'ai', 'knowledge-base'],
-    created_at: new Date(Date.now() - 259200000).toISOString(),
-  },
-] as Goal[];
-
 // Status badge component
 function StatusBadge({ status }: { status: GoalStatus }) {
   const config: Record<GoalStatus, { color: string; icon: typeof CheckCircle2 }> = {
@@ -725,8 +628,8 @@ export function Goals() {
     refetchOnWindowFocus: false,
   });
 
-  // Use demo data when API returns empty
-  const displayGoals = goalsData?.goals?.length ? goalsData.goals : demoGoals;
+  // Use API data
+  const displayGoals = goalsData?.goals || [];
 
   // Calculate counts from displayGoals to ensure they match
   const calculatedCounts = displayGoals.reduce((acc, goal) => {
@@ -734,10 +637,8 @@ export function Goals() {
     return acc;
   }, {} as Record<string, number>);
 
-  // Use calculated counts if API returns empty, otherwise use API counts
-  const displayCounts = goalsData?.goals?.length
-    ? (goalsData.counts || calculatedCounts)
-    : calculatedCounts;
+  // Use API counts or calculate from goals
+  const displayCounts = goalsData?.counts || calculatedCounts;
 
   // Filter goals based on status filter
   const filteredGoals = statusFilter === 'all'

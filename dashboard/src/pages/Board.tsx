@@ -1,6 +1,6 @@
 // Kanban Board page - Visual task management
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   Kanban,
   Plus,
@@ -83,94 +83,6 @@ const priorityConfig = {
   medium: { color: 'text-yellow-400', bg: 'bg-yellow-500/20', label: 'Medium' },
   low: { color: 'text-emerald-400', bg: 'bg-emerald-500/20', label: 'Low' },
 };
-
-// Données de démo
-const generateDemoTasks = (): Task[] => [
-  {
-    id: '1',
-    title: 'Implement Activity Feed',
-    description: 'Create real-time activity feed with WebSocket',
-    status: 'in_progress',
-    priority: 'high',
-    assignee: { id: 'a1', name: 'Sophie', type: 'agent' },
-    project_name: 'GatheRing',
-    created_at: new Date().toISOString(),
-    tags: ['frontend', 'websocket'],
-  },
-  {
-    id: '2',
-    title: 'Review API changes',
-    description: 'Review the new skill endpoints',
-    status: 'in_review',
-    priority: 'high',
-    assignee: { id: 'a2', name: 'Olivia', type: 'agent' },
-    project_name: 'GatheRing',
-    created_at: new Date().toISOString(),
-    tags: ['api', 'review'],
-  },
-  {
-    id: '3',
-    title: 'Add unit tests for skills',
-    description: 'Write comprehensive tests for new skills',
-    status: 'pending',
-    priority: 'medium',
-    project_name: 'GatheRing',
-    created_at: new Date().toISOString(),
-    tags: ['testing'],
-  },
-  {
-    id: '4',
-    title: 'Update documentation',
-    description: 'Document new dashboard features',
-    status: 'assigned',
-    priority: 'low',
-    assignee: { id: 'a3', name: 'Claude', type: 'agent' },
-    project_name: 'GatheRing',
-    created_at: new Date().toISOString(),
-    tags: ['docs'],
-  },
-  {
-    id: '5',
-    title: 'Fix authentication bug',
-    description: 'Token refresh not working correctly',
-    status: 'in_progress',
-    priority: 'critical',
-    assignee: { id: 'a1', name: 'Sophie', type: 'agent' },
-    project_name: 'GatheRing',
-    created_at: new Date().toISOString(),
-    due_date: new Date(Date.now() + 86400000).toISOString(),
-    tags: ['bug', 'auth'],
-  },
-  {
-    id: '6',
-    title: 'Implement PDF export',
-    status: 'completed',
-    priority: 'medium',
-    assignee: { id: 'a1', name: 'Sophie', type: 'agent' },
-    project_name: 'GatheRing',
-    created_at: new Date(Date.now() - 86400000).toISOString(),
-    tags: ['feature'],
-  },
-  {
-    id: '7',
-    title: 'Add email notifications',
-    status: 'completed',
-    priority: 'medium',
-    assignee: { id: 'a2', name: 'Olivia', type: 'agent' },
-    project_name: 'GatheRing',
-    created_at: new Date(Date.now() - 172800000).toISOString(),
-    tags: ['feature', 'notifications'],
-  },
-  {
-    id: '8',
-    title: 'Optimize database queries',
-    status: 'pending',
-    priority: 'high',
-    project_name: 'GatheRing',
-    created_at: new Date().toISOString(),
-    tags: ['performance', 'database'],
-  },
-];
 
 function TaskCard({
   task,
@@ -367,10 +279,7 @@ export function Board() {
   const [filterAssignee, setFilterAssignee] = useState<string>('all');
   const [filterPriority, setFilterPriority] = useState<string>('all');
 
-  // Charger les tâches (démo pour l'instant)
-  useEffect(() => {
-    setTasks(generateDemoTasks());
-  }, []);
+  // TODO: Load tasks from API when endpoint is available
 
   // Mapper les colonnes aux statuts
   const columnToStatus: Record<ColumnId, Task['status']> = {

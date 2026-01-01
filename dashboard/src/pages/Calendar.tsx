@@ -43,123 +43,6 @@ const MONTHS = [
   'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
 ];
 
-// Génération de données démo
-const generateDemoEvents = (): CalendarEvent[] => {
-  const today = new Date();
-  const events: CalendarEvent[] = [];
-
-  // Actions planifiées récurrentes
-  events.push({
-    id: '1',
-    title: 'Daily Report Generation',
-    type: 'scheduled_action',
-    date: new Date(today.getFullYear(), today.getMonth(), today.getDate()),
-    time: '09:00',
-    agent_name: 'Sophie',
-    description: 'Generate daily progress report',
-    status: 'completed',
-    recurrence: 'Daily at 9:00 AM',
-  });
-
-  events.push({
-    id: '2',
-    title: 'GitHub Sync',
-    type: 'scheduled_action',
-    date: new Date(today.getFullYear(), today.getMonth(), today.getDate()),
-    time: '10:30',
-    agent_name: 'Olivia',
-    description: 'Synchronize with GitHub repositories',
-    status: 'running',
-    recurrence: 'Every 30 minutes',
-  });
-
-  // Goals avec deadlines
-  events.push({
-    id: '3',
-    title: 'Complete Dashboard Improvements',
-    type: 'goal_deadline',
-    date: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 2),
-    agent_name: 'Sophie',
-    description: 'Finish all dashboard UI improvements',
-    status: 'pending',
-  });
-
-  events.push({
-    id: '4',
-    title: 'API Documentation',
-    type: 'goal_deadline',
-    date: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 5),
-    agent_name: 'Claude',
-    description: 'Complete API documentation for v0.4.0',
-    status: 'pending',
-  });
-
-  // Tâches dues
-  events.push({
-    id: '5',
-    title: 'Fix Authentication Bug',
-    type: 'task_due',
-    date: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1),
-    agent_name: 'Sophie',
-    status: 'pending',
-  });
-
-  events.push({
-    id: '6',
-    title: 'Review API Changes',
-    type: 'task_due',
-    date: new Date(today.getFullYear(), today.getMonth(), today.getDate()),
-    agent_name: 'Olivia',
-    status: 'pending',
-  });
-
-  // Actions planifiées futures
-  events.push({
-    id: '7',
-    title: 'Weekly Backup',
-    type: 'scheduled_action',
-    date: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 3),
-    time: '02:00',
-    description: 'Full system backup',
-    status: 'pending',
-    recurrence: 'Every Sunday at 2:00 AM',
-  });
-
-  events.push({
-    id: '8',
-    title: 'Memory Cleanup',
-    type: 'scheduled_action',
-    date: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1),
-    time: '23:00',
-    agent_name: 'System',
-    description: 'Clean up old agent memories',
-    status: 'pending',
-    recurrence: 'Daily at 11:00 PM',
-  });
-
-  // Quelques événements passés
-  events.push({
-    id: '9',
-    title: 'Skills Implementation Review',
-    type: 'meeting',
-    date: new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1),
-    time: '14:00',
-    description: 'Review meeting for extended skills',
-    status: 'completed',
-  });
-
-  events.push({
-    id: '10',
-    title: 'Extended Skills Implementation',
-    type: 'goal_deadline',
-    date: new Date(today.getFullYear(), today.getMonth(), today.getDate() - 2),
-    agent_name: 'Sophie',
-    status: 'completed',
-  });
-
-  return events;
-};
-
 // Composant pour une journée du calendrier
 function CalendarDay({
   date,
@@ -286,7 +169,7 @@ function EventCard({ event }: { event: CalendarEvent }) {
 export function Calendar() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
-  const [events] = useState<CalendarEvent[]>(generateDemoEvents());
+  const [events] = useState<CalendarEvent[]>([]);
   const [filter, setFilter] = useState<string>('all');
 
   // Navigation du calendrier

@@ -59,85 +59,6 @@ const runStatusConfig = {
   cancelled: { icon: <Square className="w-4 h-4" />, color: 'text-zinc-400', bg: 'bg-zinc-500/20' },
 };
 
-// Demo pipelines data - shown when API returns empty or fails
-const demoPipelines: Pipeline[] = [
-  {
-    id: -1,
-    name: 'Code Review Workflow',
-    description: 'Automated code review with multiple agents',
-    status: 'active',
-    nodes: [
-      { id: 'n1', type: 'trigger', name: 'PR Created', config: { trigger_type: 'webhook', event: 'pull_request.opened' }, position: { x: 50, y: 100 } },
-      { id: 'n2', type: 'agent', name: 'Sophie - Security Review', config: { agent_id: 1, agent_name: 'Sophie', task: 'security_review' }, position: { x: 250, y: 50 } },
-      { id: 'n3', type: 'agent', name: 'Olivia - Code Quality', config: { agent_id: 2, agent_name: 'Olivia', task: 'code_quality' }, position: { x: 250, y: 150 } },
-      { id: 'n4', type: 'condition', name: 'All Approved?', config: { condition: 'all_reviews_passed' }, position: { x: 450, y: 100 } },
-      { id: 'n5', type: 'action', name: 'Merge PR', config: { action: 'merge_pull_request' }, position: { x: 650, y: 50 } },
-      { id: 'n6', type: 'action', name: 'Request Changes', config: { action: 'request_changes' }, position: { x: 650, y: 150 } },
-    ],
-    edges: [
-      { id: 'e1', from: 'n1', to: 'n2' },
-      { id: 'e2', from: 'n1', to: 'n3' },
-      { id: 'e3', from: 'n2', to: 'n4' },
-      { id: 'e4', from: 'n3', to: 'n4' },
-      { id: 'e5', from: 'n4', to: 'n5', condition: 'true' },
-      { id: 'e6', from: 'n4', to: 'n6', condition: 'false' },
-    ],
-    created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-    updated_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-    last_run: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-    run_count: 45,
-    success_count: 42,
-    error_count: 3,
-  },
-  {
-    id: -2,
-    name: 'Daily Report Generation',
-    description: 'Generate and send daily project reports',
-    status: 'active',
-    nodes: [
-      { id: 'n1', type: 'trigger', name: 'Daily at 9:00', config: { trigger_type: 'schedule', cron: '0 9 * * *' }, position: { x: 50, y: 100 } },
-      { id: 'n2', type: 'agent', name: 'Sophie - Gather Data', config: { agent_id: 1, agent_name: 'Sophie', task: 'gather_metrics' }, position: { x: 250, y: 100 } },
-      { id: 'n3', type: 'agent', name: 'Olivia - Write Report', config: { agent_id: 2, agent_name: 'Olivia', task: 'write_report' }, position: { x: 450, y: 100 } },
-      { id: 'n4', type: 'action', name: 'Send Email', config: { action: 'send_email', action_type: 'notification', recipients: ['team@example.com'] }, position: { x: 650, y: 100 } },
-    ],
-    edges: [
-      { id: 'e1', from: 'n1', to: 'n2' },
-      { id: 'e2', from: 'n2', to: 'n3' },
-      { id: 'e3', from: 'n3', to: 'n4' },
-    ],
-    created_at: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
-    updated_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-    last_run: new Date(Date.now() - 15 * 60 * 60 * 1000).toISOString(),
-    run_count: 12,
-    success_count: 12,
-    error_count: 0,
-  },
-  {
-    id: -3,
-    name: 'Bug Triage Pipeline',
-    description: 'Automatically triage and assign incoming bugs',
-    status: 'paused',
-    nodes: [
-      { id: 'n1', type: 'trigger', name: 'New Issue', config: { trigger_type: 'event', event: 'issue.created' }, position: { x: 50, y: 100 } },
-      { id: 'n2', type: 'agent', name: 'Sophie - Analyze', config: { agent_id: 1, agent_name: 'Sophie', task: 'analyze_bug' }, position: { x: 250, y: 100 } },
-      { id: 'n3', type: 'condition', name: 'Severity?', config: { condition: 'severity_check', condition_type: 'output_check' }, position: { x: 450, y: 100 } },
-      { id: 'n4', type: 'action', name: 'Urgent Alert', config: { action: 'send_alert', action_type: 'notification', channel: 'urgent' }, position: { x: 650, y: 50 } },
-      { id: 'n5', type: 'action', name: 'Add to Backlog', config: { action: 'add_to_backlog', action_type: 'api_call' }, position: { x: 650, y: 150 } },
-    ],
-    edges: [
-      { id: 'e1', from: 'n1', to: 'n2' },
-      { id: 'e2', from: 'n2', to: 'n3' },
-      { id: 'e3', from: 'n3', to: 'n4', condition: 'high' },
-      { id: 'e4', from: 'n3', to: 'n5', condition: 'low' },
-    ],
-    created_at: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-    updated_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-    run_count: 28,
-    success_count: 25,
-    error_count: 3,
-  },
-];
-
 // Pipeline Node Component (simplified visual)
 function PipelineNodeVisual({ node }: { node: PipelineNode }) {
   const config = nodeTypeConfig[node.type];
@@ -525,10 +446,8 @@ export function Pipelines() {
     queryFn: () => agentsApi.list(),
   });
 
-  // Use API data if available, otherwise show demo pipelines
-  const apiPipelines = pipelinesData?.pipelines || [];
-  const pipelines = apiPipelines.length > 0 ? apiPipelines : demoPipelines;
-  const isShowingDemoData = apiPipelines.length === 0;
+  // Use API data
+  const pipelines = pipelinesData?.pipelines || [];
   const agents = agentsData?.agents || [];
 
   // Mutations
@@ -704,21 +623,6 @@ export function Pipelines() {
         </div>
       </div>
 
-      {/* Demo Data Banner */}
-      {isShowingDemoData && (
-        <div className="glass-card rounded-xl p-4 border border-amber-500/30 bg-amber-500/10">
-          <div className="flex items-center gap-3">
-            <AlertCircle className="w-5 h-5 text-amber-400 flex-shrink-0" />
-            <div>
-              <p className="text-amber-200 font-medium">Demo Mode</p>
-              <p className="text-sm text-amber-400/70">
-                These are example pipelines for demonstration. Create your own pipeline to get started!
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Filters */}
       <div className="flex items-center gap-2">
         <Filter className="w-4 h-4 text-zinc-500" />
@@ -756,41 +660,14 @@ export function Pipelines() {
               key={pipeline.id}
               pipeline={pipeline}
               onView={() => setSelectedPipeline(pipeline)}
-              onEdit={() => {
-                if (pipeline.id < 0) {
-                  // For demo pipelines, open editor with demo content as template
-                  // Create a copy without the negative ID so it will be saved as new
-                  toast.info('Demo Template', 'Editing a copy of this demo pipeline');
-                  setEditingPipeline({
-                    ...pipeline,
-                    id: 0, // Will be treated as new pipeline
-                    name: `${pipeline.name} (Copy)`,
-                  });
-                } else {
-                  setEditingPipeline(pipeline);
-                }
-              }}
-              onToggle={() => {
-                if (pipeline.id < 0) {
-                  toast.info('Demo Pipeline', 'This is a demo - create your own pipeline');
-                } else {
-                  toggleMutation.mutate(pipeline.id);
-                }
-              }}
+              onEdit={() => setEditingPipeline(pipeline)}
+              onToggle={() => toggleMutation.mutate(pipeline.id)}
               onDelete={() => {
-                if (pipeline.id < 0) {
-                  toast.info('Demo Pipeline', 'This is a demo - create your own pipeline');
-                } else if (confirm('Are you sure you want to delete this pipeline?')) {
+                if (confirm('Are you sure you want to delete this pipeline?')) {
                   deleteMutation.mutate(pipeline.id);
                 }
               }}
-              onRun={() => {
-                if (pipeline.id < 0) {
-                  toast.info('Demo Pipeline', 'This is a demo - create your own pipeline to run it');
-                } else {
-                  runMutation.mutate(pipeline.id);
-                }
-              }}
+              onRun={() => runMutation.mutate(pipeline.id)}
             />
           ))
         )}
