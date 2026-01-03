@@ -55,6 +55,7 @@ croniter = "^2.0"
 # Auth
 python-jose = {extras = ["cryptography"], version = "^3.3"}
 passlib = {extras = ["bcrypt"], version = "^1.7"}
+bcrypt = ">=4.0.0,<4.1.0"  # Pinned for passlib compatibility
 # Monitoring
 psutil = "^5.9"
 
