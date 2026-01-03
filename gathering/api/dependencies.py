@@ -27,13 +27,27 @@ class DatabaseService:
         from dotenv import load_dotenv
         load_dotenv()
 
-        self._config = PycopgConfig(
-            host=os.getenv('DB_HOST', 'localhost'),
-            port=int(os.getenv('DB_PORT', '5432')),
-            database=os.getenv('DB_NAME', 'gathering'),
-            user=os.getenv('DB_USER', 'loc'),
-            password=os.getenv('DB_PASSWORD', ''),
-        )
+        # Support DATABASE_URL (used in CI) or individual DB_* vars
+        database_url = os.getenv('DATABASE_URL')
+        if database_url:
+            # Parse postgresql://user:password@host:port/database
+            from urllib.parse import urlparse
+            parsed = urlparse(database_url)
+            self._config = PycopgConfig(
+                host=parsed.hostname or 'localhost',
+                port=parsed.port or 5432,
+                database=parsed.path.lstrip('/') or 'gathering',
+                user=parsed.username or 'postgres',
+                password=parsed.password or '',
+            )
+        else:
+            self._config = PycopgConfig(
+                host=os.getenv('DB_HOST', 'localhost'),
+                port=int(os.getenv('DB_PORT', '5432')),
+                database=os.getenv('DB_NAME', 'gathering'),
+                user=os.getenv('DB_USER', 'loc'),
+                password=os.getenv('DB_PASSWORD', ''),
+            )
         self._db = PycopgDatabase(self._config)
 
     @property
