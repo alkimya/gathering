@@ -58,6 +58,15 @@ jobs:
       - name: Install project
         run: poetry install --no-interaction
 
+      - name: Setup database schema
+        env:
+          PGPASSWORD: postgres
+        run: |
+          for f in gathering/db/migrations/[0-9]*.sql; do
+            echo "Applying $f..."
+            psql -h localhost -U postgres -d gathering_test -f "$f"
+          done
+
       - name: Run tests
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/gathering_test
