@@ -4,19 +4,15 @@ This is the main abstraction that gives persistence and identity to an agent.
 """
 
 from dataclasses import dataclass, field
-from typing import Any, Callable, Dict, List, Optional, Protocol, Union
+from typing import Any, Callable, Dict, List, Optional, Protocol
 from datetime import datetime, timezone
 import asyncio
-import time
 
 from gathering.agents.persona import AgentPersona
 from gathering.agents.project_context import ProjectContext
-from gathering.agents.session import AgentSession, InjectedContext
-from gathering.agents.memory import MemoryService, build_agent_context
+from gathering.agents.session import AgentSession
+from gathering.agents.memory import MemoryService
 from gathering.events import event_bus, Event, EventType
-from gathering.telemetry.decorators import trace_async_method
-from gathering.telemetry.metrics import agent_metrics
-from gathering.telemetry.config import get_tracer
 
 
 class LLMProvider(Protocol):

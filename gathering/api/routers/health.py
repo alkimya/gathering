@@ -5,7 +5,6 @@ Health check endpoints.
 import os
 import psutil
 from datetime import datetime, timezone
-from typing import Optional
 
 from fastapi import APIRouter, Depends
 

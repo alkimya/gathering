@@ -6,7 +6,7 @@ Provides endpoints for agent memory operations and knowledge base management.
 
 from typing import List, Optional
 
-from fastapi import APIRouter, HTTPException, Depends, Query, UploadFile, File, Form
+from fastapi import APIRouter, HTTPException, Query, UploadFile, File, Form
 from pydantic import BaseModel, Field
 
 from gathering.utils.document_extractor import DocumentExtractor, chunk_text

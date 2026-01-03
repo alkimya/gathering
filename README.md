@@ -4,7 +4,7 @@ A collaborative multi-agent AI framework built with Python, FastAPI, and React.
 
 ## Overview
 
-GatheRing is a highly customizable and modular framework for creating and managing AI agents with complex personalities, diverse competencies, and professional expertise. Agents can collaborate in "Circles", use external tools, and be managed through a modern web dashboard.
+GatheRing is a highly customizable and modular framework for creating and managing AI agents with complex personalities, diverse competencies, and professional expertise. Agents can collaborate in "Circles", use external tools, and be managed through a web dashboard.
 
 ## Key Features
 

@@ -8,10 +8,8 @@ from typing import Any, Dict, List, Optional
 from datetime import datetime, timezone
 import logging
 
-from gathering.agents.memory import MemoryStore
 from gathering.rag.memory_manager import MemoryManager
-from gathering.rag.embeddings import EmbeddingService, EmbeddingProvider
-from gathering.rag.vectorstore import VectorStore
+from gathering.rag.embeddings import EmbeddingProvider
 
 logger = logging.getLogger(__name__)
 

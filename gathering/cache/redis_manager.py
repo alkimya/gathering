@@ -19,8 +19,7 @@ import os
 import json
 import hashlib
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Union
-from datetime import timedelta
+from typing import Any, Dict, List, Optional
 
 try:
     import redis

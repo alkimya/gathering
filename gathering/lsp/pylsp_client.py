@@ -14,7 +14,6 @@ This provides professional-grade features:
 - Hover documentation
 """
 
-import asyncio
 import json
 import logging
 from typing import Optional, List, Dict, Any
@@ -365,8 +364,6 @@ class PylspClient:
         """
         if not self.initialized:
             await self.start()
-
-        uri = f"file://{Path(file_path).absolute()}"
 
         # Update document - this will trigger diagnostics
         await self.did_change(file_path, content)

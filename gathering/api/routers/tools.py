@@ -338,7 +338,7 @@ async def disable_all_tools(
     return {
         "agent_id": agent_id,
         "category": category,
-        "message": f"Disabled all tools" + (f" in category '{category}'" if category else ""),
+        "message": "Disabled all tools" + (f" in category '{category}'" if category else ""),
     }
 
 

@@ -4,8 +4,11 @@ Defines who the agent is, how it behaves, and its expertise.
 """
 
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 from datetime import datetime
+
+if TYPE_CHECKING:
+    from gathering.agents.project_context import ProjectContext
 
 
 @dataclass

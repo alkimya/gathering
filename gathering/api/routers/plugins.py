@@ -12,10 +12,10 @@ Provides REST API endpoints for managing GatheRing plugins:
 
 from typing import List, Optional, Dict, Any
 from pathlib import Path
-from fastapi import APIRouter, HTTPException, status, Depends, Body
+from fastapi import APIRouter, HTTPException, status, Body
 from pydantic import BaseModel, Field
 
-from gathering.plugins import plugin_manager, PluginStatus
+from gathering.plugins import plugin_manager
 from gathering.core.tool_registry import tool_registry, ToolCategory
 
 

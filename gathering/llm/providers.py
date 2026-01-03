@@ -20,9 +20,7 @@ Usage:
 
 import asyncio
 import time
-from abc import ABC
 from typing import List, Dict, Any, Optional, AsyncGenerator
-from functools import lru_cache
 from collections import OrderedDict
 import hashlib
 import json
@@ -959,7 +957,7 @@ class LLMProviderFactory:
         """Register a new provider type."""
         if not issubclass(provider_class, ILLMProvider):
             raise ConfigurationError(
-                f"Provider class must implement ILLMProvider",
+                "Provider class must implement ILLMProvider",
                 field="provider_class",
                 value=provider_class.__name__,
             )

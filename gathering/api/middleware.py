@@ -6,16 +6,13 @@ Includes authentication enforcement, rate limiting, and request logging.
 import time
 import logging
 from collections import defaultdict
-from datetime import datetime, timezone
-from typing import Callable, Optional
-from functools import lru_cache
+from typing import Callable
 
-from fastapi import Request, Response, HTTPException, status
+from fastapi import Request, Response, status
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from gathering.api.auth import decode_token
-from gathering.core.config import get_settings
 
 
 logger = logging.getLogger("gathering.api")

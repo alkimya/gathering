@@ -1,15 +1,11 @@
 """Social media platforms skill for reading and posting content."""
 
-import json
-import re
-from dataclasses import dataclass, field
-from datetime import datetime
+from dataclasses import dataclass
 from typing import Any
-from urllib.parse import quote_plus
 
 import httpx
 
-from gathering.skills.base import BaseSkill, SkillResponse
+from gathering.skills.base import BaseSkill
 
 
 @dataclass
@@ -682,7 +678,7 @@ class SocialMediaSkill(BaseSkill):
                         "state": item.get("state"),
                         "url": item.get("html_url"),
                         "author": item.get("user", {}).get("login"),
-                        "labels": [l.get("name") for l in item.get("labels", [])],
+                        "labels": [lbl.get("name") for lbl in item.get("labels", [])],
                         "comments": item.get("comments"),
                         "created_at": item.get("created_at"),
                         "updated_at": item.get("updated_at")

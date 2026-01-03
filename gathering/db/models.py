@@ -15,9 +15,7 @@ Note: Primary keys use BIGINT GENERATED ALWAYS AS IDENTITY (not UUID).
 This provides better performance and simpler debugging.
 """
 
-from datetime import datetime
 from enum import Enum
-from typing import Optional, List, Dict, Any
 
 from sqlalchemy import (
     Column,

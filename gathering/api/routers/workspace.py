@@ -5,8 +5,8 @@ Provides endpoints for workspace management, file operations,
 git integration, and activity tracking.
 """
 
-from fastapi import APIRouter, HTTPException, Query, Body, Depends
-from fastapi.responses import FileResponse, Response
+from fastapi import APIRouter, HTTPException, Query, Body
+from fastapi.responses import Response
 from pydantic import BaseModel
 from typing import List, Dict, Any, Optional
 from pathlib import Path
@@ -17,7 +17,6 @@ from gathering.workspace import (
     WorkspaceManager,
     FileManager,
     GitManager,
-    ActivityTracker,
     WorkspaceType,
 )
 from gathering.workspace.activity_tracker import ActivityType, activity_tracker

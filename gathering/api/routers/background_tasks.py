@@ -3,7 +3,7 @@ Background Tasks API endpoints.
 Manages long-running autonomous agent tasks.
 """
 
-from typing import Optional, List
+from typing import Optional
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, Field
 
@@ -15,8 +15,6 @@ from gathering.api.dependencies import (
 )
 from gathering.orchestration.background import (
     get_background_executor,
-    BackgroundTaskStatus,
-    BackgroundTask,
 )
 
 

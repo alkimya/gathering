@@ -13,7 +13,7 @@ Features:
 - Generate plugins dynamically (for agent-created plugins)
 """
 
-from typing import Dict, List, Optional, Type, Any, Callable
+from typing import Dict, List, Optional, Type, Any
 from pathlib import Path
 import logging
 import sys
@@ -113,7 +113,7 @@ class PluginManager:
             )
 
         if not issubclass(plugin_class, Plugin):
-            raise TypeError(f"plugin_class must be a subclass of Plugin")
+            raise TypeError("plugin_class must be a subclass of Plugin")
 
         self._plugin_classes[plugin_id] = plugin_class
         logger.info(f"Plugin class registered: {plugin_id}")
@@ -543,7 +543,7 @@ class PluginManager:
             '',
             f'{meta.description}',
             '',
-            f'Auto-generated plugin by GatheRing.',
+            'Auto-generated plugin by GatheRing.',
             '"""',
             '',
             'from gathering.plugins.base import Plugin, PluginMetadata',
@@ -553,9 +553,9 @@ class PluginManager:
             '',
             '',
             f'class {self._to_class_name(meta.id)}Plugin(Plugin):',
-            f'    """',
+            '    """',
             f'    {meta.description}',
-            f'    """',
+            '    """',
             '',
             '    @property',
             '    def metadata(self) -> PluginMetadata:',
@@ -616,10 +616,10 @@ class PluginManager:
         for tool in tools:
             code_lines.extend([
                 f'    def {tool.name}(self, **kwargs):',
-                f'        """',
+                '        """',
                 f'        {tool.description}',
-                f'        """',
-                f'        # TODO: Implement tool logic',
+                '        """',
+                '        # TODO: Implement tool logic',
                 f'        raise NotImplementedError("{tool.name} not implemented")',
                 '',
             ])
@@ -627,7 +627,7 @@ class PluginManager:
         # Add plugin_class export
         code_lines.extend([
             '',
-            f'# Export for discovery',
+            '# Export for discovery',
             f'plugin_class = {self._to_class_name(meta.id)}Plugin',
             '',
         ])

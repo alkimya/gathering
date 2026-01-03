@@ -16,8 +16,8 @@ try:
     from pylsp import uris
     from pylsp.workspace import Workspace, Document
     from pylsp.config.config import Config
-    from pylsp_mypy import plugin as mypy_plugin
-    from pylsp import hookimpl
+    from pylsp_mypy import plugin as mypy_plugin  # noqa: F401
+    from pylsp import hookimpl  # noqa: F401
 
     PYLSP_AVAILABLE = True
 except ImportError:
@@ -222,7 +222,7 @@ class PylspWrapper:
     ) -> List[Dict]:
         """Get diagnostics (errors/warnings)."""
         try:
-            from pylsp.plugins import pycodestyle_lint, pyflakes_lint
+            from pylsp.plugins import pyflakes_lint
 
             # Try ruff
             try:

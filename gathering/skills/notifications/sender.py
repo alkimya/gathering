@@ -9,7 +9,6 @@ import hmac
 import hashlib
 import logging
 from typing import Dict, Any, List, Optional
-from datetime import datetime
 import urllib.request
 import urllib.parse
 
@@ -527,7 +526,7 @@ class NotificationsSkill(BaseSkill):
         if result.get("body") != "ok" and result.get("status", 0) >= 400:
             return SkillResponse(
                 success=False,
-                message=f"Slack notification failed",
+                message="Slack notification failed",
                 error=result.get("body")
             )
 

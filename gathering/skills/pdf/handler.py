@@ -494,7 +494,7 @@ class PDFSkill(BaseSkill):
         from reportlab.lib.pagesizes import A4, LETTER, LEGAL
         from reportlab.lib.units import inch
         from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
-        from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+        from reportlab.lib.styles import getSampleStyleSheet
 
         output = params["output"]
         content = params["content"]
@@ -657,7 +657,6 @@ class PDFSkill(BaseSkill):
         """Add watermark to PDF."""
         from pypdf import PdfReader, PdfWriter
         from reportlab.pdfgen import canvas
-        from reportlab.lib.pagesizes import letter
         from reportlab.lib.colors import Color
 
         path = params["path"]
@@ -776,7 +775,8 @@ class PDFSkill(BaseSkill):
 
         images = params["images"]
         output = params["output"]
-        page_size = params.get("page_size", "fit")
+        # page_size could be used for custom sizing
+        _ = params.get("page_size", "fit")
 
         if not images:
             return SkillResponse(

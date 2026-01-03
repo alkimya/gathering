@@ -6,12 +6,15 @@ Coordinates agents, manages shared context, handles the full workflow.
 import asyncio
 import logging
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional, Callable, Awaitable
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Callable, Awaitable
 from dataclasses import dataclass, field
 from enum import Enum
 
 from gathering.orchestration.events import EventBus, EventType, Event
 from gathering.orchestration.facilitator import Facilitator, Conflict, ConflictType
+
+if TYPE_CHECKING:
+    from gathering.agents.conversation import ConversationResult
 
 logger = logging.getLogger(__name__)
 
@@ -651,7 +654,6 @@ class GatheringCircle:
         """
         from gathering.agents.conversation import (
             AgentConversation,
-            ConversationResult,
             AgentParticipant,
         )
 

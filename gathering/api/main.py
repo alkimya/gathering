@@ -36,7 +36,7 @@ from gathering.api.middleware import (
     SecurityHeadersMiddleware,
 )
 from gathering.core.config import get_settings
-from gathering.api.websocket import ws_manager, get_ws_manager
+from gathering.api.websocket import ws_manager
 from gathering.api.dependencies import get_database_service
 from gathering.orchestration.background import get_background_executor
 from gathering.orchestration.scheduler import get_scheduler

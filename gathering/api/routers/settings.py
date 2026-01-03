@@ -4,7 +4,7 @@ Manages application configuration and API keys.
 """
 
 import os
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict
 from pathlib import Path
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, Field
@@ -199,7 +199,8 @@ def get_pg_extensions(db: DatabaseService) -> List[str]:
 @router.get("", response_model=AllSettings)
 async def get_settings(db: DatabaseService = Depends(get_database_service)):
     """Get all application settings."""
-    env = read_env_file()
+    # Read env file to ensure it's valid (used for validation)
+    _ = read_env_file()
 
     # Load models from database
     models_by_provider = get_models_by_provider(db)

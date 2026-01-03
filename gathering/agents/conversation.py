@@ -4,7 +4,10 @@ Allows multiple agents to collaborate on tasks through structured conversations.
 """
 
 from dataclasses import dataclass, field
-from typing import Any, Callable, Dict, List, Optional, Protocol, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Protocol
+
+if TYPE_CHECKING:
+    from gathering.agents.wrapper import AgentWrapper
 from datetime import datetime, timezone
 from enum import Enum
 import asyncio
@@ -169,10 +172,9 @@ class AgentConversation:
 
         # Add facilitator instructions if applicable
         if self.turn_strategy == TurnStrategy.FACILITATOR_LED and for_agent_id == self.facilitator_id:
-            facilitator = self._participant_map[self.facilitator_id]
             other_participants = [p.name for p in self.participants if p.agent_id != self.facilitator_id]
-            lines.append(f"**Tu es le facilitateur de cette conversation.**")
-            lines.append(f"Ton rôle est de guider la discussion et de décider qui parle.")
+            lines.append("**Tu es le facilitateur de cette conversation.**")
+            lines.append("Ton rôle est de guider la discussion et de décider qui parle.")
             lines.append(f"Pour donner la parole à quelqu'un, mentionne son nom: {', '.join(other_participants)}")
             lines.append("")
 

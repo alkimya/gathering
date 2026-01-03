@@ -9,14 +9,12 @@ Provides:
 - Connection management
 """
 
-import json
 import logging
 from datetime import datetime, timezone
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from typing import Optional
 
 from gathering.websocket import get_connection_manager
-from gathering.events import event_bus, Event, EventType
 from gathering.api.dependencies import get_agent_registry, get_circle_registry, get_conversation_registry, get_database_service
 from gathering.agents.project_context import load_project_context
 
@@ -339,7 +337,7 @@ async def websocket_agent_chat(websocket: WebSocket, agent_id: int):
         logger.error(f"WebSocket error for agent {agent_id}: {e}")
         try:
             await websocket.send_json({"type": "error", "message": str(e)})
-        except:
+        except Exception:
             pass
 
 
@@ -557,5 +555,5 @@ async def websocket_conversation(websocket: WebSocket, conv_id: str):
         logger.error(f"WebSocket error for conversation {conv_id}: {e}")
         try:
             await websocket.send_json({"type": "error", "message": str(e)})
-        except:
+        except Exception:
             pass

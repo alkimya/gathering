@@ -255,7 +255,7 @@ class ProjectsSkill(BaseSkill):
 
         return SkillResponse(
             success=True,
-            message=f"Note added to project",
+            message="Note added to project",
             data={"notes": result[0]["notes"]}
         )
 

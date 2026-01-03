@@ -843,7 +843,7 @@ class TestSkill(BaseSkill):
             lines.append('')
             lines.append('    def test_creation(self, instance):')
             lines.append(f'        """Test {cls} can be created."""')
-            lines.append(f'        assert instance is not None')
+            lines.append('        assert instance is not None')
             lines.append('')
 
         return '\n'.join(lines)
@@ -879,7 +879,7 @@ class TestSkill(BaseSkill):
 
         # Generate test functions for classes
         for cls in classes:
-            lines.append(f'@pytest.fixture')
+            lines.append('@pytest.fixture')
             lines.append(f'def {cls.lower()}_instance():')
             lines.append(f'    """Create a {cls} instance for testing."""')
             lines.append(f'    # return {cls}(...)')

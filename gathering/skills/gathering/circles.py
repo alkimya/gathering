@@ -6,7 +6,6 @@ Circles are groups of agents working together on shared goals.
 """
 
 from typing import Any, Dict, List, Optional
-from datetime import datetime
 import logging
 
 from gathering.skills.base import BaseSkill, SkillResponse, SkillPermission
@@ -531,7 +530,6 @@ class CirclesSkill(BaseSkill):
 
     def _send_message(self, params: Dict[str, Any]) -> SkillResponse:
         """Send a message to circle members."""
-        import json
 
         result = self._db_service.execute(
             """

@@ -238,9 +238,9 @@ class EventBus:
         Creates a new event loop if needed.
         """
         try:
-            loop = asyncio.get_running_loop()
+            asyncio.get_running_loop()
             # If we're in an async context, schedule the coroutine
-            future = asyncio.ensure_future(self.emit(event_type, data, **kwargs))
+            asyncio.ensure_future(self.emit(event_type, data, **kwargs))
             # Return a placeholder event
             return Event(type=event_type, data=data, **kwargs)
         except RuntimeError:

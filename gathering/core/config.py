@@ -3,7 +3,6 @@ Configuration management for the GatheRing framework.
 Loads settings from environment variables with validation.
 """
 
-import os
 from pathlib import Path
 from typing import Optional, Literal
 from functools import lru_cache
@@ -234,7 +233,7 @@ class Settings(BaseSettings):
         issues = self.validate_for_production()
         if issues:
             raise ValueError(
-                f"Configuration not production-ready:\n" +
+                "Configuration not production-ready:\n" +
                 "\n".join(f"  - {issue}" for issue in issues)
             )
 

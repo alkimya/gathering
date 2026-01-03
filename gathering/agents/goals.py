@@ -3,13 +3,12 @@ Agent Goal Management for GatheRing.
 Enables long-term goal tracking with hierarchical decomposition.
 """
 
-import asyncio
 import logging
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from decimal import Decimal
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from gathering.orchestration.events import EventBus, EventType
 

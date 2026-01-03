@@ -3,7 +3,6 @@ FastAPI dependencies for dependency injection.
 """
 
 import os
-import sys
 from typing import Dict, Optional, List, Any
 from functools import lru_cache
 
@@ -634,7 +633,7 @@ class AgentRegistry:
             agents_data = self._db.get_agents()
             logger.info(f"Loading {len(agents_data)} agents from database")
 
-            from gathering.agents import AgentPersona, AgentConfig, AgentWrapper, MemoryService
+            from gathering.agents import AgentPersona, AgentConfig, AgentWrapper
             from gathering.llm.providers import LLMProviderFactory
             from gathering.core.config import get_settings
 

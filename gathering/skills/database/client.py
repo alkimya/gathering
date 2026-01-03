@@ -4,7 +4,6 @@ Provides SQL database operations for agents.
 """
 
 import re
-import json
 from typing import Dict, Any, List, Optional
 from datetime import datetime
 from pathlib import Path
@@ -344,7 +343,8 @@ class DatabaseSkill(BaseSkill):
         """Get database schema."""
         schema = tool_input.get("schema", "public")
         table = tool_input.get("table")
-        include_indexes = tool_input.get("include_indexes", True)
+        # include_indexes could be used for extended schema info
+        _ = tool_input.get("include_indexes", True)
 
         # Generate schema query based on db type
         if self.db_type == "postgresql":

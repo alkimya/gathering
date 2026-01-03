@@ -942,7 +942,7 @@ class AISkill(BaseSkill):
                 )
             else:
                 text = result.get("text", result) if isinstance(result, dict) else result
-                return SkillResponse(success=True, message=f"Transcribed audio", data={"text": text})
+                return SkillResponse(success=True, message="Transcribed audio", data={"text": text})
 
         except Exception as e:
             return SkillResponse(success=False, message=str(e), error=str(e))
@@ -1111,7 +1111,7 @@ Output as JSON with these exact field names."""
                 if json_match:
                     try:
                         result.data["extracted"] = json.loads(json_match.group())
-                    except:
+                    except Exception:
                         result.data["extracted"] = content
                 else:
                     result.data["extracted"] = content

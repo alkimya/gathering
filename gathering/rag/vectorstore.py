@@ -6,7 +6,6 @@ Provides vector storage and similarity search using PostgreSQL + pgvector.
 
 from __future__ import annotations
 
-import os
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional, List, Dict, Any

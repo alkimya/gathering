@@ -113,7 +113,7 @@ class ResumeContext:
         ]
 
         if self.current_task:
-            lines.append(f"\n### Tâche en cours")
+            lines.append("\n### Tâche en cours")
             lines.append(f"**{self.current_task.get('title', 'N/A')}**")
             if self.current_task.get('progress'):
                 lines.append(f"Progression: {self.current_task['progress']}")
@@ -139,7 +139,7 @@ class ResumeContext:
 
         # Current task
         if self.current_task:
-            lines.append(f"\n### Tâche en cours")
+            lines.append("\n### Tâche en cours")
             lines.append(f"**{self.current_task.get('title', 'N/A')}**")
             if self.current_task.get('progress'):
                 lines.append(f"Progression: {self.current_task['progress']}")
@@ -164,7 +164,7 @@ class ResumeContext:
 
         # Last exchange
         if self.last_user_message:
-            lines.append(f"\n### Dernier échange")
+            lines.append("\n### Dernier échange")
             lines.append(f"**Utilisateur**: {self.last_user_message[:200]}...")
             if self.last_agent_response:
                 lines.append(f"**Vous**: {self.last_agent_response[:200]}...")

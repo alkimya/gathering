@@ -5,7 +5,7 @@ These define the contracts that all implementations must follow.
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import List, Dict, Any, Optional, Union, Callable, AsyncGenerator
+from typing import List, Dict, Any, Optional, AsyncGenerator
 from datetime import datetime
 import uuid
 from enum import Enum

@@ -7,7 +7,7 @@ import json
 import asyncio
 import ast
 import operator
-from typing import List, Dict, Any, Optional, Union, AsyncGenerator
+from typing import List, Dict, Any, Optional, AsyncGenerator
 from datetime import datetime
 from pathlib import Path
 import re
@@ -28,8 +28,6 @@ from gathering.core.exceptions import (
     ConfigurationError,
     LLMProviderError,
     ToolExecutionError,
-    PermissionError,
-    ValidationError,
 )
 
 
@@ -951,8 +949,8 @@ class BasicAgent(IAgent):
 
         # Handle tool calls if present
         if "tool_calls" in response and response["tool_calls"]:
-            tool_results = self._execute_tool_calls(response["tool_calls"], message)
-            # Could add tool results to context for follow-up
+            # Execute tool calls (results could be used for follow-up)
+            self._execute_tool_calls(response["tool_calls"], message)
 
         # Get content from response
         content = response.get("content") or "I've processed your request."

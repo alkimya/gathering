@@ -5,7 +5,7 @@ Authentication is enforced by the AuthenticationMiddleware.
 
 import logging
 from datetime import datetime, timezone
-from typing import List, Optional
+from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
@@ -20,7 +20,6 @@ from gathering.api.schemas import (
     ChatResponse,
     MemoryCreate,
     MemoryResponse,
-    MemoryListResponse,
     RecallRequest,
     RecallResponse,
 )
@@ -183,12 +182,13 @@ async def create_agent(
                 "temperature": data.config.temperature,
             })
             logger.info(f"Created {provider_name} LLM provider for agent {agent_id}")
-        except Exception as e:
-            logger.warning(f"Failed to create LLM provider: {e}, using mock")
+        except Exception as exc:
+            logger.warning(f"Failed to create LLM provider: {exc}, using mock")
+            error_msg = str(exc)
             # Fallback to mock if provider creation fails
             class MockLLM:
                 def complete(self, messages, **kwargs):
-                    return {"content": f"LLM provider '{provider_name}' configuration failed: {e}"}
+                    return {"content": f"LLM provider '{provider_name}' configuration failed: {error_msg}"}
             llm = MockLLM()
     else:
         logger.warning(f"No API key for provider '{provider_name}', using mock LLM")

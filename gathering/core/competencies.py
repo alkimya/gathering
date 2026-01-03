@@ -20,7 +20,6 @@ Usage:
 """
 
 from typing import List, Dict, Any, Optional
-import re
 
 from gathering.core.interfaces import ICompetency
 from gathering.core.exceptions import CompetencyError

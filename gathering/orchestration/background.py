@@ -8,8 +8,7 @@ import logging
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Set
-from uuid import uuid4
+from typing import Any, Dict, List, Optional
 
 from gathering.orchestration.events import EventBus, EventType
 
@@ -345,8 +344,6 @@ class BackgroundTaskRunner:
 
     async def _step_plan(self) -> str:
         """Plan the next action."""
-        step_start = datetime.now(timezone.utc)
-
         # Build planning prompt
         prompt = f"""You are working on a background task autonomously.
 
@@ -391,8 +388,6 @@ Your next action:"""
 
     async def _step_execute(self, action: str) -> Dict[str, Any]:
         """Execute the planned action."""
-        step_start = datetime.now(timezone.utc)
-
         # Execute via agent (with tools enabled)
         prompt = f"""Execute this action for the background task:
 
@@ -491,8 +486,6 @@ Use the tools available to you to complete this action. Report what you did and 
             return True
 
         # Ask the agent to evaluate completion
-        step_start = datetime.now(timezone.utc)
-
         prompt = f"""Evaluate if the following goal has been achieved.
 
 GOAL: {self.task.goal}
@@ -911,7 +904,7 @@ class BackgroundTaskExecutor:
                     timeout=timeout,
                 )
             except asyncio.TimeoutError:
-                logger.warning(f"Shutdown timeout - cancelling remaining tasks")
+                logger.warning("Shutdown timeout - cancelling remaining tasks")
                 for asyncio_task in self._asyncio_tasks.values():
                     if not asyncio_task.done():
                         asyncio_task.cancel()

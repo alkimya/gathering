@@ -5,7 +5,6 @@ Provides CI/CD and deployment operations for agents.
 
 import subprocess
 import json
-import os
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 from datetime import datetime
@@ -678,7 +677,7 @@ class DeploySkill(BaseSkill):
 
             return SkillResponse(
                 success=True,
-                message=f"Ready to trigger GitHub Actions workflow",
+                message="Ready to trigger GitHub Actions workflow",
                 needs_confirmation=True,
                 confirmation_type="execute",
                 confirmation_message=f"Trigger workflow on {repo}:{branch}?",

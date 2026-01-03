@@ -3,11 +3,9 @@ Terminal Manager with PTY support.
 Provides real terminal sessions for workspace.
 """
 
-import asyncio
 import os
 import pty
 import select
-import subprocess
 import termios
 import struct
 import fcntl
@@ -35,7 +33,7 @@ class TerminalSession:
                 # Change to project directory
                 try:
                     os.chdir(self.project_path)
-                except Exception as e:
+                except Exception:
                     # If path doesn't exist, use home directory
                     os.chdir(os.path.expanduser('~'))
 
@@ -111,14 +109,14 @@ class TerminalSession:
         if self.master_fd:
             try:
                 os.close(self.master_fd)
-            except:
+            except Exception:
                 pass
 
         if self.pid:
             try:
                 os.kill(self.pid, 9)
                 os.waitpid(self.pid, 0)
-            except:
+            except Exception:
                 pass
 
 

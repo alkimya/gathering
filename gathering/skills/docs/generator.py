@@ -365,7 +365,7 @@ class DocsSkill(BaseSkill):
                 if ann:
                     lines.append(f":type {name}:{type_hint}")
             if returns:
-                lines.append(f":returns: Description.")
+                lines.append(":returns: Description.")
                 lines.append(f":rtype: {returns}")
             lines.append('"""')
 

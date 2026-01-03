@@ -1,18 +1,14 @@
 """Sandboxed code execution skill."""
 
 import ast
-import io
 import os
-import signal
 import subprocess
 import sys
 import tempfile
-import traceback
-from contextlib import redirect_stdout, redirect_stderr
 from dataclasses import dataclass, field
 from typing import Any
 
-from gathering.skills.base import BaseSkill, SkillResponse
+from gathering.skills.base import BaseSkill
 
 
 @dataclass
@@ -296,7 +292,7 @@ class CodeExecutionSkill(BaseSkill):
         finally:
             try:
                 os.unlink(temp_file)
-            except:
+            except Exception:
                 pass
 
     def _eval_python(self, expression: str) -> dict[str, Any]:
@@ -423,7 +419,7 @@ class CodeExecutionSkill(BaseSkill):
             elif isinstance(node, ast.Call):
                 func = safe_eval_node(node.func)
                 if func not in SAFE_FUNCTIONS.values():
-                    raise ValueError(f"Function call not allowed")
+                    raise ValueError("Function call not allowed")
                 args = [safe_eval_node(arg) for arg in node.args]
                 return func(*args)
 
@@ -478,7 +474,7 @@ class CodeExecutionSkill(BaseSkill):
         # Check if Node.js is available
         try:
             subprocess.run(["node", "--version"], capture_output=True, check=True)
-        except:
+        except Exception:
             return {"success": False, "error": "Node.js is not installed"}
 
         # Create temp file
@@ -544,7 +540,7 @@ try {{
         finally:
             try:
                 os.unlink(temp_file)
-            except:
+            except Exception:
                 pass
 
     def _execute_bash(self, script: str, timeout: int) -> dict[str, Any]:
@@ -708,7 +704,7 @@ try {{
                         "valid": False,
                         "error": result.stderr
                     }
-            except:
+            except Exception:
                 return {"success": False, "error": "Could not analyze JavaScript"}
 
         return {"success": False, "error": f"Unsupported language: {language}"}
@@ -721,8 +717,7 @@ try {{
                 formatted = black.format_str(code, mode=black.Mode())
                 return {"success": True, "formatted": formatted}
             except ImportError:
-                # Fallback: just fix basic indentation
-                lines = code.split('\n')
+                # Fallback: return code as-is
                 return {"success": True, "formatted": code, "note": "black not installed"}
             except Exception as e:
                 return {"success": False, "error": str(e)}

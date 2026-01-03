@@ -255,7 +255,6 @@ class GoalsSkill(BaseSkill):
             loop = asyncio.get_event_loop()
             if loop.is_running():
                 # We're in an async context, need to use run_coroutine_threadsafe
-                import concurrent.futures
                 future = asyncio.run_coroutine_threadsafe(
                     self.execute_async(tool_name, tool_input),
                     loop
@@ -424,7 +423,7 @@ class GoalsSkill(BaseSkill):
     async def _complete_goal(self, params: Dict[str, Any]) -> SkillResponse:
         """Mark goal as completed."""
         from gathering.agents.goals import GoalStatus
-        from datetime import datetime, timezone
+        from datetime import timezone
 
         goal = await self._goal_manager.update_goal(
             params["goal_id"],
@@ -456,7 +455,7 @@ class GoalsSkill(BaseSkill):
     async def _fail_goal(self, params: Dict[str, Any]) -> SkillResponse:
         """Mark goal as failed."""
         from gathering.agents.goals import GoalStatus
-        from datetime import datetime, timezone
+        from datetime import timezone
 
         goal = await self._goal_manager.update_goal(
             params["goal_id"],

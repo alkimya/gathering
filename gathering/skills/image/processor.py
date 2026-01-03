@@ -7,7 +7,7 @@ import os
 import io
 import base64
 import logging
-from typing import Dict, Any, List, Optional, Tuple
+from typing import Dict, Any, List, Optional
 from pathlib import Path
 
 from gathering.skills.base import BaseSkill, SkillResponse, SkillPermission
@@ -398,7 +398,7 @@ class ImageSkill(BaseSkill):
     def execute(self, tool_name: str, tool_input: Dict[str, Any]) -> SkillResponse:
         """Execute image tool."""
         try:
-            from PIL import Image, ImageFilter, ImageEnhance, ImageDraw, ImageFont
+            from PIL import Image, ImageFilter, ImageEnhance, ImageDraw, ImageFont  # noqa: F401
 
             path = tool_input.get("path")
 

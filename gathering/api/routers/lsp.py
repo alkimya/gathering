@@ -6,7 +6,7 @@ Provides REST API for LSP features like autocomplete, diagnostics, hover, etc.
 
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
-from typing import Optional, List, Dict, Any
+from typing import Optional
 import logging
 
 from gathering.lsp.manager import LSPManager

@@ -4,7 +4,7 @@ Dashboard endpoints - provides data for the web dashboard.
 Uses USE_DEMO_DATA toggle to switch between demo and real database data.
 """
 
-from typing import List, Optional
+from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
 

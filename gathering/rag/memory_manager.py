@@ -11,7 +11,7 @@ from dataclasses import dataclass
 from typing import Optional, List, Dict, Any
 
 from gathering.rag.embeddings import EmbeddingService, EmbeddingProvider
-from gathering.rag.vectorstore import VectorStore, MemoryResult, KnowledgeResult
+from gathering.rag.vectorstore import VectorStore, KnowledgeResult
 from gathering.events import event_bus, Event, EventType
 
 # Import cache (optional dependency)

@@ -5,14 +5,12 @@ Provides metrics collection, log analysis, and health monitoring.
 
 import os
 import re
-import json
 import time
 import logging
 import psutil
 from typing import Dict, Any, List, Optional
 from datetime import datetime, timedelta
 from collections import defaultdict
-from pathlib import Path
 
 from gathering.skills.base import BaseSkill, SkillResponse, SkillPermission
 
@@ -580,12 +578,12 @@ class MonitoringSkill(BaseSkill):
         # Filter by pattern
         if pattern:
             regex = re.compile(pattern, re.IGNORECASE)
-            lines = [l for l in lines if regex.search(l)]
+            lines = [ln for ln in lines if regex.search(ln)]
 
         # Filter by level
         if level:
             level_pattern = re.compile(rf"\b{level}\b", re.IGNORECASE)
-            lines = [l for l in lines if level_pattern.search(l)]
+            lines = [ln for ln in lines if level_pattern.search(ln)]
 
         # Filter by time (basic timestamp detection)
         if since_dt:
@@ -609,7 +607,7 @@ class MonitoringSkill(BaseSkill):
             message=f"Retrieved {len(lines)} log line(s)",
             data={
                 "path": path,
-                "lines": [l.strip() for l in lines],
+                "lines": [ln.strip() for ln in lines],
                 "total_lines": len(all_lines),
                 "filters_applied": {
                     "pattern": pattern,
@@ -910,7 +908,8 @@ class MonitoringSkill(BaseSkill):
     def _disk_usage(self, params: Dict[str, Any]) -> SkillResponse:
         """Get detailed disk usage."""
         path = params.get("path", "/")
-        include_inodes = params.get("include_inodes", False)
+        # include_inodes could be used for extended inode info
+        _ = params.get("include_inodes", False)
 
         partitions = []
         for partition in psutil.disk_partitions():

@@ -78,7 +78,7 @@ class ProjectContext:
 
         # Python environment
         if self.venv_path:
-            lines.append(f"\nEnvironnement Python:")
+            lines.append("\nEnvironnement Python:")
             lines.append(f"  - venv: {self.venv_path}")
             lines.append(f"  - Python: {self.python_version}")
             lines.append(

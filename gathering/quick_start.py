@@ -5,7 +5,6 @@ Run this to verify your installation and see basic functionality.
 """
 
 import sys
-import os
 from pathlib import Path
 
 # Add gathering to path for development
@@ -33,14 +32,14 @@ def demo_basic_agent():
 
     # Process a message
     response = agent.process_message("Hello! What's your name?")
-    print(f"\nUser: Hello! What's your name?")
+    print("\nUser: Hello! What's your name?")
     print(f"Agent: {response}")
 
     # Test memory
     agent.process_message("My name is Alice")
     response2 = agent.process_message("What's my name?")
-    print(f"\nUser: My name is Alice")
-    print(f"User: What's my name?")
+    print("\nUser: My name is Alice")
+    print("User: What's my name?")
     print(f"Agent: {response2}")
 
 

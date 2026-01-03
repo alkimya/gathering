@@ -4,11 +4,11 @@ import json
 import re
 from dataclasses import dataclass, field
 from typing import Any
-from urllib.parse import urlencode, urlparse
+from urllib.parse import urlencode
 
 import httpx
 
-from gathering.skills.base import BaseSkill, SkillResponse
+from gathering.skills.base import BaseSkill
 
 
 @dataclass

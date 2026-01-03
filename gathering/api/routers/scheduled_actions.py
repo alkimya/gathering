@@ -14,7 +14,6 @@ from gathering.orchestration.scheduler import (
     get_scheduler,
     ScheduledAction,
     ScheduleType,
-    ScheduledActionStatus,
 )
 
 router = APIRouter(prefix="/scheduled-actions", tags=["scheduled-actions"])

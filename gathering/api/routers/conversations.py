@@ -2,11 +2,10 @@
 Conversation and collaboration endpoints.
 """
 
-import asyncio
 from datetime import datetime, timezone
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, status
 
 from gathering.api.schemas import (
     ConversationCreate,
@@ -23,11 +22,9 @@ from gathering.api.dependencies import (
     ConversationRegistry,
 )
 from gathering.agents import (
-    AgentConversation,
-    TurnStrategy,
     ConversationStatus as AgentConversationStatus,
 )
-from gathering.api.websocket import ws_manager, emit_conversation_event
+from gathering.api.websocket import emit_conversation_event
 
 
 router = APIRouter(prefix="/conversations", tags=["conversations"])

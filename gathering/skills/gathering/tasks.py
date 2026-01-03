@@ -6,7 +6,6 @@ Tasks execute goals in the background and report progress.
 """
 
 from typing import Any, Dict, List, Optional
-from datetime import datetime
 import logging
 
 from gathering.skills.base import BaseSkill, SkillResponse, SkillPermission
@@ -194,7 +193,6 @@ class BackgroundTasksSkill(BaseSkill):
         try:
             loop = asyncio.get_event_loop()
             if loop.is_running():
-                import concurrent.futures
                 future = asyncio.run_coroutine_threadsafe(
                     self.execute_async(tool_name, tool_input),
                     loop

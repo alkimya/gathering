@@ -5,9 +5,8 @@ Web Scraper Skill - Advanced content extraction and parsing.
 import re
 import json
 from typing import List, Dict, Any, Optional
-from dataclasses import dataclass
 from datetime import datetime
-from urllib.parse import urljoin, urlparse
+from urllib.parse import urljoin
 
 import httpx
 

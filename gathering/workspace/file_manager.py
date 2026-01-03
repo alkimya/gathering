@@ -4,9 +4,8 @@ File Manager for workspace file operations.
 Handles file tree generation, reading, writing with git status integration.
 """
 
-import os
 from pathlib import Path
-from typing import List, Dict, Any, Optional
+from typing import Dict, Any, Optional
 import mimetypes
 import logging
 import subprocess

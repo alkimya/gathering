@@ -5,10 +5,9 @@ Handles workspace type detection and provides unified interface
 for different workspace types.
 """
 
-import os
 from pathlib import Path
 from enum import Enum
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any
 import logging
 
 logger = logging.getLogger(__name__)

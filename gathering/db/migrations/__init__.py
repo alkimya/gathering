@@ -78,7 +78,7 @@ def apply_migrations(
         )
 
     if verbose:
-        print(f"Connecting to database...")
+        print("Connecting to database...")
 
     with psycopg.connect(connection_string) as conn:
         # Check which migrations have been applied

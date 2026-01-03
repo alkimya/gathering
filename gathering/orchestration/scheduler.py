@@ -8,14 +8,12 @@ import logging
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Set
+from typing import Any, Dict, List, Optional, Set
 
 from croniter import croniter
 
 from gathering.orchestration.events import EventBus, EventType
 from gathering.orchestration.background import (
-    BackgroundTaskExecutor,
-    BackgroundTask,
     BackgroundTaskStatus,
     get_background_executor,
 )

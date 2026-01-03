@@ -6,8 +6,6 @@ import os
 import re
 import shlex
 import subprocess
-import tempfile
-from pathlib import Path
 from typing import List, Dict, Any, Optional, Set
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -518,7 +516,7 @@ class ShellSkill(BaseSkill):
                 if not allowed:
                     return {
                         "success": False,
-                        "message": f"Working directory not in allowed paths",
+                        "message": "Working directory not in allowed paths",
                     }
 
         # Build environment
@@ -818,8 +816,8 @@ class ShellSkill(BaseSkill):
                         if context_lines > 0:
                             start = max(0, i - 1 - context_lines)
                             end = min(len(lines), i + context_lines)
-                            match["context_before"] = [l.rstrip() for l in lines[start:i-1]]
-                            match["context_after"] = [l.rstrip() for l in lines[i:end]]
+                            match["context_before"] = [ln.rstrip() for ln in lines[start:i-1]]
+                            match["context_after"] = [ln.rstrip() for ln in lines[i:end]]
                         matches.append(match)
 
             except (IOError, PermissionError):

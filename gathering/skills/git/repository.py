@@ -3,7 +3,6 @@ Git Skill for GatheRing.
 Provides Git operations for agents.
 """
 
-import os
 import subprocess
 import re
 from pathlib import Path
@@ -607,7 +606,7 @@ class GitSkill(BaseSkill):
             if not allowed:
                 return SkillResponse(
                     success=False,
-                    message=f"Remote not in allowed list",
+                    message="Remote not in allowed list",
                     error="remote_not_allowed"
                 )
 
@@ -620,7 +619,7 @@ class GitSkill(BaseSkill):
         if tool_input.get("depth"):
             args.extend(["--depth", str(tool_input["depth"])])
 
-        result = self._run_git(args)
+        self._run_git(args)
 
         return SkillResponse(
             success=True,

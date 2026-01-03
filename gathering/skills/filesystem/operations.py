@@ -3,7 +3,6 @@ Filesystem Skill for GatheRing.
 Provides secure file system operations for agents.
 """
 
-import os
 import shutil
 import hashlib
 import mimetypes

@@ -9,7 +9,7 @@ Provides metrics for:
 - Cache performance
 """
 
-from typing import Optional, Dict, Any
+from typing import Optional
 
 from gathering.telemetry.config import get_meter, is_enabled
 
