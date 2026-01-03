@@ -50,3 +50,6 @@ site/
 
 # pycopg
 pycopg/
+
+# Workspace test files
+workspace/
