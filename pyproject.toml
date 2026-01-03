@@ -57,8 +57,6 @@ python-jose = {extras = ["cryptography"], version = "^3.3"}
 passlib = {extras = ["bcrypt"], version = "^1.7"}
 # Monitoring
 psutil = "^5.9"
-# Database sync driver (for migrations and skills)
-psycopg2-binary = "^2.9"
 
 [tool.poetry.extras]
 # Optional dependencies for specific features

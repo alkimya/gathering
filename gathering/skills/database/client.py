@@ -645,12 +645,10 @@ class DatabaseSkill(BaseSkill):
         """Generate example code for query execution."""
         if self.db_type == "postgresql":
             return f"""
-import psycopg2
+from pycopg import Database
 
-conn = psycopg2.connect(connection_string)
-cur = conn.cursor()
-cur.execute('''{sql}''', {params})
-results = cur.fetchall()
+db = Database(connection_string)
+results = db.fetch_all('''{sql}''', {params})
 """
         elif self.db_type == "sqlite":
             return f"""
