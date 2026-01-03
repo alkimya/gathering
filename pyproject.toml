@@ -51,6 +51,7 @@ structlog = "^24.0"
 tenacity = "^8.2"
 aiofiles = "^23.0"
 python-multipart = "^0.0.9"
+croniter = "^2.0"
 
 [tool.poetry.extras]
 # Optional dependencies for specific features
