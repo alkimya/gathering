@@ -34,7 +34,7 @@ CREATE TYPE public.agent_status AS ENUM ('idle', 'active', 'busy', 'offline');
 CREATE TYPE public.agent_role AS ENUM ('lead', 'member', 'specialist', 'reviewer', 'observer');
 
 -- Circle types
-CREATE TYPE public.circle_status AS ENUM ('created', 'active', 'paused', 'archived');
+CREATE TYPE public.circle_status AS ENUM ('created', 'stopped', 'running', 'active', 'paused', 'archived');
 
 -- Task types
 CREATE TYPE public.task_status AS ENUM ('pending', 'in_progress', 'in_review', 'blocked', 'completed', 'cancelled');
