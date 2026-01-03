@@ -461,8 +461,10 @@ CREATE TABLE circle.members (
 
     role public.agent_role DEFAULT 'member',
     permissions JSONB DEFAULT '{}',
+    is_active BOOLEAN DEFAULT TRUE,
 
     joined_at TIMESTAMPTZ DEFAULT NOW(),
+    left_at TIMESTAMPTZ,
 
     UNIQUE(circle_id, agent_id)
 );
@@ -787,6 +789,7 @@ CREATE TABLE memory.memories (
     -- Metadata
     tags TEXT[] DEFAULT '{}',
     metadata JSONB DEFAULT '{}',
+    is_active BOOLEAN DEFAULT TRUE,
 
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
