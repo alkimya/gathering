@@ -15,8 +15,8 @@ sys.path.insert(0, os.path.abspath("../gathering"))
 # -- Project information -----------------------------------------------------
 
 project = "GatheRing"
-copyright = f"{datetime.now().year}, GatheRing Team"
-author = "GatheRing Team"
+copyright = f"{datetime.now().year}, Loc Cosnier"
+author = "Loc Cosnier"
 
 # The version info
 version = "0.5.0"

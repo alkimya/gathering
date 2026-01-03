@@ -1,16 +1,24 @@
-# GatheRing Documentation
+# GatheRing
 
-**GatheRing** is a collaborative multi-agent AI framework that enables autonomous AI agents to work together in circles, share knowledge, and accomplish complex tasks.
+A collaborative multi-agent AI framework built with Python, FastAPI, and React.
 
-## Overview
+GatheRing is a highly customizable and modular framework for creating and managing AI agents with complex personalities, diverse competencies, and professional expertise. Agents can collaborate in "Circles", use external tools, and be managed through a web dashboard.
 
-GatheRing provides:
+## Key Features
 
-- **Multi-Agent Collaboration**: AI agents with distinct personalities working together in circles
-- **Persistent Memory**: Long-term memory with RAG (Retrieval-Augmented Generation)
-- **Real-time Communication**: WebSocket-based streaming and event bus
-- **Integrated Workspace**: Full-featured IDE with file explorer, code editor, terminal
-- **Dashboard**: React-based monitoring and management interface
+- **Multi-Model Support**: Anthropic (Claude), OpenAI, DeepSeek, and local models via Ollama
+- **Gathering Circles**: Team orchestration with task routing, reviews, and conflict detection
+- **Agent Persistence**: Personas, memory, sessions with automatic context injection
+- **Agent Conversations**: Direct inter-agent collaboration with turn strategies
+- **REST API**: Full FastAPI backend with WebSocket support
+- **React Dashboard**: Modern Web3 dark theme UI for agents, circles, tasks, and conversations
+- **RAG Support**: PostgreSQL + pgvector for semantic memory search
+- **Knowledge Base**: Semantic search across documentation and best practices
+- **Skills System**: 18+ skills (filesystem, git, code, shell, database, http, etc.) with per-agent configuration
+- **Agent Autonomy**: Background tasks, scheduled actions, goal management
+- **Integrated Workspace**: Full-featured IDE with file explorer, code editor, terminal, and git integration
+- **Authentication**: JWT-based auth with token revocation and OWASP security headers
+- **Fully Tested**: 1060+ tests with TDD approach
 
 ## Quick Links
 
