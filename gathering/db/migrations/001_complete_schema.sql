@@ -461,6 +461,8 @@ CREATE TABLE circle.members (
 
     role public.agent_role DEFAULT 'member',
     permissions JSONB DEFAULT '{}',
+    competencies TEXT[] DEFAULT '{}',
+    can_review TEXT[] DEFAULT '{}',
     is_active BOOLEAN DEFAULT TRUE,
 
     joined_at TIMESTAMPTZ DEFAULT NOW(),
