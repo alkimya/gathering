@@ -52,6 +52,13 @@ tenacity = "^8.2"
 aiofiles = "^23.0"
 python-multipart = "^0.0.9"
 croniter = "^2.0"
+# Auth
+python-jose = {extras = ["cryptography"], version = "^3.3"}
+passlib = {extras = ["bcrypt"], version = "^1.7"}
+# Monitoring
+psutil = "^5.9"
+# Database sync driver (for migrations and skills)
+psycopg2-binary = "^2.9"
 
 [tool.poetry.extras]
 # Optional dependencies for specific features
