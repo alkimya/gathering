@@ -175,17 +175,18 @@ class TestAgentProjectIntegration:
         params = {"path": "src/main.py"}
         skill_name = "filesystem"
 
-        # Add mock skill
+        # Add mock skill that captures the resolved path (sync method)
         class MockSkill:
-            async def execute(self, tool_name, **params):
-                return {"resolved_path": params.get("path")}
+            def execute(self, tool_name, tool_input):
+                # tool_input is the params dict with resolved path
+                return {"resolved_path": tool_input.get("path")}
 
         agent._skills[skill_name] = MockSkill()
         agent._tool_map["fs_read"] = skill_name
 
         # Execute tool with relative path
         import asyncio
-        result = asyncio.run(agent._execute_tool("fs_read", params.copy()))
+        result = asyncio.run(agent._execute_tool("fs_read", params))
 
         # Verify path was resolved
         expected_path = str(Path(temp_project) / "src" / "main.py")

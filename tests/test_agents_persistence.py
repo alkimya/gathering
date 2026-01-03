@@ -167,7 +167,11 @@ class TestProjectContext:
         assert project.commands["test"] == "pytest"
 
     def test_gathering_project_constant(self):
-        """Test pre-configured GATHERING_PROJECT."""
+        """Test pre-configured GATHERING_PROJECT (lazy-loaded, may be None in CI)."""
+        # GATHERING_PROJECT is now lazy-loaded and may be None in CI environments
+        # where the project path doesn't exist
+        if GATHERING_PROJECT is None:
+            pytest.skip("GATHERING_PROJECT not available (no project path in CI)")
         assert GATHERING_PROJECT.name.lower() == "gathering"
         assert "pycopg" in GATHERING_PROJECT.tools["database"] or "picopg" in GATHERING_PROJECT.tools["database"]
         assert "pytest" in GATHERING_PROJECT.tools["testing"]

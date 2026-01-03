@@ -404,27 +404,34 @@ class TestFromPath:
 class TestGatheringProject:
     """Test the pre-configured GATHERING_PROJECT constant."""
 
-    def test_gathering_project_exists(self):
+    @pytest.fixture
+    def gathering_project(self):
+        """Get GATHERING_PROJECT, skip if not available."""
+        if GATHERING_PROJECT is None:
+            pytest.skip("GATHERING_PROJECT not available (no project path in CI)")
+        return GATHERING_PROJECT
+
+    def test_gathering_project_exists(self, gathering_project):
         """Test that GATHERING_PROJECT is defined."""
-        assert GATHERING_PROJECT is not None
-        assert GATHERING_PROJECT.name.lower() == "gathering"
+        assert gathering_project is not None
+        assert gathering_project.name.lower() == "gathering"
 
-    def test_gathering_project_has_tools(self):
+    def test_gathering_project_has_tools(self, gathering_project):
         """Test that GATHERING_PROJECT has tools defined."""
-        assert len(GATHERING_PROJECT.tools) > 0
-        assert "database" in GATHERING_PROJECT.tools
-        assert "testing" in GATHERING_PROJECT.tools
+        assert len(gathering_project.tools) > 0
+        assert "database" in gathering_project.tools
+        assert "testing" in gathering_project.tools
 
-    def test_gathering_project_has_conventions(self):
+    def test_gathering_project_has_conventions(self, gathering_project):
         """Test that GATHERING_PROJECT has conventions."""
-        assert len(GATHERING_PROJECT.conventions) > 0
+        assert len(gathering_project.conventions) > 0
 
-    def test_gathering_project_has_notes(self):
+    def test_gathering_project_has_notes(self, gathering_project):
         """Test that GATHERING_PROJECT has notes."""
-        assert len(GATHERING_PROJECT.notes) > 0
+        assert len(gathering_project.notes) > 0
 
-    def test_gathering_project_prompt(self):
+    def test_gathering_project_prompt(self, gathering_project):
         """Test that GATHERING_PROJECT can generate a prompt."""
-        prompt = GATHERING_PROJECT.to_prompt()
+        prompt = gathering_project.to_prompt()
         assert "gathering" in prompt.lower()
         assert "pycopg" in prompt.lower() or "picopg" in prompt.lower()
