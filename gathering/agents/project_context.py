@@ -488,19 +488,20 @@ def load_project_context(
         # Fallback to auto-detection
         return ProjectContext.from_path(project_path)
 
-    # Default: try gathering from DB, then from path
+    # Default: try gathering from DB
     context = load_project_from_db(project_name="gathering")
     if context:
         return context
 
-    return ProjectContext.from_path("/home/loc/workspace/gathering")
+    # Return None if no project found (don't fail on missing path)
+    return None
 
 
 # Lazy-loaded project context
 _gathering_project: Optional[ProjectContext] = None
 
 
-def get_gathering_project() -> ProjectContext:
+def get_gathering_project() -> Optional[ProjectContext]:
     """Get the Gathering project context (lazy-loaded)."""
     global _gathering_project
     if _gathering_project is None:
@@ -508,5 +509,13 @@ def get_gathering_project() -> ProjectContext:
     return _gathering_project
 
 
-# For backwards compatibility - now loads from YAML
-GATHERING_PROJECT = load_project_context()
+# For backwards compatibility - lazy loaded, not at import time
+GATHERING_PROJECT: Optional[ProjectContext] = None
+
+
+def _get_gathering_project() -> Optional[ProjectContext]:
+    """Get GATHERING_PROJECT lazily."""
+    global GATHERING_PROJECT
+    if GATHERING_PROJECT is None:
+        GATHERING_PROJECT = load_project_context()
+    return GATHERING_PROJECT
