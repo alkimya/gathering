@@ -419,17 +419,26 @@ CREATE TABLE circle.circles (
     display_name VARCHAR(200),
     description TEXT,
 
+    -- Owner (optional)
+    owner_id BIGINT REFERENCES agent.agents(id) ON DELETE SET NULL,
+
     -- Project link
     project_id BIGINT REFERENCES project.projects(id) ON DELETE SET NULL,
 
     -- Configuration
     config JSONB DEFAULT '{}',
+    settings JSONB DEFAULT '{}',
     review_policy VARCHAR(50) DEFAULT 'required',  -- required, optional, none
+    require_review BOOLEAN DEFAULT TRUE,
     auto_route_tasks BOOLEAN DEFAULT TRUE,
+    auto_route BOOLEAN DEFAULT TRUE,
     max_agents INTEGER DEFAULT 10,
 
     -- Status
     status public.circle_status DEFAULT 'created',
+    is_active BOOLEAN DEFAULT TRUE,
+    started_at TIMESTAMPTZ,
+    stopped_at TIMESTAMPTZ,
 
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
