@@ -73,7 +73,7 @@ jobs:
           DISABLE_AUTH: "true"
           ENVIRONMENT: test
         run: |
-          poetry run pytest tests/ -v --tb=short -x
+          poetry run pytest tests/ -v --tb=short -x --no-cov
 
       - name: Run tests with coverage
         if: matrix.python-version == '3.11'
