@@ -1,0 +1,49 @@
+{
+  "title": "Agents",
+  "subtitle": "Gérer vos agents IA et leurs capacités",
+  "createAgent": "Créer un agent",
+  "editAgent": "Modifier l'agent",
+  "deleteAgent": "Supprimer l'agent",
+  "agentDetails": "Détails de l'agent",
+  "status": {
+    "online": "En ligne",
+    "offline": "Hors ligne",
+    "busy": "Occupé",
+    "idle": "Inactif"
+  },
+  "fields": {
+    "name": "Nom",
+    "role": "Rôle",
+    "description": "Description",
+    "model": "Modèle",
+    "provider": "Fournisseur",
+    "traits": "Traits",
+    "specializations": "Spécialisations",
+    "communicationStyle": "Style de communication",
+    "temperature": "Température",
+    "maxTokens": "Tokens maximum"
+  },
+  "tabs": {
+    "overview": "Vue d'ensemble",
+    "chat": "Chat",
+    "memories": "Mémoires",
+    "tasks": "Tâches",
+    "skills": "Compétences",
+    "settings": "Paramètres"
+  },
+  "stats": {
+    "totalAgents": "Total des agents",
+    "activeAgents": "Agents actifs",
+    "totalTasks": "Total des tâches",
+    "completedTasks": "Tâches terminées"
+  },
+  "empty": {
+    "title": "Aucun agent",
+    "description": "Créez votre premier agent pour commencer avec GatheRing."
+  },
+  "chat": {
+    "placeholder": "Écrire un message...",
+    "send": "Envoyer",
+    "thinking": "Réflexion..."
+  }
+}

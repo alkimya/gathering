@@ -39,6 +39,7 @@ config/local.py
 config/secrets.py
 .env
 .env.local
+docs/archive/
 
 # Documentation
 docs/_build/

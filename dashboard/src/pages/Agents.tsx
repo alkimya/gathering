@@ -3,15 +3,12 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import ReactMarkdown from 'react-markdown';
 import {
   Bot,
-  Send,
   Plus,
   Trash2,
   MessageSquare,
   Brain,
-  Clock,
   Sparkles,
   X,
   Settings,
@@ -25,11 +22,10 @@ import {
   Users,
   User,
   LayoutDashboard,
-  AlertCircle,
-  RefreshCw,
 } from 'lucide-react';
 import { agents, models, providers, personas } from '../services/api';
-import type { Agent, ChatMessage } from '../types';
+import { StreamingChatPanel } from '../components/StreamingChatPanel';
+import type { Agent } from '../types';
 
 function AgentCard({
   agent,
@@ -47,274 +43,77 @@ function AgentCard({
   return (
     <div
       onClick={onSelect}
-      className={`p-4 rounded-xl cursor-pointer transition-all glass-card-hover ${
+      className={`p-3 rounded-xl cursor-pointer transition-all glass-card-hover ${
         isSelected
           ? 'glass-card border-purple-500/50 glow-purple'
           : 'glass-card'
       }`}
     >
-      <div className="flex items-start justify-between">
-        <div className="flex items-center gap-3">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2.5">
           <div className="relative">
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+            <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${
               agent.status === 'busy'
                 ? 'bg-gradient-to-br from-amber-500 to-orange-500'
                 : 'bg-gradient-to-br from-emerald-500 to-teal-500'
             }`}>
-              <Bot className="w-5 h-5 text-white" />
+              <Bot className="w-4 h-4 text-white" />
             </div>
-            <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-[#11111b] ${
+            <div className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-[#11111b] ${
               agent.status === 'busy' ? 'bg-amber-500' : 'bg-emerald-500'
             }`} />
           </div>
           <div>
-            <h3 className="font-semibold text-white">{agent.name}</h3>
-            <p className="text-sm text-zinc-500">{agent.role}</p>
+            <h3 className="font-semibold text-white text-sm">{agent.name}</h3>
+            <p className="text-xs text-zinc-500">{agent.role}</p>
           </div>
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-0.5">
           <Link
             to={`/agents/${agent.id}`}
             onClick={(e) => e.stopPropagation()}
-            className="p-1.5 text-zinc-500 hover:text-purple-400 hover:bg-purple-500/10 rounded-lg transition-all"
+            className="p-1 text-zinc-500 hover:text-purple-400 hover:bg-purple-500/10 rounded-lg transition-all"
             title="Agent Dashboard"
           >
-            <LayoutDashboard className="w-4 h-4" />
+            <LayoutDashboard className="w-3.5 h-3.5" />
           </Link>
           <button
             onClick={(e) => {
               e.stopPropagation();
               onEdit();
             }}
-            className="p-1.5 text-zinc-500 hover:text-cyan-400 hover:bg-cyan-500/10 rounded-lg transition-all"
+            className="p-1 text-zinc-500 hover:text-cyan-400 hover:bg-cyan-500/10 rounded-lg transition-all"
             title="Agent Settings"
           >
-            <Settings className="w-4 h-4" />
+            <Settings className="w-3.5 h-3.5" />
           </button>
           <button
             onClick={(e) => {
               e.stopPropagation();
               onDelete();
             }}
-            className="p-1.5 text-zinc-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
+            className="p-1 text-zinc-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
             title="Delete Agent"
           >
-            <Trash2 className="w-4 h-4" />
+            <Trash2 className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
 
-      <div className="mt-3 flex items-center gap-4 text-xs text-zinc-500">
-        <div className="flex items-center gap-1.5">
-          <Brain className="w-3.5 h-3.5 text-purple-400" />
-          <span>{agent.memory_count ?? 0} memories</span>
+      <div className="mt-2 flex items-center gap-3 text-xs text-zinc-500">
+        <div className="flex items-center gap-1">
+          <Brain className="w-3 h-3 text-purple-400" />
+          <span>{agent.memory_count ?? 0}</span>
         </div>
-        <div className="flex items-center gap-1.5">
-          <MessageSquare className="w-3.5 h-3.5 text-cyan-400" />
-          <span>{agent.message_count ?? 0} messages</span>
+        <div className="flex items-center gap-1">
+          <MessageSquare className="w-3 h-3 text-cyan-400" />
+          <span>{agent.message_count ?? 0}</span>
         </div>
-      </div>
-
-      <div className="mt-3">
-        <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${
-          agent.status === 'busy' ? 'badge-warning' : 'badge-success'
-        }`}>
-          {agent.status}
-        </span>
       </div>
     </div>
   );
 }
 
-function ChatPanel({ agent }: { agent: Agent }) {
-  const [message, setMessage] = useState('');
-  const [thinkingPhase, setThinkingPhase] = useState<'idle' | 'thinking' | 'generating'>('idle');
-  const queryClient = useQueryClient();
-
-  const { data: history, isLoading, error: historyError, refetch } = useQuery({
-    queryKey: ['agent-history', agent.id],
-    queryFn: () => agents.getHistory(agent.id),
-    refetchOnWindowFocus: false,
-  });
-
-  const displayMessages = history?.messages || [];
-
-  const chatMutation = useMutation({
-    mutationFn: async (msg: string) => {
-      setThinkingPhase('thinking');
-      // Simulate thinking phase transition
-      await new Promise(resolve => setTimeout(resolve, 500));
-      setThinkingPhase('generating');
-      return agents.chat(agent.id, msg);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['agent-history', agent.id] });
-      setMessage('');
-      setThinkingPhase('idle');
-    },
-    onError: () => {
-      setThinkingPhase('idle');
-    },
-  });
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (message.trim() && !chatMutation.isPending) {
-      chatMutation.mutate(message);
-    }
-  };
-
-  return (
-    <div className="flex flex-col h-full">
-      {/* Chat header */}
-      <div className="p-5 border-b border-white/5">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center glow-purple">
-            <Bot className="w-6 h-6 text-white" />
-          </div>
-          <div>
-            <h2 className="font-semibold text-lg text-white">{agent.name}</h2>
-            <p className="text-sm text-zinc-500">{agent.role}</p>
-          </div>
-          <div className="ml-auto flex items-center gap-2">
-            {thinkingPhase !== 'idle' && (
-              <span className="text-xs px-3 py-1.5 rounded-full font-medium badge-info flex items-center gap-1.5">
-                {thinkingPhase === 'thinking' ? (
-                  <><Brain className="w-3 h-3" /> Réflexion...</>
-                ) : (
-                  <><Sparkles className="w-3 h-3" /> Génération...</>
-                )}
-              </span>
-            )}
-            <span className={`text-xs px-3 py-1.5 rounded-full font-medium ${
-              agent.status === 'busy' || thinkingPhase !== 'idle' ? 'badge-warning' : 'badge-success'
-            }`}>
-              {thinkingPhase !== 'idle' ? 'busy' : agent.status}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Error banner */}
-      {(historyError || chatMutation.error) && (
-        <div className="mx-5 mt-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30 flex items-center gap-3">
-          <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
-          <div className="flex-1">
-            <p className="text-sm text-red-400">
-              {historyError ? 'Erreur de chargement de l\'historique' : 'Erreur lors de l\'envoi du message'}
-            </p>
-            <p className="text-xs text-red-400/70 mt-0.5">
-              {historyError ? (historyError as Error)?.message : (chatMutation.error as Error)?.message}
-            </p>
-          </div>
-          <button
-            onClick={() => historyError ? refetch() : chatMutation.reset()}
-            className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors"
-          >
-            <RefreshCw className="w-4 h-4" />
-          </button>
-        </div>
-      )}
-
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-5 space-y-4">
-        {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-12 gap-3">
-            <div className="flex gap-1">
-              <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" />
-              <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce [animation-delay:0.1s]" />
-              <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce [animation-delay:0.2s]" />
-            </div>
-            <p className="text-sm text-zinc-500">Chargement de l'historique...</p>
-          </div>
-        ) : displayMessages.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-12 gap-3">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-zinc-700 to-zinc-800 flex items-center justify-center">
-              <MessageSquare className="w-7 h-7 text-zinc-500" />
-            </div>
-            <p className="text-sm text-zinc-500">Aucun message</p>
-            <p className="text-xs text-zinc-600">Commencez la conversation ci-dessous</p>
-          </div>
-        ) : (
-          displayMessages.map((msg: ChatMessage, i: number) => (
-            <div
-              key={i}
-              className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`}
-            >
-              <div
-                className={`max-w-[80%] rounded-2xl p-4 ${
-                  msg.role === 'user'
-                    ? 'bg-gradient-to-br from-indigo-500 to-purple-500 text-white'
-                    : 'glass-card'
-                }`}
-              >
-                <div className={`text-sm leading-relaxed prose prose-sm max-w-none ${
-                  msg.role === 'user'
-                    ? 'prose-invert text-white prose-p:text-white prose-strong:text-white prose-code:text-white prose-headings:text-white'
-                    : 'prose-invert prose-p:text-zinc-300 prose-strong:text-white prose-code:bg-zinc-700 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-purple-300 prose-pre:bg-zinc-800 prose-pre:border prose-pre:border-white/10 prose-headings:text-white prose-li:text-zinc-300'
-                }`}>
-                  <ReactMarkdown>{msg.content}</ReactMarkdown>
-                </div>
-                <p className={`text-xs mt-2 flex items-center gap-1 ${
-                  msg.role === 'user' ? 'text-indigo-200' : 'text-zinc-500'
-                }`}>
-                  <Clock className="w-3 h-3" />
-                  {new Date(msg.timestamp).toLocaleTimeString()}
-                </p>
-              </div>
-            </div>
-          ))
-        )}
-        {chatMutation.isPending && (
-          <div className="flex justify-start animate-fade-in">
-            <div className="glass-card rounded-2xl p-4">
-              <div className="flex items-center gap-3">
-                {thinkingPhase === 'thinking' ? (
-                  <Brain className="w-4 h-4 text-purple-400 animate-pulse" />
-                ) : (
-                  <Sparkles className="w-4 h-4 text-amber-400 animate-pulse" />
-                )}
-                <span className="text-sm text-zinc-400">
-                  {thinkingPhase === 'thinking' ? `${agent.name} réfléchit...` : `${agent.name} génère une réponse...`}
-                </span>
-                <div className="flex gap-1.5">
-                  <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" />
-                  <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce [animation-delay:0.1s]" />
-                  <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce [animation-delay:0.2s]" />
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Input */}
-      <form onSubmit={handleSubmit} className="p-5 border-t border-white/5">
-        <div className="flex gap-3">
-          <input
-            type="text"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            placeholder={chatMutation.isPending ? `${agent.name} répond...` : "Type a message..."}
-            disabled={chatMutation.isPending}
-            className="flex-1 px-5 py-3.5 input-glass rounded-xl disabled:opacity-50"
-          />
-          <button
-            type="submit"
-            disabled={chatMutation.isPending || !message.trim()}
-            className="btn-gradient px-5 py-3.5 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-          >
-            {chatMutation.isPending ? (
-              <RefreshCw className="w-5 h-5 animate-spin" />
-            ) : (
-              <Send className="w-5 h-5" />
-            )}
-          </button>
-        </div>
-      </form>
-    </div>
-  );
-}
 
 function CreateAgentModal({
   isOpen,
@@ -449,17 +248,23 @@ function CreateAgentModal({
   const selectedPersona = personasData?.personas.find((p) => p.id === selectedPersonaId);
 
   return (
-    <div className="fixed inset-0 modal-overlay flex items-center justify-center z-50 p-4">
+    <div
+      className="fixed inset-0 modal-overlay flex items-center justify-center z-50 p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="create-agent-title"
+    >
       <div className="glass-card rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center glow-purple">
               <Plus className="w-5 h-5 text-white" />
             </div>
-            <h2 className="text-xl font-bold text-white">Create Agent</h2>
+            <h2 id="create-agent-title" className="text-xl font-bold text-white">Create Agent</h2>
           </div>
           <button
             onClick={onClose}
+            aria-label="Close dialog"
             className="p-2 text-zinc-400 hover:text-white hover:bg-white/5 rounded-lg transition-all"
           >
             <X className="w-5 h-5" />
@@ -927,7 +732,12 @@ function EditAgentModal({
   if (!isOpen || !agent) return null;
 
   return (
-    <div className="fixed inset-0 modal-overlay flex items-center justify-center z-50 p-4">
+    <div
+      className="fixed inset-0 modal-overlay flex items-center justify-center z-50 p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="edit-agent-title"
+    >
       <div className="glass-card rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
@@ -935,12 +745,13 @@ function EditAgentModal({
               <Settings className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-white">Edit Agent</h2>
+              <h2 id="edit-agent-title" className="text-xl font-bold text-white">Edit Agent</h2>
               <p className="text-sm text-zinc-500">{name || agent.name}</p>
             </div>
           </div>
           <button
             onClick={onClose}
+            aria-label="Close dialog"
             className="p-2 text-zinc-400 hover:text-white hover:bg-white/5 rounded-lg transition-all"
           >
             <X className="w-5 h-5" />
@@ -1198,6 +1009,7 @@ export function Agents() {
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingAgent, setEditingAgent] = useState<Agent | null>(null);
+  const [showSidebar, setShowSidebar] = useState(true);
   const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery({
@@ -1215,11 +1027,40 @@ export function Agents() {
     },
   });
 
+  // On mobile, hide sidebar when an agent is selected
+  const handleSelectAgent = (agent: Agent) => {
+    setSelectedAgent(agent);
+    // Hide sidebar on small screens when selecting
+    if (window.innerWidth < 768) {
+      setShowSidebar(false);
+    }
+  };
+
   return (
-    <div className="h-full flex gap-6">
-      {/* Agents list */}
-      <div className="w-80 flex-shrink-0 flex flex-col">
-        <div className="flex items-center justify-between mb-6">
+    <div className="h-full flex flex-col md:flex-row gap-4 md:gap-6">
+      {/* Mobile header with toggle */}
+      <div className="md:hidden flex items-center justify-between">
+        <button
+          onClick={() => setShowSidebar(!showSidebar)}
+          className="flex items-center gap-2 px-3 py-2 glass-card rounded-xl text-zinc-400 hover:text-white transition-colors"
+        >
+          <Users className="w-4 h-4" />
+          <span className="text-sm">{showSidebar ? 'Hide' : 'Show'} Agents</span>
+          {selectedAgent && !showSidebar && (
+            <span className="text-purple-400 font-medium ml-1">{selectedAgent.name}</span>
+          )}
+        </button>
+        <button
+          onClick={() => setShowCreateModal(true)}
+          className="p-2 btn-gradient rounded-xl"
+        >
+          <Plus className="w-4 h-4" />
+        </button>
+      </div>
+
+      {/* Agents list - collapsible on mobile */}
+      <div className={`${showSidebar ? 'flex' : 'hidden'} md:flex w-full md:w-80 flex-shrink-0 flex-col`}>
+        <div className="hidden md:flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-bold text-white">Agents</h1>
             <Sparkles className="w-5 h-5 text-purple-400 animate-pulse" />
@@ -1232,7 +1073,7 @@ export function Agents() {
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto space-y-3 pr-2">
+        <div className="flex-1 overflow-y-auto space-y-3 pr-2 max-h-[30vh] md:max-h-none">
           {isLoading ? (
             <div className="text-center py-12">
               <div className="flex gap-1 justify-center">
@@ -1260,7 +1101,7 @@ export function Agents() {
                 key={agent.id}
                 agent={agent}
                 isSelected={selectedAgent?.id === agent.id}
-                onSelect={() => setSelectedAgent(agent)}
+                onSelect={() => handleSelectAgent(agent)}
                 onDelete={() => deleteMutation.mutate(agent.id)}
                 onEdit={() => setEditingAgent(agent)}
               />
@@ -1269,10 +1110,10 @@ export function Agents() {
         </div>
       </div>
 
-      {/* Chat panel */}
-      <div className="flex-1 glass-card rounded-2xl overflow-hidden">
+      {/* Chat panel with WebSocket streaming */}
+      <div className={`${!showSidebar || selectedAgent ? 'flex' : 'hidden md:flex'} flex-1 glass-card rounded-2xl overflow-hidden min-h-[50vh] md:min-h-0`}>
         {selectedAgent ? (
-          <ChatPanel key={selectedAgent.id} agent={selectedAgent} />
+          <StreamingChatPanel key={selectedAgent.id} agent={selectedAgent} />
         ) : (
           <div className="h-full flex items-center justify-center">
             <div className="text-center">

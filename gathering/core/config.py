@@ -208,13 +208,35 @@ class Settings(BaseSettings):
             if self.debug:
                 issues.append("DEBUG should be False in production")
 
-            if self.secret_key.get_secret_value() == "dev-secret-key-change-me":
-                issues.append("SECRET_KEY must be changed from default")
+            secret = self.secret_key.get_secret_value()
+            if secret == "dev-secret-key-change-me":
+                issues.append("SECRET_KEY must be changed from default in production")
+            elif len(secret) < 32:
+                issues.append("SECRET_KEY should be at least 32 characters")
+
+            if self.disable_auth:
+                issues.append("DISABLE_AUTH cannot be True in production")
 
             if not self.openai_api_key and not self.anthropic_api_key:
                 issues.append("At least one LLM provider API key must be configured")
 
+            # Warn about localhost CORS in production
+            if "localhost" in self.cors_origins:
+                issues.append("CORS_ORIGINS should not contain localhost in production")
+
         return issues
+
+    def require_production_ready(self) -> None:
+        """
+        Validate and raise error if settings are not production-ready.
+        Call this at application startup in production.
+        """
+        issues = self.validate_for_production()
+        if issues:
+            raise ValueError(
+                f"Configuration not production-ready:\n" +
+                "\n".join(f"  - {issue}" for issue in issues)
+            )
 
 
 @lru_cache()

@@ -116,10 +116,13 @@ describe('Type Definitions', () => {
         auto_route: false,
         created_at: '2024-01-01T00:00:00Z',
         started_at: '2024-01-01T01:00:00Z',
+        project_id: 1,
+        project_name: 'gathering',
       };
 
       expect(circle.name).toBe('dev-team');
       expect(circle.status).toBe('running');
+      expect(circle.project_name).toBe('gathering');
     });
   });
 

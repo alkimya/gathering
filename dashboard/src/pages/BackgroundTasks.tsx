@@ -23,81 +23,6 @@ import {
 import { backgroundTasks, agents } from '../services/api';
 import type { BackgroundTask, BackgroundTaskStatus } from '../types';
 
-// Demo data for when API returns empty
-const demoTasks = [
-  {
-    id: 1,
-    agent_id: 1,
-    agent_name: 'sophie',
-    agent_display_name: 'Sophie',
-    circle_name: 'dev-team',
-    goal: 'Implement the new user dashboard with analytics widgets and real-time data updates',
-    status: 'running' as const,
-    current_step: 12,
-    max_steps: 50,
-    progress_percent: 24,
-    progress_summary: 'Creating analytics components and integrating with API...',
-    total_llm_calls: 45,
-    total_tokens_used: 12500,
-    total_tool_calls: 23,
-    duration_seconds: 1845,
-    created_at: new Date(Date.now() - 1845000).toISOString(),
-  },
-  {
-    id: 2,
-    agent_id: 2,
-    agent_name: 'olivia',
-    agent_display_name: 'Olivia',
-    circle_name: 'code-review',
-    goal: 'Review and optimize database queries for better performance',
-    status: 'completed' as const,
-    current_step: 30,
-    max_steps: 30,
-    progress_percent: 100,
-    progress_summary: 'Successfully optimized 5 queries, reducing response time by 40%',
-    total_llm_calls: 78,
-    total_tokens_used: 25000,
-    total_tool_calls: 45,
-    duration_seconds: 3600,
-    created_at: new Date(Date.now() - 7200000).toISOString(),
-    completed_at: new Date(Date.now() - 3600000).toISOString(),
-  },
-  {
-    id: 3,
-    agent_id: 1,
-    agent_name: 'sophie',
-    agent_display_name: 'Sophie',
-    circle_name: 'dev-team',
-    goal: 'Write comprehensive unit tests for the authentication module',
-    status: 'paused' as const,
-    current_step: 8,
-    max_steps: 40,
-    progress_percent: 20,
-    progress_summary: 'Paused after completing login flow tests. Waiting for auth refactor.',
-    total_llm_calls: 22,
-    total_tokens_used: 8000,
-    total_tool_calls: 12,
-    duration_seconds: 900,
-    created_at: new Date(Date.now() - 5400000).toISOString(),
-  },
-  {
-    id: 4,
-    agent_id: 2,
-    agent_name: 'olivia',
-    agent_display_name: 'Olivia',
-    goal: 'Generate API documentation for all public endpoints',
-    status: 'pending' as const,
-    current_step: 0,
-    max_steps: 25,
-    progress_percent: 0,
-    total_llm_calls: 0,
-    total_tokens_used: 0,
-    total_tool_calls: 0,
-    duration_seconds: 0,
-    created_at: new Date().toISOString(),
-  },
-] as BackgroundTask[];
-
 const statusConfig: Record<BackgroundTaskStatus, { color: string; icon: React.ReactNode; label: string }> = {
   pending: { color: 'text-zinc-400', icon: <Clock className="w-4 h-4" />, label: 'Pending' },
   running: { color: 'text-blue-400', icon: <Loader2 className="w-4 h-4 animate-spin" />, label: 'Running' },
@@ -339,10 +264,15 @@ function CreateTaskModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="create-task-title"
+    >
       <div className="absolute inset-0 modal-overlay" onClick={onClose} />
       <div className="relative glass-card rounded-2xl p-6 w-full max-w-lg mx-4">
-        <h2 className="text-xl font-bold text-white mb-4">Create Background Task</h2>
+        <h2 id="create-task-title" className="text-xl font-bold text-white mb-4">Create Background Task</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -424,20 +354,8 @@ export function BackgroundTasks() {
     refetchOnWindowFocus: false,
   });
 
-  // Use demo data when API returns empty
-  const displayTasks = data?.tasks?.length ? data.tasks : demoTasks;
-
-  // Calculate counts from displayTasks to ensure they match
-  const calculatedCounts = displayTasks.reduce((acc, task) => {
-    acc[task.status] = (acc[task.status] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
-
-  // Use calculated counts if API returns empty
-  const displayCounts = data?.tasks?.length
-    ? (data.counts || calculatedCounts)
-    : calculatedCounts;
-
+  const displayTasks = data?.tasks || [];
+  const displayCounts = data?.counts || {};
   const displayTotal = displayTasks.length;
 
   // Filter tasks based on status filter
@@ -501,29 +419,29 @@ export function BackgroundTasks() {
         </div>
       </div>
 
-      {/* Status counts */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
+      {/* Compact Stats & Filter Bar */}
+      <div className="glass-card rounded-xl px-4 py-3 flex flex-wrap items-center gap-x-2 gap-y-2">
         <button
           onClick={() => setStatusFilter('')}
-          className={`p-3 rounded-xl text-center transition-colors ${
-            statusFilter === '' ? 'bg-purple-500/20 border border-purple-500/50' : 'glass-card hover:bg-white/5'
+          className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors ${
+            statusFilter === '' ? 'bg-purple-500/20 text-purple-400' : 'text-zinc-400 hover:text-white hover:bg-white/5'
           }`}
         >
-          <div className="text-2xl font-bold text-white">{displayTotal}</div>
-          <div className="text-xs text-zinc-500">All</div>
+          <Activity className="w-4 h-4" />
+          <span className="font-semibold">{displayTotal}</span>
+          <span>all</span>
         </button>
         {Object.entries(statusConfig).map(([status, config]) => (
           <button
             key={status}
             onClick={() => setStatusFilter(status as BackgroundTaskStatus)}
-            className={`p-3 rounded-xl text-center transition-colors ${
-              statusFilter === status ? 'bg-purple-500/20 border border-purple-500/50' : 'glass-card hover:bg-white/5'
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors ${
+              statusFilter === status ? 'bg-purple-500/20 text-purple-400' : 'text-zinc-400 hover:text-white hover:bg-white/5'
             }`}
           >
-            <div className={`text-2xl font-bold ${config.color}`}>
-              {displayCounts[status] || 0}
-            </div>
-            <div className="text-xs text-zinc-500">{config.label}</div>
+            <span className={config.color}>{config.icon}</span>
+            <span className="font-semibold">{displayCounts[status] || 0}</span>
+            <span className="hidden sm:inline">{config.label.toLowerCase()}</span>
           </button>
         ))}
       </div>
@@ -532,6 +450,12 @@ export function BackgroundTasks() {
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
           <Loader2 className="w-8 h-8 text-purple-400 animate-spin" />
+        </div>
+      ) : filteredTasks.length === 0 ? (
+        <div className="glass-card rounded-xl p-12 text-center">
+          <Activity className="w-12 h-12 text-zinc-600 mx-auto mb-4" />
+          <p className="text-zinc-400">No background tasks yet</p>
+          <p className="text-zinc-500 text-sm mt-1">Create a task to start autonomous agent work</p>
         </div>
       ) : (
         <div className="space-y-4">

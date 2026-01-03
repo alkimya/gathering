@@ -27,7 +27,9 @@ from gathering.api.schemas import (
 from gathering.api.dependencies import (
     get_agent_registry,
     get_memory_service,
+    get_database_service,
     AgentRegistry,
+    DatabaseService,
 )
 from gathering.agents import (
     AgentWrapper,
@@ -276,11 +278,69 @@ async def delete_agent(
 # =============================================================================
 
 
+@router.get("/{agent_id}/history")
+async def get_agent_history(
+    agent_id: int,
+    limit: int = 50,
+    registry: AgentRegistry = Depends(get_agent_registry),
+    db: DatabaseService = Depends(get_database_service),
+) -> dict:
+    """
+    Get chat history for an agent.
+
+    Returns the recent messages from the database.
+    """
+    agent = registry.get(agent_id)
+    if not agent:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Agent {agent_id} not found",
+        )
+
+    # Get messages from database
+    messages = []
+    try:
+        rows = db.execute(
+            """
+            SELECT id, role, content, created_at
+            FROM communication.chat_history
+            WHERE agent_id = %(agent_id)s
+            ORDER BY created_at DESC
+            LIMIT %(limit)s
+            """,
+            {"agent_id": agent_id, "limit": limit},
+        )
+        # Reverse to get chronological order
+        for row in reversed(rows):
+            messages.append({
+                "id": row["id"],
+                "role": row["role"],
+                "content": row["content"],
+                "timestamp": row["created_at"].isoformat() if row["created_at"] else datetime.now(timezone.utc).isoformat(),
+                "agent_name": agent.name if row["role"] == "assistant" else None,
+            })
+    except Exception as e:
+        logger.warning(f"Failed to load history from DB, falling back to session: {e}")
+        # Fallback to session if DB fails
+        session = agent.session
+        for msg in session.recent_messages[-limit:]:
+            messages.append({
+                "id": hash(f"{msg.get('timestamp', '')}{msg.get('content', '')[:20]}"),
+                "role": msg.get("role", "user"),
+                "content": msg.get("content", ""),
+                "timestamp": msg.get("timestamp", datetime.now(timezone.utc).isoformat()),
+                "agent_name": agent.name if msg.get("role") == "assistant" else None,
+            })
+
+    return {"messages": messages}
+
+
 @router.post("/{agent_id}/chat", response_model=ChatResponse)
 async def chat_with_agent(
     agent_id: int,
     data: ChatRequest,
     registry: AgentRegistry = Depends(get_agent_registry),
+    db: DatabaseService = Depends(get_database_service),
 ) -> ChatResponse:
     """
     Chat with an agent.
@@ -301,6 +361,29 @@ async def chat_with_agent(
             include_memories=data.include_memories,
             allow_tools=data.allow_tools,
         )
+
+        # Save to database
+        try:
+            # Save user message
+            db._db.execute(
+                """
+                INSERT INTO communication.chat_history
+                (agent_id, role, content, created_at)
+                VALUES (%(agent_id)s, 'user', %(content)s, NOW())
+                """,
+                {"agent_id": agent_id, "content": data.message},
+            )
+            # Save assistant response
+            db._db.execute(
+                """
+                INSERT INTO communication.chat_history
+                (agent_id, role, content, model_used, tokens_output, created_at)
+                VALUES (%(agent_id)s, 'assistant', %(content)s, %(model)s, %(tokens)s, NOW())
+                """,
+                {"agent_id": agent_id, "content": response.content, "model": response.model, "tokens": response.tokens_used},
+            )
+        except Exception as e:
+            logger.warning(f"Failed to save chat to database: {e}")
 
         return ChatResponse(
             content=response.content,
@@ -449,3 +532,261 @@ async def clear_current_task(
 
     agent.clear_current_task()
     return {"status": "ok"}
+
+
+# =============================================================================
+# Skills Management Endpoints
+# =============================================================================
+
+
+@router.get("/{agent_id}/skills")
+async def get_agent_skills(
+    agent_id: int,
+    registry: AgentRegistry = Depends(get_agent_registry),
+    db: DatabaseService = Depends(get_database_service),
+) -> dict:
+    """
+    Get skills configured for an agent.
+
+    Returns:
+        - configured_skills: Skills assigned to this agent in DB
+        - loaded_skills: Skills currently loaded in memory
+        - available_skills: All skills available in the system
+    """
+    agent = registry.get(agent_id)
+    if not agent:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Agent {agent_id} not found",
+        )
+
+    # Get skills from DB
+    skill_row = db.execute_one(
+        "SELECT skill_names FROM agent.agents WHERE id = %(id)s",
+        {'id': agent_id}
+    )
+    configured_skills = skill_row.get('skill_names') or [] if skill_row else []
+
+    # Get loaded skills from agent wrapper
+    loaded_skills = list(agent._skills.keys())
+
+    # Get all available skills
+    from gathering.skills.registry import SkillRegistry
+    available_skills = SkillRegistry.list_skills()
+
+    # Get tool count per loaded skill
+    skill_details = []
+    for skill_name in loaded_skills:
+        skill = agent._skills.get(skill_name)
+        if skill:
+            skill_details.append({
+                "name": skill_name,
+                "description": getattr(skill, 'description', ''),
+                "version": getattr(skill, 'version', '1.0.0'),
+                "tools_count": len(skill.tools),
+                "tools": [t.get('name') for t in skill.tools],
+            })
+
+    return {
+        "agent_id": agent_id,
+        "configured_skills": configured_skills,
+        "loaded_skills": loaded_skills,
+        "skill_details": skill_details,
+        "available_skills": available_skills,
+        "tools_count": len(agent._tool_map),
+    }
+
+
+@router.put("/{agent_id}/skills")
+async def update_agent_skills(
+    agent_id: int,
+    skills: List[str],
+    registry: AgentRegistry = Depends(get_agent_registry),
+    db: DatabaseService = Depends(get_database_service),
+) -> dict:
+    """
+    Update skills for an agent.
+
+    Args:
+        skills: List of skill names to assign to the agent
+
+    Returns:
+        Updated skill configuration
+    """
+    agent = registry.get(agent_id)
+    if not agent:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Agent {agent_id} not found",
+        )
+
+    # Validate skill names
+    from gathering.skills.registry import SkillRegistry
+    available_skills = SkillRegistry.list_skills()
+    invalid_skills = [s for s in skills if s not in available_skills]
+    if invalid_skills:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid skill names: {invalid_skills}. Available: {available_skills}",
+        )
+
+    # Update in database
+    try:
+        db._db.execute(
+            "UPDATE agent.agents SET skill_names = %(skills)s WHERE id = %(id)s",
+            {'id': agent_id, 'skills': skills}
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to update skills in database: {str(e)}",
+        )
+
+    # Reload skills in agent wrapper
+    # First remove existing skills
+    for skill_name in list(agent._skills.keys()):
+        agent.remove_skill(skill_name)
+
+    # Load new skills
+    project_path = "/home/loc/workspace/gathering"
+    loaded = []
+    failed = []
+
+    for skill_name in skills:
+        try:
+            skill = SkillRegistry.get(
+                skill_name,
+                config={"working_dir": project_path, "allowed_paths": [project_path]},
+            )
+            agent.add_skill(skill)
+            loaded.append(skill_name)
+        except Exception as e:
+            logger.warning(f"Failed to load skill {skill_name}: {e}")
+            failed.append({"skill": skill_name, "error": str(e)})
+
+    return {
+        "agent_id": agent_id,
+        "configured_skills": skills,
+        "loaded_skills": loaded,
+        "failed_skills": failed,
+        "tools_count": len(agent._tool_map),
+    }
+
+
+@router.post("/{agent_id}/skills/{skill_name}")
+async def add_agent_skill(
+    agent_id: int,
+    skill_name: str,
+    registry: AgentRegistry = Depends(get_agent_registry),
+    db: DatabaseService = Depends(get_database_service),
+) -> dict:
+    """Add a single skill to an agent."""
+    agent = registry.get(agent_id)
+    if not agent:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Agent {agent_id} not found",
+        )
+
+    # Validate skill name
+    from gathering.skills.registry import SkillRegistry
+    available_skills = SkillRegistry.list_skills()
+    if skill_name not in available_skills:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid skill name: {skill_name}. Available: {available_skills}",
+        )
+
+    # Get current skills from DB
+    skill_row = db.execute_one(
+        "SELECT skill_names FROM agent.agents WHERE id = %(id)s",
+        {'id': agent_id}
+    )
+    current_skills = skill_row.get('skill_names') or [] if skill_row else []
+
+    # Add skill if not already present
+    if skill_name in current_skills:
+        return {
+            "status": "already_exists",
+            "agent_id": agent_id,
+            "skill": skill_name,
+            "skills": current_skills,
+        }
+
+    new_skills = current_skills + [skill_name]
+
+    # Update in database
+    db._db.execute(
+        "UPDATE agent.agents SET skill_names = %(skills)s WHERE id = %(id)s",
+        {'id': agent_id, 'skills': new_skills}
+    )
+
+    # Load skill in agent wrapper
+    try:
+        project_path = "/home/loc/workspace/gathering"
+        skill = SkillRegistry.get(
+            skill_name,
+            config={"working_dir": project_path, "allowed_paths": [project_path]},
+        )
+        agent.add_skill(skill)
+    except Exception as e:
+        logger.warning(f"Failed to load skill {skill_name}: {e}")
+
+    return {
+        "status": "added",
+        "agent_id": agent_id,
+        "skill": skill_name,
+        "skills": new_skills,
+        "tools_count": len(agent._tool_map),
+    }
+
+
+@router.delete("/{agent_id}/skills/{skill_name}")
+async def remove_agent_skill(
+    agent_id: int,
+    skill_name: str,
+    registry: AgentRegistry = Depends(get_agent_registry),
+    db: DatabaseService = Depends(get_database_service),
+) -> dict:
+    """Remove a skill from an agent."""
+    agent = registry.get(agent_id)
+    if not agent:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Agent {agent_id} not found",
+        )
+
+    # Get current skills from DB
+    skill_row = db.execute_one(
+        "SELECT skill_names FROM agent.agents WHERE id = %(id)s",
+        {'id': agent_id}
+    )
+    current_skills = skill_row.get('skill_names') or [] if skill_row else []
+
+    # Remove skill if present
+    if skill_name not in current_skills:
+        return {
+            "status": "not_found",
+            "agent_id": agent_id,
+            "skill": skill_name,
+            "skills": current_skills,
+        }
+
+    new_skills = [s for s in current_skills if s != skill_name]
+
+    # Update in database
+    db._db.execute(
+        "UPDATE agent.agents SET skill_names = %(skills)s WHERE id = %(id)s",
+        {'id': agent_id, 'skills': new_skills}
+    )
+
+    # Remove skill from agent wrapper
+    agent.remove_skill(skill_name)
+
+    return {
+        "status": "removed",
+        "agent_id": agent_id,
+        "skill": skill_name,
+        "skills": new_skills,
+        "tools_count": len(agent._tool_map),
+    }

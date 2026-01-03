@@ -253,40 +253,27 @@ export function Activity() {
         </div>
       </div>
 
-      {/* Quick Stats */}
-      <div className="grid grid-cols-3 gap-4">
-        <div className="glass-card rounded-xl p-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-emerald-500/20">
-              <CheckCircle className="w-5 h-5 text-emerald-400" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-white">{stats.tasks_completed}</p>
-              <p className="text-xs text-zinc-500">Tâches complétées</p>
-            </div>
-          </div>
+      {/* Compact Stats Bar */}
+      <div className="glass-card rounded-xl px-5 py-3 flex flex-wrap items-center gap-x-8 gap-y-2">
+        <div className="flex items-center gap-2">
+          <CheckCircle className="w-4 h-4 text-emerald-400" />
+          <span className="text-white font-semibold">{stats.tasks_completed}</span>
+          <span className="text-zinc-500 text-sm">completed</span>
         </div>
-        <div className="glass-card rounded-xl p-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-yellow-500/20">
-              <GitBranch className="w-5 h-5 text-yellow-400" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-white">{stats.reviews_pending}</p>
-              <p className="text-xs text-zinc-500">Reviews en attente</p>
-            </div>
-          </div>
+        <div className="flex items-center gap-2">
+          <GitBranch className="w-4 h-4 text-yellow-400" />
+          <span className="text-white font-semibold">{stats.reviews_pending}</span>
+          <span className="text-zinc-500 text-sm">reviews</span>
         </div>
-        <div className="glass-card rounded-xl p-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-amber-500/20">
-              <AlertTriangle className="w-5 h-5 text-amber-400" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-white">{stats.conflicts}</p>
-              <p className="text-xs text-zinc-500">Conflits</p>
-            </div>
-          </div>
+        <div className="flex items-center gap-2">
+          <AlertTriangle className="w-4 h-4 text-amber-400" />
+          <span className="text-white font-semibold">{stats.conflicts}</span>
+          <span className="text-zinc-500 text-sm">conflicts</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <Bell className="w-4 h-4 text-purple-400" />
+          <span className="text-white font-semibold">{events.length}</span>
+          <span className="text-zinc-500 text-sm">events</span>
         </div>
       </div>
 
@@ -320,7 +307,7 @@ export function Activity() {
         {filteredEvents.length === 0 ? (
           <div className="glass-card rounded-xl p-12 text-center">
             <Bell className="w-12 h-12 text-zinc-600 mx-auto mb-4" />
-            <p className="text-zinc-400">Aucune activité pour le moment</p>
+            <p className="text-zinc-400">No activity yet</p>
           </div>
         ) : (
           filteredEvents.map(event => (

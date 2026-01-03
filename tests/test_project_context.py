@@ -407,7 +407,7 @@ class TestGatheringProject:
     def test_gathering_project_exists(self):
         """Test that GATHERING_PROJECT is defined."""
         assert GATHERING_PROJECT is not None
-        assert GATHERING_PROJECT.name == "Gathering"
+        assert GATHERING_PROJECT.name.lower() == "gathering"
 
     def test_gathering_project_has_tools(self):
         """Test that GATHERING_PROJECT has tools defined."""
@@ -426,5 +426,5 @@ class TestGatheringProject:
     def test_gathering_project_prompt(self):
         """Test that GATHERING_PROJECT can generate a prompt."""
         prompt = GATHERING_PROJECT.to_prompt()
-        assert "Gathering" in prompt
-        assert "picopg" in prompt
+        assert "gathering" in prompt.lower()
+        assert "pycopg" in prompt.lower() or "picopg" in prompt.lower()

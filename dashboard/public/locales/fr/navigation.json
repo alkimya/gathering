@@ -1,0 +1,31 @@
+{
+  "groups": {
+    "overview": "Vue d'ensemble",
+    "work": "Travail",
+    "agentsTeams": "Agents & Équipes",
+    "intelligence": "Intelligence",
+    "system": "Système"
+  },
+  "items": {
+    "dashboard": "Tableau de bord",
+    "activityFeed": "Flux d'activité",
+    "projects": "Projets",
+    "calendar": "Calendrier",
+    "board": "Kanban",
+    "goals": "Objectifs",
+    "pipelines": "Pipelines",
+    "backgroundTasks": "Tâches de fond",
+    "schedules": "Planifications",
+    "agents": "Agents",
+    "circles": "Cercles",
+    "conversations": "Conversations",
+    "knowledgeBase": "Base de connaissances",
+    "models": "Modèles",
+    "monitoring": "Surveillance",
+    "settings": "Paramètres"
+  },
+  "search": {
+    "placeholder": "Rechercher agents, projets, tâches..."
+  },
+  "skipToContent": "Aller au contenu principal"
+}

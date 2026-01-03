@@ -1,0 +1,687 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026, GatheRing Team
+# This file is distributed under the same license as the GatheRing package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: GatheRing 0.2.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-01-02 14:08+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.17.0\n"
+
+#: ../../developer/testing.md:1 820d06f0769c486786e9b9d210920e26
+msgid "Testing"
+msgstr ""
+
+#: ../../developer/testing.md:3 724dedad90b64a3099a8de0312648268
+msgid ""
+"GatheRing uses pytest for testing with a focus on test-driven development"
+" (TDD)."
+msgstr ""
+
+#: ../../developer/testing.md:5 1a133b0bf61a4ee5b3fdb33131058f87
+msgid "Test Structure"
+msgstr ""
+
+#: ../../developer/testing.md:7 35223d19eb4749fc88809a8a27bc1573
+msgid ""
+"tests/\n"
+"├── unit/                 # Unit tests\n"
+"│   ├── test_agents.py\n"
+"│   ├── test_circles.py\n"
+"│   ├── test_memory.py\n"
+"│   └── test_tools.py\n"
+"├── integration/          # Integration tests\n"
+"│   ├── test_api.py\n"
+"│   ├── test_database.py\n"
+"│   └── test_websocket.py\n"
+"├── e2e/                  # End-to-end tests\n"
+"│   └── test_workflows.py\n"
+"├── conftest.py           # Shared fixtures\n"
+"└── fixtures/             # Test data\n"
+"    ├── agents.json\n"
+"    └── conversations.json\n"
+msgstr ""
+
+#: ../../developer/testing.md:26 9d4e9db01e2e442aa660e5024f70a835
+msgid "Running Tests"
+msgstr ""
+
+#: ../../developer/testing.md:28 3635bf8c96a246a98d6e2dc36a7c38a0
+msgid "All Tests"
+msgstr ""
+
+#: ../../developer/testing.md:30 b577ad4751204c9da73bc9a622442698
+msgid "pytest\n"
+msgstr ""
+
+#: ../../developer/testing.md:34 65357463beed4803969e8248c10f5133
+msgid "With Coverage"
+msgstr ""
+
+#: ../../developer/testing.md:36 b737796ad1c140ff8835a786ccc9bcd9
+msgid "pytest --cov=gathering --cov-report=html\n"
+msgstr ""
+
+#: ../../developer/testing.md:40 7947f8908bf041f9aae7a6272ab6eaab
+msgid "Specific Tests"
+msgstr ""
+
+#: ../../developer/testing.md:42 522af8a56a19450bb7002b49303524cf
+msgid ""
+"# Single file\n"
+"pytest tests/unit/test_agents.py\n"
+"\n"
+"# Single test\n"
+"pytest tests/unit/test_agents.py::test_create_agent\n"
+"\n"
+"# By marker\n"
+"pytest -m \"not slow\"\n"
+"\n"
+"# By keyword\n"
+"pytest -k \"memory\"\n"
+msgstr ""
+
+#: ../../developer/testing.md:56 efbf182df10f464cb1009581474d66a2
+msgid "Verbose Output"
+msgstr ""
+
+#: ../../developer/testing.md:58 f9420936aba64526ac577b24e21c4e09
+msgid "pytest -v --tb=short\n"
+msgstr ""
+
+#: ../../developer/testing.md:62 125eeb92d1ed44cdbbb598d707407f62
+msgid "Writing Tests"
+msgstr ""
+
+#: ../../developer/testing.md:64 939f2d2c192e4d02bf1101d7394e5c53
+msgid "Basic Test"
+msgstr ""
+
+#: ../../developer/testing.md:66 64391cf4c161458d8b7ecaf7890424df
+#, python-brace-format
+msgid ""
+"# tests/unit/test_agents.py\n"
+"import pytest\n"
+"from gathering.agents import Agent\n"
+"\n"
+"\n"
+"def test_create_agent():\n"
+"    \"\"\"Test basic agent creation.\"\"\"\n"
+"    # Arrange\n"
+"    config = {\"name\": \"TestAgent\", \"provider\": \"openai\", "
+"\"model\": \"gpt-4o\"}\n"
+"\n"
+"    # Act\n"
+"    agent = Agent.from_config(config)\n"
+"\n"
+"    # Assert\n"
+"    assert agent.name == \"TestAgent\"\n"
+"    assert agent.provider == \"openai\"\n"
+"    assert agent.model == \"gpt-4o\"\n"
+msgstr ""
+
+#: ../../developer/testing.md:86 148d7e3b6dec47f18cf0a7ed6832e55c
+msgid "Async Tests"
+msgstr ""
+
+#: ../../developer/testing.md:88 4271da56209f426ab4161d6bb39aee0a
+msgid ""
+"import pytest\n"
+"\n"
+"\n"
+"@pytest.mark.asyncio\n"
+"async def test_agent_process_message():\n"
+"    \"\"\"Test async message processing.\"\"\"\n"
+"    agent = Agent(name=\"Test\", provider=\"anthropic\", model=\"claude-"
+"sonnet-4-20250514\")\n"
+"\n"
+"    response = await agent.process_message(\"Hello\")\n"
+"\n"
+"    assert response is not None\n"
+"    assert len(response) > 0\n"
+msgstr ""
+
+#: ../../developer/testing.md:103 bcc9e6e3252b4fe6860aa5cfafc86b8d
+msgid "Parametrized Tests"
+msgstr ""
+
+#: ../../developer/testing.md:105 ef61353e1140480c86424a8c853fce2b
+msgid ""
+"import pytest\n"
+"\n"
+"\n"
+"@pytest.mark.parametrize(\"provider,model,expected_class\", [\n"
+"    (\"openai\", \"gpt-4o\", \"OpenAIProvider\"),\n"
+"    (\"anthropic\", \"claude-sonnet-4-20250514\", \"AnthropicProvider\"),"
+"\n"
+"    (\"ollama\", \"llama3.2\", \"OllamaProvider\"),\n"
+"])\n"
+"def test_provider_initialization(provider, model, expected_class):\n"
+"    \"\"\"Test provider initialization.\"\"\"\n"
+"    agent = Agent(name=\"Test\", provider=provider, model=model)\n"
+"    assert agent.llm_provider.__class__.__name__ == expected_class\n"
+msgstr ""
+
+#: ../../developer/testing.md:120 d8e2b5050602498eb97d36bcd753413f
+msgid "Test Classes"
+msgstr ""
+
+#: ../../developer/testing.md:122 585b7c89d3ff496a89f1115ae0445ec6
+msgid ""
+"class TestAgentMemory:\n"
+"    \"\"\"Tests for agent memory functionality.\"\"\"\n"
+"\n"
+"    def test_memory_stores_messages(self, agent):\n"
+"        \"\"\"Test that messages are stored.\"\"\"\n"
+"        agent.process_message(\"Hello\")\n"
+"        history = agent.memory.get_history()\n"
+"        assert len(history) >= 1\n"
+"\n"
+"    def test_memory_clears(self, agent):\n"
+"        \"\"\"Test memory clearing.\"\"\"\n"
+"        agent.process_message(\"Hello\")\n"
+"        agent.memory.clear()\n"
+"        assert len(agent.memory.get_history()) == 0\n"
+msgstr ""
+
+#: ../../developer/testing.md:139 5cc8958004124da9a020a87c61c1c2fc
+msgid "Fixtures"
+msgstr ""
+
+#: ../../developer/testing.md:141 6c88905fe7434ff8a18668a925bd15e4
+msgid "Basic Fixtures"
+msgstr ""
+
+#: ../../developer/testing.md:143 a026652397724f0ca0c32b38116bc4e3
+msgid ""
+"# tests/conftest.py\n"
+"import pytest\n"
+"from gathering.agents import Agent\n"
+"from gathering.db import Database\n"
+"\n"
+"\n"
+"@pytest.fixture\n"
+"def agent():\n"
+"    \"\"\"Create a test agent.\"\"\"\n"
+"    return Agent(name=\"TestAgent\", provider=\"ollama\", "
+"model=\"llama3.2\")\n"
+"\n"
+"\n"
+"@pytest.fixture\n"
+"async def db():\n"
+"    \"\"\"Create a test database connection.\"\"\"\n"
+"    database = Database(test=True)\n"
+"    await database.connect()\n"
+"    yield database\n"
+"    await database.disconnect()\n"
+msgstr ""
+
+#: ../../developer/testing.md:165 c69cb055a9f047a9a1b74db29dbaeb94
+msgid "Scoped Fixtures"
+msgstr ""
+
+#: ../../developer/testing.md:167 2701a778465d41d6a46e0273ad9f5652
+msgid ""
+"@pytest.fixture(scope=\"session\")\n"
+"def app():\n"
+"    \"\"\"Create app once per test session.\"\"\"\n"
+"    from gathering.api.app import create_app\n"
+"    return create_app(testing=True)\n"
+"\n"
+"\n"
+"@pytest.fixture(scope=\"function\")\n"
+"async def clean_db(db):\n"
+"    \"\"\"Clean database before each test.\"\"\"\n"
+"    await db.execute(\"TRUNCATE agent.agents CASCADE\")\n"
+"    yield db\n"
+msgstr ""
+
+#: ../../developer/testing.md:182 be1385154b584475bad3fd2eb094395f
+msgid "Factory Fixtures"
+msgstr ""
+
+#: ../../developer/testing.md:184 fafaee65f2c644faa4d59b459434a0c1
+msgid ""
+"@pytest.fixture\n"
+"def agent_factory():\n"
+"    \"\"\"Factory for creating test agents.\"\"\"\n"
+"    created = []\n"
+"\n"
+"    def _create(name=\"Test\", provider=\"ollama\", model=\"llama3.2\", "
+"**kwargs):\n"
+"        agent = Agent(name=name, provider=provider, model=model, "
+"**kwargs)\n"
+"        created.append(agent)\n"
+"        return agent\n"
+"\n"
+"    yield _create\n"
+"\n"
+"    # Cleanup\n"
+"    for agent in created:\n"
+"        agent.cleanup()\n"
+"\n"
+"\n"
+"def test_with_factory(agent_factory):\n"
+"    agent1 = agent_factory(name=\"Agent1\")\n"
+"    agent2 = agent_factory(name=\"Agent2\", provider=\"openai\", model"
+"=\"gpt-4o\")\n"
+"    # ...\n"
+msgstr ""
+
+#: ../../developer/testing.md:208 744475f28a474802bcb9c19dd63e0d17
+msgid "Mocking"
+msgstr ""
+
+#: ../../developer/testing.md:210 c87c331f17dc4031b58a0d43de705b1e
+msgid "Basic Mocking"
+msgstr ""
+
+#: ../../developer/testing.md:212 941df7d208ce4639ad28bff61394672a
+msgid ""
+"from unittest.mock import Mock, patch\n"
+"\n"
+"\n"
+"def test_with_mock():\n"
+"    mock_llm = Mock()\n"
+"    mock_llm.generate.return_value = \"Mocked response\"\n"
+"\n"
+"    agent = Agent(name=\"Test\", provider=\"openai\", model=\"gpt-4o\", "
+"llm=mock_llm)\n"
+"    response = agent.process_message(\"Hello\")\n"
+"\n"
+"    assert response == \"Mocked response\"\n"
+"    mock_llm.generate.assert_called_once()\n"
+msgstr ""
+
+#: ../../developer/testing.md:227 d537b28ea9cc406790b1593c0d776e49
+msgid "Patching"
+msgstr ""
+
+#: ../../developer/testing.md:229 f499e599f2ef49e2b685e0b04628e36d
+msgid ""
+"from unittest.mock import patch\n"
+"\n"
+"\n"
+"@patch(\"gathering.agents.llm_client\")\n"
+"def test_with_patch(mock_client):\n"
+"    mock_client.generate.return_value = Mock(\n"
+"        content=[Mock(text=\"Response\")]\n"
+"    )\n"
+"\n"
+"    agent = Agent(name=\"Test\", provider=\"anthropic\", model=\"claude-"
+"sonnet-4-20250514\")\n"
+"    response = agent.process_message(\"Hello\")\n"
+"\n"
+"    assert response == \"Response\"\n"
+msgstr ""
+
+#: ../../developer/testing.md:245 a4584c0af0934bf3b7cfcc820e44f000
+msgid "Async Mocking"
+msgstr ""
+
+#: ../../developer/testing.md:247 b0f25f2cc5c94a5ab411922c2620767d
+#, python-brace-format
+msgid ""
+"from unittest.mock import AsyncMock\n"
+"\n"
+"\n"
+"@pytest.mark.asyncio\n"
+"async def test_async_mock():\n"
+"    mock_db = AsyncMock()\n"
+"    mock_db.fetch_one.return_value = {\"id\": 1, \"name\": \"Test\"}\n"
+"\n"
+"    result = await mock_db.fetch_one(\"SELECT * FROM agents WHERE id = "
+"1\")\n"
+"\n"
+"    assert result[\"name\"] == \"Test\"\n"
+msgstr ""
+
+#: ../../developer/testing.md:261 71be91ad52704574acb99ff908761857
+msgid "API Testing"
+msgstr ""
+
+#: ../../developer/testing.md:263 9a785ddbfcd94bc892970ed1ddc82810
+msgid "Testing Endpoints"
+msgstr ""
+
+#: ../../developer/testing.md:265 0fd00d8d16a44c068d56aea51ccee6b3
+#, python-brace-format
+msgid ""
+"import pytest\n"
+"from httpx import AsyncClient\n"
+"from gathering.api.app import app\n"
+"\n"
+"\n"
+"@pytest.fixture\n"
+"async def client():\n"
+"    async with AsyncClient(app=app, base_url=\"http://test\") as ac:\n"
+"        yield ac\n"
+"\n"
+"\n"
+"@pytest.mark.asyncio\n"
+"async def test_list_agents(client):\n"
+"    response = await client.get(\"/agents\")\n"
+"\n"
+"    assert response.status_code == 200\n"
+"    assert isinstance(response.json(), list)\n"
+"\n"
+"\n"
+"@pytest.mark.asyncio\n"
+"async def test_create_agent(client):\n"
+"    response = await client.post(\n"
+"        \"/agents\",\n"
+"        json={\n"
+"            \"name\": \"NewAgent\",\n"
+"            \"provider\": \"anthropic\",\n"
+"            \"model\": \"claude-sonnet-4-20250514\"\n"
+"        },\n"
+"    )\n"
+"\n"
+"    assert response.status_code == 201\n"
+"    assert response.json()[\"name\"] == \"NewAgent\"\n"
+msgstr ""
+
+#: ../../developer/testing.md:300 72ee34a4d048483eba6cc419d7a3797f
+msgid "Testing WebSocket"
+msgstr ""
+
+#: ../../developer/testing.md:302 e3cc6979bd774d0eb5322a10d67df446
+#, python-brace-format
+msgid ""
+"from starlette.testclient import TestClient\n"
+"\n"
+"\n"
+"def test_websocket_connection():\n"
+"    client = TestClient(app)\n"
+"\n"
+"    with client.websocket_connect(\"/ws/circles/test\") as ws:\n"
+"        ws.send_json({\"type\": \"ping\"})\n"
+"        response = ws.receive_json()\n"
+"        assert response[\"type\"] == \"pong\"\n"
+msgstr ""
+
+#: ../../developer/testing.md:315 5dfbb92395d54e0eae9913c295254655
+msgid "Database Testing"
+msgstr ""
+
+#: ../../developer/testing.md:317 d16978ebb84f4bc8a9491409953d77ce
+msgid "Test Database"
+msgstr ""
+
+#: ../../developer/testing.md:319 91e4c24ae37f420e9a91cfb7e27d5bb4
+msgid ""
+"# tests/conftest.py\n"
+"import pytest\n"
+"from gathering.db import Database\n"
+"\n"
+"\n"
+"@pytest.fixture(scope=\"session\")\n"
+"async def test_db():\n"
+"    \"\"\"Create test database.\"\"\"\n"
+"    db = Database(url=\"postgresql://localhost/gathering_test\")\n"
+"    await db.connect()\n"
+"    await db.run_migrations()\n"
+"    yield db\n"
+"    await db.disconnect()\n"
+"\n"
+"\n"
+"@pytest.fixture(autouse=True)\n"
+"async def clean_tables(test_db):\n"
+"    \"\"\"Clean tables before each test.\"\"\"\n"
+"    await test_db.execute(\"TRUNCATE agent.agents CASCADE\")\n"
+"    yield\n"
+msgstr ""
+
+#: ../../developer/testing.md:342 a9ab69940e9d4405b5b8fa497ed749a5
+msgid "Testing Queries"
+msgstr ""
+
+#: ../../developer/testing.md:344 e3d1c11aa29e4e0b862e7a2642aaa030
+msgid ""
+"@pytest.mark.asyncio\n"
+"async def test_insert_agent(test_db):\n"
+"    result = await test_db.execute(\n"
+"        \"\"\"\n"
+"        INSERT INTO agent.agents (name, provider, model)\n"
+"        VALUES ($1, $2, $3)\n"
+"        RETURNING id\n"
+"        \"\"\",\n"
+"        \"TestAgent\",\n"
+"        \"openai\",\n"
+"        \"gpt-4o\",\n"
+"    )\n"
+"\n"
+"    assert result[\"id\"] is not None\n"
+"\n"
+"    agent = await test_db.fetch_one(\n"
+"        \"SELECT * FROM agent.agents WHERE id = $1\",\n"
+"        result[\"id\"],\n"
+"    )\n"
+"    assert agent[\"name\"] == \"TestAgent\"\n"
+"    assert agent[\"provider\"] == \"openai\"\n"
+msgstr ""
+
+#: ../../developer/testing.md:368 2669d2dc09f24ae2bfed177f4949cd5b
+msgid "Test Markers"
+msgstr ""
+
+#: ../../developer/testing.md:370 46aca5b89e044341ab6053e992ee1475
+msgid ""
+"# pytest.ini\n"
+"[pytest]\n"
+"markers =\n"
+"    slow: marks tests as slow\n"
+"    integration: marks integration tests\n"
+"    e2e: marks end-to-end tests\n"
+msgstr ""
+
+#: ../../developer/testing.md:379 9cc0ec823add4d74a0538359e3ab5768
+msgid "Usage:"
+msgstr ""
+
+#: ../../developer/testing.md:381 edeb5653b0414c37b9e4da37742b6d81
+msgid ""
+"@pytest.mark.slow\n"
+"def test_large_dataset():\n"
+"    # ...\n"
+"\n"
+"\n"
+"@pytest.mark.integration\n"
+"async def test_database_integration():\n"
+"    # ...\n"
+msgstr ""
+
+#: ../../developer/testing.md:392 97c06840ebb24715a312dd71c7c50ea4
+msgid "Running:"
+msgstr ""
+
+#: ../../developer/testing.md:394 9f5fa08649814d3690b88db7e3878f12
+msgid ""
+"# Skip slow tests\n"
+"pytest -m \"not slow\"\n"
+"\n"
+"# Only integration tests\n"
+"pytest -m integration\n"
+msgstr ""
+
+#: ../../developer/testing.md:402 e3c7f0de070647caa8d765dd561355c6
+msgid "Test Coverage"
+msgstr ""
+
+#: ../../developer/testing.md:404 b9f26cad3214410aad91ca9bbb9acf0f
+msgid "Configuration"
+msgstr ""
+
+#: ../../developer/testing.md:406 75e2254ebee44580bb31be26d50eda14
+msgid ""
+"# .coveragerc\n"
+"[run]\n"
+"source = gathering\n"
+"omit =\n"
+"    */tests/*\n"
+"    */__init__.py\n"
+"\n"
+"[report]\n"
+"exclude_lines =\n"
+"    pragma: no cover\n"
+"    def __repr__\n"
+"    raise NotImplementedError\n"
+msgstr ""
+
+#: ../../developer/testing.md:421 86c2d305575f43f2a0339df95a7221f0
+msgid "Running Coverage"
+msgstr ""
+
+#: ../../developer/testing.md:423 2e7ccf489c9f49fea2d19da2337e8eeb
+msgid ""
+"# Generate coverage report\n"
+"pytest --cov=gathering --cov-report=html\n"
+"\n"
+"# Check minimum coverage\n"
+"pytest --cov=gathering --cov-fail-under=80\n"
+msgstr ""
+
+#: ../../developer/testing.md:431 9e7fcc57888f444ba2bcb227f371cdd9
+msgid "Best Practices"
+msgstr ""
+
+#: ../../developer/testing.md:433 769c6ae323f846709f3fdd8a5df4a293
+msgid "1. Follow AAA Pattern"
+msgstr ""
+
+#: ../../developer/testing.md:435 d04277b1ec0a4c91a6396206e8fd3b7a
+msgid ""
+"def test_something():\n"
+"    # Arrange - Set up test data\n"
+"    data = create_test_data()\n"
+"\n"
+"    # Act - Perform the action\n"
+"    result = do_something(data)\n"
+"\n"
+"    # Assert - Verify the result\n"
+"    assert result == expected\n"
+msgstr ""
+
+#: ../../developer/testing.md:447 f9669edd7b2a466aa94bb54945e7b61d
+msgid "2. One Assertion Per Test (When Possible)"
+msgstr ""
+
+#: ../../developer/testing.md:449 0318a84c99c448ae9646af5e321b610d
+msgid ""
+"# Good - focused tests\n"
+"def test_agent_has_name():\n"
+"    agent = Agent(name=\"Test\")\n"
+"    assert agent.name == \"Test\"\n"
+"\n"
+"\n"
+"def test_agent_has_default_provider():\n"
+"    agent = Agent(name=\"Test\")\n"
+"    assert agent.provider == \"anthropic\"  # default provider\n"
+msgstr ""
+
+#: ../../developer/testing.md:461 021237b727bb4e61a6d54b1a2691fb31
+msgid "3. Use Descriptive Names"
+msgstr ""
+
+#: ../../developer/testing.md:463 9a97b42ecd0744cda4c299dd88db5c21
+msgid ""
+"# Good\n"
+"def test_agent_raises_error_when_name_is_empty():\n"
+"    with pytest.raises(ValueError):\n"
+"        Agent(name=\"\")\n"
+"\n"
+"\n"
+"# Bad\n"
+"def test_agent_error():\n"
+"    # ...\n"
+msgstr ""
+
+#: ../../developer/testing.md:475 cb4d73f6acf946fd8aa3794bfe6dafdc
+msgid "4. Isolate Tests"
+msgstr ""
+
+#: ../../developer/testing.md:477 9fb31346e15147248addc8b13e2e1ae0
+msgid "Tests should not depend on each other or external state."
+msgstr ""
+
+#: ../../developer/testing.md:479 15069046628048a3ab9de1714ad1ea32
+msgid "5. Mock External Services"
+msgstr ""
+
+#: ../../developer/testing.md:481 22fd9a469093473eba5f9713d42c0937
+msgid ""
+"@patch(\"gathering.llm.anthropic_client\")\n"
+"def test_without_real_api(mock_client):\n"
+"    # Test without calling real API\n"
+"    pass\n"
+msgstr ""
+
+#: ../../developer/testing.md:488 23c0ec96bace49d484b42e40744d4cf6
+msgid "Continuous Integration"
+msgstr ""
+
+#: ../../developer/testing.md:490 003e3235d1df499e9ef79feb8b3de5dd
+msgid ""
+"# .github/workflows/test.yml\n"
+"name: Tests\n"
+"\n"
+"on: [push, pull_request]\n"
+"\n"
+"jobs:\n"
+"  test:\n"
+"    runs-on: ubuntu-latest\n"
+"\n"
+"    services:\n"
+"      postgres:\n"
+"        image: postgres:15\n"
+"        env:\n"
+"          POSTGRES_DB: gathering_test\n"
+"          POSTGRES_PASSWORD: test\n"
+"        ports:\n"
+"          - 5432:5432\n"
+"\n"
+"    steps:\n"
+"      - uses: actions/checkout@v3\n"
+"      - uses: actions/setup-python@v4\n"
+"        with:\n"
+"          python-version: \"3.11\"\n"
+"\n"
+"      - name: Install dependencies\n"
+"        run: |\n"
+"          pip install -r requirements-dev.txt\n"
+"\n"
+"      - name: Run tests\n"
+"        run: |\n"
+"          pytest --cov=gathering --cov-report=xml\n"
+"\n"
+"      - name: Upload coverage\n"
+"        uses: codecov/codecov-action@v3\n"
+msgstr ""
+
+#: ../../developer/testing.md:527 2be9eee04d55455c9d33d45112a2dd3e
+msgid "Related Topics"
+msgstr ""
+
+#: ../../developer/testing.md:529 2ad7c20924914bed96e90e4121f97e4f
+msgid "[Contributing](contributing.md) - Contribution guidelines"
+msgstr ""
+
+#: ../../developer/testing.md:530 8023fbf0a1ee4df392e9a9e0f739b1aa
+msgid "[API](api.md) - API testing"
+msgstr ""
+
+#: ../../developer/testing.md:531 693813779dbb4ca1933d3e02e67988df
+msgid "[Database](database.md) - Database testing"
+msgstr ""
+

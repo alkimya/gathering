@@ -1,0 +1,31 @@
+{
+  "groups": {
+    "overview": "Overview",
+    "work": "Work",
+    "agentsTeams": "Agents & Teams",
+    "intelligence": "Intelligence",
+    "system": "System"
+  },
+  "items": {
+    "dashboard": "Dashboard",
+    "activityFeed": "Activity Feed",
+    "projects": "Projects",
+    "calendar": "Calendar",
+    "board": "Board",
+    "goals": "Goals",
+    "pipelines": "Pipelines",
+    "backgroundTasks": "Background Tasks",
+    "schedules": "Schedules",
+    "agents": "Agents",
+    "circles": "Circles",
+    "conversations": "Conversations",
+    "knowledgeBase": "Knowledge Base",
+    "models": "Models",
+    "monitoring": "Monitoring",
+    "settings": "Settings"
+  },
+  "search": {
+    "placeholder": "Search agents, projects, tasks..."
+  },
+  "skipToContent": "Skip to main content"
+}

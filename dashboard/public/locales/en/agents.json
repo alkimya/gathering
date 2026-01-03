@@ -1,0 +1,49 @@
+{
+  "title": "Agents",
+  "subtitle": "Manage your AI agents and their capabilities",
+  "createAgent": "Create Agent",
+  "editAgent": "Edit Agent",
+  "deleteAgent": "Delete Agent",
+  "agentDetails": "Agent Details",
+  "status": {
+    "online": "Online",
+    "offline": "Offline",
+    "busy": "Busy",
+    "idle": "Idle"
+  },
+  "fields": {
+    "name": "Name",
+    "role": "Role",
+    "description": "Description",
+    "model": "Model",
+    "provider": "Provider",
+    "traits": "Traits",
+    "specializations": "Specializations",
+    "communicationStyle": "Communication Style",
+    "temperature": "Temperature",
+    "maxTokens": "Max Tokens"
+  },
+  "tabs": {
+    "overview": "Overview",
+    "chat": "Chat",
+    "memories": "Memories",
+    "tasks": "Tasks",
+    "skills": "Skills",
+    "settings": "Settings"
+  },
+  "stats": {
+    "totalAgents": "Total Agents",
+    "activeAgents": "Active Agents",
+    "totalTasks": "Total Tasks",
+    "completedTasks": "Completed Tasks"
+  },
+  "empty": {
+    "title": "No agents yet",
+    "description": "Create your first agent to get started with GatheRing."
+  },
+  "chat": {
+    "placeholder": "Type a message...",
+    "send": "Send",
+    "thinking": "Thinking..."
+  }
+}

@@ -75,7 +75,7 @@ class DesignPlugin(Plugin):
             version="1.0.0",
             description="AI-powered design tools for image generation, editing, and creative work",
             author="GatheRing Team",
-            author_email="gathering.ai@pm.me",
+            author_email="loc.cosnier@pm.me",
             license="MIT",
             homepage="https://github.com/alkimya/gathering",
             tags=["design", "image", "ai", "creative"],

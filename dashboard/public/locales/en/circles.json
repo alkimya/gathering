@@ -1,0 +1,52 @@
+{
+  "title": "Circles",
+  "subtitle": "Manage agent teams and collaboration spaces",
+  "createCircle": "Create Circle",
+  "editCircle": "Edit Circle",
+  "deleteCircle": "Delete Circle",
+  "circleDetails": "Circle Details",
+  "status": {
+    "running": "Running",
+    "stopped": "Stopped",
+    "starting": "Starting",
+    "stopping": "Stopping"
+  },
+  "fields": {
+    "name": "Name",
+    "description": "Description",
+    "requireReview": "Require Review",
+    "autoRoute": "Auto Route",
+    "minReviewers": "Minimum Reviewers"
+  },
+  "actions": {
+    "start": "Start",
+    "stop": "Stop",
+    "addAgent": "Add Agent",
+    "removeAgent": "Remove Agent",
+    "createTask": "Create Task"
+  },
+  "tabs": {
+    "overview": "Overview",
+    "agents": "Agents",
+    "tasks": "Tasks",
+    "conversations": "Conversations",
+    "settings": "Settings"
+  },
+  "stats": {
+    "totalCircles": "Total Circles",
+    "activeCircles": "Active Circles",
+    "totalMembers": "Total Members",
+    "activeTasks": "Active Tasks"
+  },
+  "empty": {
+    "title": "No circles yet",
+    "description": "Create a circle to organize your agents into teams."
+  },
+  "tasks": {
+    "pending": "Pending",
+    "inProgress": "In Progress",
+    "inReview": "In Review",
+    "completed": "Completed",
+    "failed": "Failed"
+  }
+}

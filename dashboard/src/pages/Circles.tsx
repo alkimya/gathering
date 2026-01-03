@@ -19,6 +19,9 @@ import {
   Bot,
   Settings,
   Zap,
+  FolderGit2,
+  Menu,
+  ArrowLeft,
 } from 'lucide-react';
 import { circles, agents as agentsApi } from '../services/api';
 import type { Circle as CircleType, Task, TaskStatus } from '../types';
@@ -129,6 +132,14 @@ function CircleCard({
           <ListTodo className="w-3.5 h-3.5 text-cyan-400" />
           <span>{circle.active_tasks} active tasks</span>
         </div>
+        {circle.project_name && (
+          <div className="flex items-center gap-1.5">
+            <FolderGit2 className="w-3.5 h-3.5 text-purple-400" />
+            <span className="text-purple-400 truncate max-w-[120px]" title={circle.project_name}>
+              {circle.project_name}
+            </span>
+          </div>
+        )}
       </div>
 
       <div className="mt-3">
@@ -431,6 +442,7 @@ function CreateCircleModal({
   const [selectedAgents, setSelectedAgents] = useState<number[]>([]);
   const [requireReview, setRequireReview] = useState(true);
   const [autoRoute, setAutoRoute] = useState(true);
+  const [autoStart, setAutoStart] = useState(true);
   const queryClient = useQueryClient();
 
   // Fetch available agents
@@ -465,6 +477,11 @@ function CreateCircleModal({
         }
       }
 
+      // Auto-start the circle if option is enabled
+      if (autoStart) {
+        await circles.start(name);
+      }
+
       return circle;
     },
     onSuccess: () => {
@@ -474,6 +491,7 @@ function CreateCircleModal({
       setSelectedAgents([]);
       setRequireReview(true);
       setAutoRoute(true);
+      setAutoStart(true);
     },
   });
 
@@ -486,14 +504,19 @@ function CreateCircleModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 modal-overlay flex items-center justify-center z-50 p-4">
+    <div
+      className="fixed inset-0 modal-overlay flex items-center justify-center z-50 p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="create-circle-title"
+    >
       <div className="glass-card rounded-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center glow-green">
               <Plus className="w-5 h-5 text-white" />
             </div>
-            <h2 className="text-xl font-bold text-white">Create Circle</h2>
+            <h2 id="create-circle-title" className="text-xl font-bold text-white">Create Circle</h2>
           </div>
           <button
             onClick={onClose}
@@ -561,6 +584,27 @@ function CreateCircleModal({
               </div>
             </label>
           </div>
+
+          {/* Auto Start Option */}
+          <label className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all ${
+            autoStart
+              ? 'bg-emerald-500/20 border border-emerald-500/30'
+              : 'glass-card hover:bg-white/5 border border-transparent'
+          }`}>
+            <input
+              type="checkbox"
+              checked={autoStart}
+              onChange={(e) => setAutoStart(e.target.checked)}
+              className="w-4 h-4 text-emerald-500 bg-zinc-800 border-zinc-600 rounded focus:ring-emerald-500 focus:ring-offset-0"
+            />
+            <div className="flex items-center gap-2">
+              <Play className="w-4 h-4 text-emerald-400" />
+              <div>
+                <span className="text-sm text-white">Start immediately</span>
+                <p className="text-xs text-zinc-500">Activate the circle after creation</p>
+              </div>
+            </div>
+          </label>
 
           {/* Agent Selection */}
           <div>
@@ -649,6 +693,7 @@ function CreateCircleModal({
 export function Circles() {
   const [selectedCircle, setSelectedCircle] = useState<CircleType | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showSidebar, setShowSidebar] = useState(true);
   const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery({
@@ -681,13 +726,46 @@ export function Circles() {
     },
   });
 
+  // On mobile, hide sidebar when a circle is selected
+  const handleSelectCircle = (circle: CircleType) => {
+    setSelectedCircle(circle);
+    if (window.innerWidth < 768) {
+      setShowSidebar(false);
+    }
+  };
+
   return (
-    <div className="h-full flex gap-6">
-      {/* Circles list */}
-      <div className="w-80 flex-shrink-0 flex flex-col">
-        <div className="flex items-center justify-between mb-6">
+    <div className="h-full flex flex-col md:flex-row gap-4 md:gap-6">
+      {/* Mobile header with toggle */}
+      <div className="md:hidden flex items-center justify-between">
+        <button
+          onClick={() => setShowSidebar(!showSidebar)}
+          className="flex items-center gap-2 p-2 text-zinc-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
+        >
+          {showSidebar ? (
+            <>
+              <ArrowLeft className="w-5 h-5" />
+              <span className="text-sm">Hide list</span>
+            </>
+          ) : (
+            <>
+              <Menu className="w-5 h-5" />
+              <span className="text-sm">Show circles</span>
+            </>
+          )}
+        </button>
+        {selectedCircle && !showSidebar && (
+          <span className="text-sm text-zinc-400 truncate max-w-[150px]">
+            {selectedCircle.name}
+          </span>
+        )}
+      </div>
+
+      {/* Circles list - collapsible on mobile */}
+      <div className={`${showSidebar ? 'flex' : 'hidden'} md:flex w-full md:w-80 flex-shrink-0 flex-col`}>
+        <div className="flex items-center justify-between mb-4 md:mb-6">
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-white">Circles</h1>
+            <h1 className="text-xl md:text-2xl font-bold text-white">Circles</h1>
             <Target className="w-5 h-5 text-emerald-400 animate-pulse" />
           </div>
           <button
@@ -719,7 +797,7 @@ export function Circles() {
                 key={circle.id}
                 circle={circle}
                 isSelected={selectedCircle?.id === circle.id}
-                onSelect={() => setSelectedCircle(circle)}
+                onSelect={() => handleSelectCircle(circle)}
                 onStart={() => startMutation.mutate(circle.name)}
                 onStop={() => stopMutation.mutate(circle.name)}
                 onDelete={() => deleteMutation.mutate(circle.name)}
@@ -729,12 +807,12 @@ export function Circles() {
         </div>
       </div>
 
-      {/* Circle detail */}
-      <div className="flex-1 glass-card rounded-2xl overflow-hidden">
+      {/* Circle detail - show on mobile when sidebar is hidden or a circle is selected */}
+      <div className={`${!showSidebar || selectedCircle ? 'flex' : 'hidden md:flex'} flex-1 glass-card rounded-2xl overflow-hidden min-h-[300px]`}>
         {selectedCircle ? (
           <CircleDetail circle={selectedCircle} />
         ) : (
-          <div className="h-full flex items-center justify-center">
+          <div className="h-full flex items-center justify-center w-full">
             <div className="text-center">
               <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border border-emerald-500/20 flex items-center justify-center mx-auto mb-6">
                 <Circle className="w-10 h-10 text-emerald-400" />

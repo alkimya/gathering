@@ -66,6 +66,8 @@ export interface Circle {
   auto_route: boolean;
   created_at: string;
   started_at: string | null;
+  project_id: number | null;
+  project_name: string | null;
 }
 
 export interface CircleDetail extends Circle {
@@ -161,6 +163,53 @@ export interface HealthResponse {
   active_tasks: number;
 }
 
+export interface CpuMetrics {
+  percent: number;
+  count: number;
+  frequency_mhz: number | null;
+}
+
+export interface MemoryMetrics {
+  total_gb: number;
+  available_gb: number;
+  used_gb: number;
+  percent: number;
+}
+
+export interface DiskMetrics {
+  total_gb: number;
+  used_gb: number;
+  free_gb: number;
+  percent: number;
+}
+
+export interface LoadAverage {
+  '1min': number;
+  '5min': number;
+  '15min': number;
+}
+
+export interface SystemMetricsResponse {
+  cpu: CpuMetrics;
+  memory: MemoryMetrics;
+  disk: DiskMetrics;
+  load_average: LoadAverage;
+  uptime_seconds: number;
+}
+
+export interface ServiceHealth {
+  name: string;
+  status: 'healthy' | 'warning' | 'critical';
+  message?: string;
+  value?: string;
+  last_check: string;
+}
+
+export interface HealthChecksResponse {
+  checks: ServiceHealth[];
+  overall_status: 'healthy' | 'warning' | 'critical';
+}
+
 export interface WebSocketEvent {
   type: string;
   data: Record<string, unknown>;
@@ -236,6 +285,30 @@ export interface KnowledgeSearchResponse {
   query: string;
   results: Knowledge[];
   total: number;
+}
+
+export interface KnowledgeListResponse {
+  entries: Knowledge[];
+  total: number;
+  page: number;
+  page_size: number;
+}
+
+export interface KnowledgeStatsResponse {
+  total_entries: number;
+  by_category: Record<string, number>;
+  recent_entries: Knowledge[];
+}
+
+export interface DocumentUploadResponse {
+  id: number;
+  title: string;
+  filename: string;
+  format: string;
+  char_count: number;
+  chunk_count: number;
+  category?: KnowledgeCategory;
+  tags?: string[];
 }
 
 export interface MemoryStats {
@@ -540,11 +613,20 @@ export interface GoalActivity {
 }
 
 // Settings Types
+export interface SettingsModelInfo {
+  id: number;
+  model_name: string;
+  model_alias?: string;
+  vision: boolean;
+  extended_thinking: boolean;
+}
+
 export interface ProviderSettings {
   api_key?: string;
   default_model?: string;
   base_url?: string;
   is_configured: boolean;
+  models: SettingsModelInfo[];
 }
 
 export interface DatabaseSettings {
@@ -553,6 +635,9 @@ export interface DatabaseSettings {
   name: string;
   user: string;
   is_connected: boolean;
+  pool_size: number;
+  max_overflow: number;
+  extensions: string[];
 }
 
 export interface ApplicationSettings {
@@ -731,4 +816,56 @@ export interface PipelineRun {
   trigger_data?: Record<string, unknown>;
   error_message?: string;
   duration_seconds: number;
+}
+
+// Agent Tools/Skills Types
+export interface SkillInfo {
+  id: number;
+  name: string;
+  display_name?: string;
+  description?: string;
+  category: string;
+  required_permissions: string[];
+  is_dangerous: boolean;
+  is_enabled: boolean;
+  version: string;
+  tools_count: number;
+}
+
+export interface AgentToolInfo {
+  skill_id: number;
+  skill_name: string;
+  skill_display_name?: string;
+  skill_category: string;
+  required_permissions: string[];
+  is_dangerous: boolean;
+  is_enabled: boolean;
+  usage_count: number;
+  last_used_at?: string;
+}
+
+export interface AgentToolsResponse {
+  agent_id: number;
+  agent_name: string;
+  tools: AgentToolInfo[];
+  enabled_count: number;
+  total_count: number;
+}
+
+// Agent Skills
+export interface SkillDetail {
+  name: string;
+  description: string;
+  version: string;
+  tools_count: number;
+  tools: string[];
+}
+
+export interface AgentSkillsResponse {
+  agent_id: number;
+  configured_skills: string[];
+  loaded_skills: string[];
+  skill_details: SkillDetail[];
+  available_skills: string[];
+  tools_count: number;
 }

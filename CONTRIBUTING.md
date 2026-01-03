@@ -23,7 +23,7 @@ First off, thank you for considering contributing to GatheRing! It's people like
 
 ## Code of Conduct
 
-This project and everyone participating in it is governed by our Code of Conduct. By participating, you are expected to uphold this code. Please report unacceptable behavior to [gathering-conduct@example.com].
+This project and everyone participating in it is governed by our Code of Conduct. By participating, you are expected to uphold this code. Please report unacceptable behavior to [loc.cosnier@pm.me](mailto:loc.cosnier@pm.me).
 
 ### Our Pledge
 
@@ -42,7 +42,7 @@ We pledge to make participation in our project and our community a harassment-fr
 3. **Add the upstream repository**:
 
    ```bash
-   git remote add upstream https://github.com/original/gathering.git
+   git remote add upstream https://github.com/alkimya/gathering.git
    ```
 
 4. **Create a new branch** for your feature or fix:
@@ -308,7 +308,6 @@ GatheRing/
 │   ├── api/               # API reference
 │   ├── user/              # User guide
 │   └── developer/         # Developer guide
-├── examples/               # Example code
 ├── scripts/                # Utility scripts
 └── benchmarks/             # Performance benchmarks
 ```
@@ -411,8 +410,7 @@ make livehtml  # Serve with auto-reload
 
 - **GitHub Issues**: For bugs and features
 - **Discussions**: For questions and ideas
-- **Discord**: [Join our server](https://discord.gg/gathering) (coming soon)
-- **Email**: <gathering-dev@example.com>
+- **Email**: <loc.cosnier@pm.me>
 
 ### Recognition
 

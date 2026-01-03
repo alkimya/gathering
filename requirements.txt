@@ -19,6 +19,9 @@ email-validator>=2.0,<3.0
 # Database (PostgreSQL)
 # -----------------------------------------------------------------------------
 
+# High-level PostgreSQL API
+pycopg>=0.1.0
+
 # SQLAlchemy ORM
 sqlalchemy>=2.0,<3.0
 
@@ -110,3 +113,10 @@ opentelemetry-instrumentation-httpx>=0.41,<1.0
 fastapi>=0.109.0,<1.0
 uvicorn[standard]>=0.27.0,<1.0
 python-multipart>=0.0.6,<1.0
+
+# -----------------------------------------------------------------------------
+# Document Processing
+# -----------------------------------------------------------------------------
+
+# PDF extraction
+pypdf>=4.0,<5.0

@@ -160,6 +160,11 @@ class BaseSkill(ABC):
             for perm in self.required_permissions
         )
 
+    @property
+    def tools(self) -> List[Dict[str, Any]]:
+        """Get tool definitions (property for compatibility with AgentWrapper)."""
+        return self.get_tools_definition()
+
     def get_tool_names(self) -> List[str]:
         """Get list of available tool names."""
         return [tool["name"] for tool in self.get_tools_definition()]

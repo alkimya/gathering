@@ -1,0 +1,610 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026, GatheRing Team
+# This file is distributed under the same license as the GatheRing package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: GatheRing 0.2.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-01-02 14:08+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.17.0\n"
+
+#: ../../developer/architecture.md:1 bf866bc78c3c4ac3b49358f1610a29f8
+msgid "Architecture"
+msgstr ""
+
+#: ../../developer/architecture.md:3 467de51129bb448d9cba8ec01e203b4c
+msgid "This document describes the architecture of GatheRing."
+msgstr ""
+
+#: ../../developer/architecture.md:5 13b2f12739c545819059dd76590895ba
+msgid "System Overview"
+msgstr ""
+
+#: ../../developer/architecture.md:7 da6c64da2b014b58b254d4e19d25688c
+msgid ""
+"┌─────────────────────────────────────────────────────────────────┐\n"
+"│                         Dashboard (React)                        │\n"
+"│   ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐           │\n"
+"│   │  Agents  │ │ Circles  │ │ Workspace│ │ Calendar │           │\n"
+"│   └──────────┘ └──────────┘ └──────────┘ └──────────┘           │\n"
+"└─────────────────────────┬───────────────────────────────────────┘\n"
+"                          │ HTTP/WebSocket\n"
+"┌─────────────────────────┴───────────────────────────────────────┐\n"
+"│                        FastAPI Backend                           │\n"
+"│   ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐           │\n"
+"│   │   API    │ │ WebSocket│ │ Event Bus│ │  Skills  │           │\n"
+"│   │ Routers  │ │  Server  │ │  (Redis) │ │  System  │           │\n"
+"│   └──────────┘ └──────────┘ └──────────┘ └──────────┘           │\n"
+"└─────────────────────────┬───────────────────────────────────────┘\n"
+"                          │\n"
+"┌─────────────────────────┴───────────────────────────────────────┐\n"
+"│                        Core Services                             │\n"
+"│   ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐           │\n"
+"│   │  Agent   │ │  Circle  │ │  Memory  │ │Conversation│          │\n"
+"│   │ Service  │ │ Service  │ │ Service  │ │  Service  │           │\n"
+"│   └──────────┘ └──────────┘ └──────────┘ └──────────┘           │\n"
+"└─────────────────────────┬───────────────────────────────────────┘\n"
+"                          │\n"
+"┌─────────────────────────┴───────────────────────────────────────┐\n"
+"│                       Data Layer                                 │\n"
+"│   ┌────────────────┐ ┌────────────────┐ ┌────────────────┐      │\n"
+"│   │   PostgreSQL   │ │     Redis      │ │  File System   │      │\n"
+"│   │   + pgvector   │ │    (Cache)     │ │  (Workspace)   │      │\n"
+"│   └────────────────┘ └────────────────┘ └────────────────┘      │\n"
+"└─────────────────────────────────────────────────────────────────┘\n"
+msgstr ""
+
+#: ../../developer/architecture.md:40 8c7ff2c24efe4e7587d22b497f965238
+msgid "Directory Structure"
+msgstr ""
+
+#: ../../developer/architecture.md:42 c695d005d38547778dfa982ad986ffd8
+msgid ""
+"gathering/\n"
+"├── gathering/              # Python backend\n"
+"│   ├── api/               # FastAPI routers\n"
+"│   ├── core/              # Core domain logic\n"
+"│   ├── agents/            # Agent implementations\n"
+"│   ├── circles/           # Circle management\n"
+"│   ├── memory/            # Memory systems\n"
+"│   ├── skills/            # Skills framework\n"
+"│   ├── tools/             # Agent tools\n"
+"│   ├── db/                # Database layer\n"
+"│   └── websocket/         # WebSocket handlers\n"
+"├── dashboard/             # React frontend\n"
+"│   ├── src/\n"
+"│   │   ├── components/    # React components\n"
+"│   │   ├── pages/         # Page components\n"
+"│   │   ├── stores/        # Zustand stores\n"
+"│   │   ├── api/           # API client\n"
+"│   │   └── lib/           # Utilities\n"
+"│   └── public/\n"
+"├── docs/                  # Documentation\n"
+"├── tests/                 # Test suite\n"
+"├── personas/              # Agent personas\n"
+"└── scripts/               # Utility scripts\n"
+msgstr ""
+
+#: ../../developer/architecture.md:68 3d250916dced4b4fa8b5ccdea1090cf2
+msgid "Core Components"
+msgstr ""
+
+#: ../../developer/architecture.md:70 29be331bd05b4c70a1e0953c7edd51e6
+msgid "Agent System"
+msgstr ""
+
+#: ../../developer/architecture.md:72 307ae6738f614b87bfa00a15081270d5
+msgid "Agents are the primary actors in GatheRing."
+msgstr ""
+
+#: ../../developer/architecture.md:74 46c5119b2dce45b4bfd2d5af0b802669
+msgid ""
+"class Agent:\n"
+"    \"\"\"Core agent class.\"\"\"\n"
+"    id: int\n"
+"    name: str\n"
+"    role: str\n"
+"    provider: str  # openai, anthropic, ollama\n"
+"    model: str     # provider-specific model name\n"
+"    personality: PersonalityConfig\n"
+"    memory: MemorySystem\n"
+"    tools: list[Tool]\n"
+msgstr ""
+
+#: ../../developer/architecture.md:87 28a0cf8dbe0547738f24ff6e63b57c58
+msgid "Key concepts:"
+msgstr ""
+
+#: ../../developer/architecture.md:89 b7272a796dbb4986b093fac0aeb63054
+msgid "**Personality**: Traits that influence behavior"
+msgstr ""
+
+#: ../../developer/architecture.md:90 cd35357166df4ff280e49388bf5edc1a
+msgid "**Memory**: Short-term and long-term storage"
+msgstr ""
+
+#: ../../developer/architecture.md:91 78b3dacfcd0f4b30bd5bec8682f8e6fd
+msgid "**Tools**: Capabilities the agent can use"
+msgstr ""
+
+#: ../../developer/architecture.md:92 b2887ff58fc340659425e0a2c6e67f36
+msgid "**Sessions**: Track agent activity"
+msgstr ""
+
+#: ../../developer/architecture.md:94 d55e24b788824fd88b7328b7c8c2aa94
+msgid "Circle System"
+msgstr ""
+
+#: ../../developer/architecture.md:96 4bf06a66cc4149f88234098e523f66bc
+msgid "Circles organize agents into collaborative groups."
+msgstr ""
+
+#: ../../developer/architecture.md:98 32f2812596b14f3dad20614747eac7f4
+msgid ""
+"class Circle:\n"
+"    \"\"\"Circle for agent collaboration.\"\"\"\n"
+"    id: int\n"
+"    name: str\n"
+"    agents: list[Agent]\n"
+"    config: CircleConfig\n"
+"    state: CircleState\n"
+msgstr ""
+
+#: ../../developer/architecture.md:108 53e5755d83fd415dbcf384de275249cd
+msgid "Features:"
+msgstr ""
+
+#: ../../developer/architecture.md:110 b9a8ca70d36342df8be0807fa1199581
+msgid "Agent membership management"
+msgstr ""
+
+#: ../../developer/architecture.md:111 98daa669da8140c19f9a768aa995392b
+msgid "Conversation hosting"
+msgstr ""
+
+#: ../../developer/architecture.md:112 60a6b51723f14eff9d4ad5f3f3836b4d
+msgid "Shared memory scope"
+msgstr ""
+
+#: ../../developer/architecture.md:113 c6ec84a7c9ae4a59b358ec692586333d
+msgid "Configurable conversation modes"
+msgstr ""
+
+#: ../../developer/architecture.md:115 a856a45b8157411f836332e040ce3599
+msgid "Memory System"
+msgstr ""
+
+#: ../../developer/architecture.md:117 03f2ef2e84f0405c8e0856c5b0caea1b
+msgid "Multi-layered memory architecture:"
+msgstr ""
+
+#: ../../developer/architecture.md:119 9103333f27b8481cb963531b83b0e36e
+msgid ""
+"┌─────────────────────────────────────┐\n"
+"│         Semantic Search             │\n"
+"│        (pgvector + RAG)             │\n"
+"├─────────────────────────────────────┤\n"
+"│         Long-term Memory            │\n"
+"│      (PostgreSQL + embeddings)      │\n"
+"├─────────────────────────────────────┤\n"
+"│         Short-term Memory           │\n"
+"│       (Session context)             │\n"
+"└─────────────────────────────────────┘\n"
+msgstr ""
+
+#: ../../developer/architecture.md:132 d53e3ebe1d924d3c929ca7a1f5279e28
+msgid "Memory scopes:"
+msgstr ""
+
+#: ../../developer/architecture.md:134 4a0bb0f376194830b4e5ad4646323577
+msgid "`global`: Shared across all agents"
+msgstr ""
+
+#: ../../developer/architecture.md:135 98046aa24b174eda939f62549454066c
+msgid "`circle`: Shared within a circle"
+msgstr ""
+
+#: ../../developer/architecture.md:136 ebaf053360674ebb8c45f6e85c5d80e7
+msgid "`agent`: Private to an agent"
+msgstr ""
+
+#: ../../developer/architecture.md:137 1588110b4ef3448189f0cb0d6ed6834f
+msgid "`conversation`: Specific to a conversation"
+msgstr ""
+
+#: ../../developer/architecture.md:139 25459f433a224e159581e5d01822995d
+msgid "Event System"
+msgstr ""
+
+#: ../../developer/architecture.md:141 17639d0199614c09a19e92edd3673011
+msgid "Publish-subscribe event bus using Redis:"
+msgstr ""
+
+#: ../../developer/architecture.md:143 5b53414953404140bc2541f617d7f698
+#, python-brace-format
+msgid ""
+"# Publishing events\n"
+"await event_bus.publish(\"agent.message\", {\n"
+"    \"agent_id\": 1,\n"
+"    \"content\": \"Hello!\"\n"
+"})\n"
+"\n"
+"# Subscribing to events\n"
+"@event_bus.subscribe(\"agent.message\")\n"
+"async def handle_message(event):\n"
+"    print(f\"Agent said: {event['content']}\")\n"
+msgstr ""
+
+#: ../../developer/architecture.md:156 935b47b907284ec4a1ccb2add50da964
+msgid "Event types:"
+msgstr ""
+
+#: ../../developer/architecture.md:158 509761bd772449f3bae04f21b9e9139c
+msgid "`agent.*`: Agent lifecycle events"
+msgstr ""
+
+#: ../../developer/architecture.md:159 5e21dedfa06a4482b5e2506e66e17cb8
+msgid "`circle.*`: Circle events"
+msgstr ""
+
+#: ../../developer/architecture.md:160 bbc14ba7858b4ea2baa1f8edcba11674
+msgid "`conversation.*`: Conversation events"
+msgstr ""
+
+#: ../../developer/architecture.md:161 f425bdea5acd47e9bc2e7dfc73d664d9
+msgid "`workspace.*`: Workspace events"
+msgstr ""
+
+#: ../../developer/architecture.md:163 41a65500cf874db692c49ee2aa45362d
+msgid "API Layer"
+msgstr ""
+
+#: ../../developer/architecture.md:165 2fc59a106a014c9a8f5a7538471c027f
+msgid "REST Endpoints"
+msgstr ""
+
+#: ../../developer/architecture.md:167 ed8e248626004825905fed9c66f6e8b6
+msgid "Organized by domain:"
+msgstr ""
+
+#: ../../developer/architecture.md:169 2505e0d28b5b4d83b9eac68a1b555b9a
+msgid ""
+"/agents           # Agent CRUD\n"
+"/circles          # Circle management\n"
+"/conversations    # Conversation handling\n"
+"/workspace        # Workspace operations\n"
+"/memory           # Memory access\n"
+msgstr ""
+
+#: ../../developer/architecture.md:177 6ac4cc084f4e4278b4cdf80947ecf50f
+msgid "WebSocket Channels"
+msgstr ""
+
+#: ../../developer/architecture.md:179 92e4743da5264b0bb21ceb7725c520a6
+msgid "Real-time communication:"
+msgstr ""
+
+#: ../../developer/architecture.md:181 19681853ca454d14bf1e88d3028058e1
+#, python-brace-format
+msgid ""
+"/ws/circles/{name}     # Circle events\n"
+"/ws/workspace/{id}     # Workspace updates\n"
+"/ws/agents/{id}        # Agent streams\n"
+msgstr ""
+
+#: ../../developer/architecture.md:187 96d59c712e1d4f22bde9c62d81d63a22
+msgid "Message format:"
+msgstr ""
+
+#: ../../developer/architecture.md:189 f53fef19e7b640b6a641571e1c67c658
+#, python-brace-format
+msgid ""
+"{\n"
+"  \"type\": \"message\",\n"
+"  \"data\": {\n"
+"    \"agent_id\": 1,\n"
+"    \"content\": \"Hello!\",\n"
+"    \"timestamp\": \"2025-01-01T00:00:00Z\"\n"
+"  }\n"
+"}\n"
+msgstr ""
+
+#: ../../developer/architecture.md:200 13693201fb624b82963a924267aad3e4
+msgid "Database Schema"
+msgstr ""
+
+#: ../../developer/architecture.md:202 47d989579d5f4050b8bbc8339ae9d2c8
+msgid "Core Tables"
+msgstr ""
+
+#: ../../developer/architecture.md:204 608ca216188540498236e1b72b1727d3
+msgid ""
+"agent.agents           # Agent definitions\n"
+"agent.sessions         # Agent sessions\n"
+"agent.tools            # Agent tools\n"
+"\n"
+"circle.circles         # Circle definitions\n"
+"circle.memberships     # Agent-circle relationships\n"
+"\n"
+"conversation.conversations  # Conversations\n"
+"conversation.turns          # Conversation turns\n"
+"conversation.messages       # Messages\n"
+"\n"
+"memory.memories        # Long-term memories\n"
+"memory.embeddings_cache    # Cached embeddings\n"
+"memory.knowledge_base      # Shared knowledge\n"
+"\n"
+"project.projects       # Projects\n"
+"project.tasks          # Tasks\n"
+msgstr ""
+
+#: ../../developer/architecture.md:224 a5217eee80b24650acaf573ccc219fd8
+msgid "Schemas"
+msgstr ""
+
+#: ../../developer/architecture.md:226 a6f41a82a5d445d2bbd185c49f26d590
+msgid "`public`: Common types and functions"
+msgstr ""
+
+#: ../../developer/architecture.md:227 4b61b06a116047e69bc4bebbe127fe1f
+msgid "`agent`: Agent-related tables"
+msgstr ""
+
+#: ../../developer/architecture.md:228 81955943ed31435cbe23b97f306ab657
+msgid "`circle`: Circle-related tables"
+msgstr ""
+
+#: ../../developer/architecture.md:229 a2c78b7407f44edaa6ffae3fbd952bfd
+msgid "`conversation`: Conversation tables"
+msgstr ""
+
+#: ../../developer/architecture.md:230 c87d90f21ca54608b9b28b8a73eb5bb3
+msgid "`memory`: Memory and RAG"
+msgstr ""
+
+#: ../../developer/architecture.md:231 ab75ef029bde4d54ab6d01234920f7c6
+msgid "`project`: Project management"
+msgstr ""
+
+#: ../../developer/architecture.md:233 27b4364821f64876b73ce4bb259b24fa
+msgid "Frontend Architecture"
+msgstr ""
+
+#: ../../developer/architecture.md:235 260f094df3694994861f5ea5adf4c7c4
+msgid "Tech Stack"
+msgstr ""
+
+#: ../../developer/architecture.md:237 30fdb44e49334b65b1f5688b9cdb0eac
+msgid "**React 18**: UI framework"
+msgstr ""
+
+#: ../../developer/architecture.md:238 09dfae4279c94f15b6fad2f7ba27633d
+msgid "**TypeScript**: Type safety"
+msgstr ""
+
+#: ../../developer/architecture.md:239 f20749861478451299e6122979078a75
+msgid "**Zustand**: State management"
+msgstr ""
+
+#: ../../developer/architecture.md:240 f232db4e9f62455bb62e1f5f8bef732c
+msgid "**TanStack Query**: Data fetching"
+msgstr ""
+
+#: ../../developer/architecture.md:241 543121bdd1f4435497aa48e4752652ca
+msgid "**Tailwind CSS**: Styling"
+msgstr ""
+
+#: ../../developer/architecture.md:242 a86980b46cb14203852288a7d55d6ab2
+msgid "**Monaco Editor**: Code editing"
+msgstr ""
+
+#: ../../developer/architecture.md:243 99023eaac88b40dc925a49ee56cfec8a
+msgid "**xterm.js**: Terminal emulation"
+msgstr ""
+
+#: ../../developer/architecture.md:245 92fc00ecaf54459c941f9dbe8cf2179c
+msgid "State Management"
+msgstr ""
+
+#: ../../developer/architecture.md:247 2e4347e180244aa99d84a7226fb6b293
+#, python-brace-format
+msgid ""
+"// Zustand store example\n"
+"const useAgentStore = create((set) => ({\n"
+"  agents: [],\n"
+"  selectedAgent: null,\n"
+"\n"
+"  setAgents: (agents) => set({ agents }),\n"
+"  selectAgent: (agent) => set({ selectedAgent: agent }),\n"
+"}));\n"
+msgstr ""
+
+#: ../../developer/architecture.md:258 cc173d24fed24489a357837dfcdb94a2
+msgid "Component Structure"
+msgstr ""
+
+#: ../../developer/architecture.md:260 6c618e864a9440b9a5b1b99a0b92dee4
+msgid ""
+"src/\n"
+"├── components/\n"
+"│   ├── ui/            # Base UI components\n"
+"│   ├── agents/        # Agent components\n"
+"│   ├── circles/       # Circle components\n"
+"│   └── workspace/     # Workspace components\n"
+"├── pages/\n"
+"│   ├── Dashboard.tsx\n"
+"│   ├── AgentDetail.tsx\n"
+"│   ├── CircleView.tsx\n"
+"│   └── Workspace.tsx\n"
+"└── stores/\n"
+"    ├── agentStore.ts\n"
+"    ├── circleStore.ts\n"
+"    └── workspaceStore.ts\n"
+msgstr ""
+
+#: ../../developer/architecture.md:278 a8e1c68e496b4d09a8fd005313a3f989
+msgid "Security"
+msgstr ""
+
+#: ../../developer/architecture.md:280 190fde50e1cc48ce8c18e508772b278e
+msgid "API Security"
+msgstr ""
+
+#: ../../developer/architecture.md:282 c6ec056bd2be449ea873ba311f6fc08f
+msgid "Input validation with Pydantic"
+msgstr ""
+
+#: ../../developer/architecture.md:283 a4fe759ca21b47b3873a01dc55a6310c
+msgid "SQL injection prevention (SQLAlchemy ORM)"
+msgstr ""
+
+#: ../../developer/architecture.md:284 ebc1f583c8a24dd1be67997304f72fbc
+msgid "Rate limiting (configurable)"
+msgstr ""
+
+#: ../../developer/architecture.md:285 eab37399b7b347c297e08fcc47b985e8
+msgid "CORS configuration"
+msgstr ""
+
+#: ../../developer/architecture.md:287 bddd8c2388e54ead881215814cfe4872
+msgid "Agent Security"
+msgstr ""
+
+#: ../../developer/architecture.md:289 40904738f1a049ed8a0a68117ed105a1
+msgid "Tool permission system"
+msgstr ""
+
+#: ../../developer/architecture.md:290 c1f01b6fbc374020b9cc0a711fbf5399
+msgid "Filesystem sandboxing"
+msgstr ""
+
+#: ../../developer/architecture.md:291 2de7947614274f40936f2c4a8615686b
+msgid "Code execution isolation"
+msgstr ""
+
+#: ../../developer/architecture.md:292 9bc5336a958c44948f77b6f316aa7751
+msgid "Memory scope isolation"
+msgstr ""
+
+#: ../../developer/architecture.md:294 6e4207ef2fc54cba87e5b5098db77b10
+msgid "Scalability"
+msgstr ""
+
+#: ../../developer/architecture.md:296 c8c5282f4b0c42a6b97aea762422d343
+msgid "Horizontal Scaling"
+msgstr ""
+
+#: ../../developer/architecture.md:298 198536eb36b64d1e8c60061df818a3ac
+msgid "Stateless API servers"
+msgstr ""
+
+#: ../../developer/architecture.md:299 ef93f81d5b0145ee97639cec49a3c843
+msgid "Redis for session sharing"
+msgstr ""
+
+#: ../../developer/architecture.md:300 b1df4441b81247f99c63b43f56e64c3e
+msgid "PostgreSQL connection pooling"
+msgstr ""
+
+#: ../../developer/architecture.md:301 3c4fdd9de0814c4ab4ac63b359c5486f
+msgid "Load balancer compatible"
+msgstr ""
+
+#: ../../developer/architecture.md:303 8147ca2385a84ed49d59b71f71b32562
+msgid "Performance Optimizations"
+msgstr ""
+
+#: ../../developer/architecture.md:305 7487486fa3e24dfdbbc5d1045145539b
+msgid "Embedding caching"
+msgstr ""
+
+#: ../../developer/architecture.md:306 67f094c2ec9748aabf3e5ded02dea4a8
+msgid "Query result caching"
+msgstr ""
+
+#: ../../developer/architecture.md:307 07836cf2022b40eda7e4fbc256f91ca0
+msgid "Connection pooling"
+msgstr ""
+
+#: ../../developer/architecture.md:308 a22c73a77f3547648874bc43d3dbec1f
+msgid "Async I/O throughout"
+msgstr ""
+
+#: ../../developer/architecture.md:310 31cfe519bc2f4cd2aadc8131ec4613a0
+msgid "Configuration"
+msgstr ""
+
+#: ../../developer/architecture.md:312 d81c829813a74d409a10332f040af09b
+msgid "Environment Variables"
+msgstr ""
+
+#: ../../developer/architecture.md:314 ad5209ea92524b3491cf792649abb447
+msgid ""
+"# Database\n"
+"DATABASE_URL=postgresql://...\n"
+"REDIS_URL=redis://...\n"
+"\n"
+"# AI Providers\n"
+"ANTHROPIC_API_KEY=sk-ant-...\n"
+"OPENAI_API_KEY=sk-...\n"
+"\n"
+"# Server\n"
+"API_HOST=0.0.0.0\n"
+"API_PORT=8000\n"
+"\n"
+"# Features\n"
+"ENABLE_REDIS_CACHE=true\n"
+"ENABLE_WEBSOCKET=true\n"
+msgstr ""
+
+#: ../../developer/architecture.md:332 d3e0f353e327478ab5d80c08ec969553
+msgid "Configuration Files"
+msgstr ""
+
+#: ../../developer/architecture.md:334 383d90e474a44ee7ab967985b6644f64
+msgid "`pyproject.toml`: Python project config"
+msgstr ""
+
+#: ../../developer/architecture.md:335 b4669f0da7424cedb618aa6825fcc78c
+msgid "`pytest.ini`: Test configuration"
+msgstr ""
+
+#: ../../developer/architecture.md:336 2f16cb93cd8940bcb608df8cb5fa501b
+msgid "`.env`: Environment variables"
+msgstr ""
+
+#: ../../developer/architecture.md:337 c555a598040943d19cb6a5679f4020d0
+msgid "`dashboard/vite.config.ts`: Frontend config"
+msgstr ""
+
+#: ../../developer/architecture.md:339 8cfd78a8cada413ea8267bbae12ad274
+msgid "Related Topics"
+msgstr ""
+
+#: ../../developer/architecture.md:341 ab36e557c2344bbdb13ffc3ff2e801e7
+msgid "[Contributing](contributing.md) - How to contribute"
+msgstr ""
+
+#: ../../developer/architecture.md:342 d192375dc67440169297b6cee65be3bc
+msgid "[Database](database.md) - Database details"
+msgstr ""
+
+#: ../../developer/architecture.md:343 389bcfe9fb224120b263b01681af55cd
+msgid "[API](api.md) - API development"
+msgstr ""
+
+#: ../../developer/architecture.md:344 3e1b506e58b04ba29de7c49a04a6aa50
+msgid "[Testing](testing.md) - Test guidelines"
+msgstr ""
+

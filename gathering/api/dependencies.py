@@ -603,14 +603,161 @@ def get_database_service() -> DatabaseService:
 
 
 class AgentRegistry:
-    """Registry for managing agents across the API."""
+    """Registry for managing agents across the API with database loading."""
 
-    def __init__(self):
+    def __init__(self, db: Optional[DatabaseService] = None):
         self._agents: Dict[int, AgentWrapper] = {}
         self._next_id: int = 1
+        self._db = db
+        self._loaded = False
+
+    def set_db(self, db: DatabaseService) -> None:
+        """Set the database service (for lazy initialization)."""
+        self._db = db
+
+    def _ensure_loaded(self) -> None:
+        """Ensure agents are loaded from database on first access."""
+        if self._loaded or not self._db:
+            return
+        self._loaded = True
+        self._load_from_db()
+
+    def _load_from_db(self) -> None:
+        """Load all agents from database."""
+        if not self._db:
+            return
+
+        import logging
+        logger = logging.getLogger(__name__)
+
+        try:
+            agents_data = self._db.get_agents()
+            logger.info(f"Loading {len(agents_data)} agents from database")
+
+            from gathering.agents import AgentPersona, AgentConfig, AgentWrapper, MemoryService
+            from gathering.llm.providers import LLMProviderFactory
+            from gathering.core.config import get_settings
+
+            settings = get_settings()
+            memory = get_memory_service()
+
+            for agent_row in agents_data:
+                try:
+                    agent_id = agent_row['id']
+
+                    # Get full agent details
+                    full_agent = self._db.get_agent(agent_id)
+                    if not full_agent:
+                        continue
+
+                    # Create persona
+                    persona = AgentPersona(
+                        name=full_agent.get('name', f'Agent-{agent_id}'),
+                        role=full_agent.get('role', 'Assistant'),
+                        traits=full_agent.get('traits') or [],
+                        communication_style=full_agent.get('communication_style', 'professional'),
+                        specializations=full_agent.get('specializations') or [],
+                        languages=full_agent.get('languages') or ['English'],
+                    )
+
+                    # Get provider and model info
+                    provider_name = full_agent.get('provider_name', 'anthropic') or 'anthropic'
+                    model_name = full_agent.get('model_alias') or full_agent.get('model_name') or 'claude-sonnet-4'
+
+                    # Create config
+                    config = AgentConfig(
+                        provider=provider_name,
+                        model=model_name,
+                        max_tokens=full_agent.get('max_tokens') or 4096,
+                        temperature=full_agent.get('temperature') or 0.7,
+                    )
+
+                    # Create LLM provider
+                    api_key = settings.get_llm_api_key(provider_name)
+                    llm = None
+
+                    if api_key:
+                        try:
+                            llm = LLMProviderFactory.create(provider_name, {
+                                "api_key": api_key,
+                                "model": model_name,
+                                "max_tokens": config.max_tokens,
+                                "temperature": config.temperature,
+                            })
+                        except Exception as e:
+                            logger.warning(f"Failed to create LLM for agent {agent_id}: {e}")
+
+                    if not llm:
+                        # Mock LLM fallback
+                        class MockLLM:
+                            def complete(self, messages, **kwargs):
+                                return {"content": f"LLM not configured for {provider_name}"}
+                        llm = MockLLM()
+
+                    # Create agent wrapper
+                    agent = AgentWrapper(
+                        agent_id=agent_id,
+                        persona=persona,
+                        llm=llm,
+                        memory=memory,
+                        config=config,
+                    )
+
+                    # Load skills from database for this agent
+                    try:
+                        from gathering.skills.registry import SkillRegistry
+                        from gathering.agents.project_context import load_project_context
+
+                        # Get skill_names from the agent row in DB
+                        skill_row = self._db.execute_one(
+                            "SELECT skill_names FROM agent.agents WHERE id = %(id)s",
+                            {'id': agent_id}
+                        )
+                        skill_names = skill_row.get('skill_names') or [] if skill_row else []
+
+                        # Fallback to core skills if none configured
+                        if not skill_names:
+                            skill_names = ["filesystem", "git", "code"]
+
+                        project_path = "/home/loc/workspace/gathering"
+
+                        for skill_name in skill_names:
+                            try:
+                                skill = SkillRegistry.get(
+                                    skill_name,
+                                    config={"working_dir": project_path, "allowed_paths": [project_path]},
+                                )
+                                agent.add_skill(skill)
+                            except Exception as skill_err:
+                                logger.warning(f"Failed to load skill {skill_name} for agent {agent_id}: {skill_err}")
+
+                        # Set default project context
+                        project = load_project_context(project_name="gathering")
+                        if project:
+                            agent.set_project(project)
+                            logger.debug(f"Set project context for agent {agent_id}")
+
+                    except Exception as skill_err:
+                        logger.warning(f"Failed to load skills for agent {agent_id}: {skill_err}")
+
+                    self._agents[agent_id] = agent
+                    if agent_id >= self._next_id:
+                        self._next_id = agent_id + 1
+
+                    logger.debug(f"Loaded agent {agent_id}: {persona.name} with skills")
+
+                except Exception as e:
+                    logger.error(f"Failed to load agent {agent_row.get('id')}: {e}")
+
+            logger.info(f"Loaded {len(self._agents)} agents into registry")
+
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).error(f"Failed to load agents from database: {e}")
 
     def add(self, agent: AgentWrapper) -> int:
         """Add an agent to the registry."""
+        self._ensure_loaded()
         agent_id = agent.agent_id
         self._agents[agent_id] = agent
         if agent_id >= self._next_id:
@@ -619,10 +766,12 @@ class AgentRegistry:
 
     def get(self, agent_id: int) -> Optional[AgentWrapper]:
         """Get an agent by ID."""
+        self._ensure_loaded()
         return self._agents.get(agent_id)
 
     def remove(self, agent_id: int) -> bool:
         """Remove an agent from the registry."""
+        self._ensure_loaded()
         if agent_id in self._agents:
             del self._agents[agent_id]
             return True
@@ -630,14 +779,17 @@ class AgentRegistry:
 
     def list_all(self) -> list:
         """List all agents."""
+        self._ensure_loaded()
         return list(self._agents.values())
 
     def count(self) -> int:
         """Count agents."""
+        self._ensure_loaded()
         return len(self._agents)
 
     def next_id(self) -> int:
         """Get next available ID."""
+        self._ensure_loaded()
         next_id = self._next_id
         self._next_id += 1
         return next_id
@@ -648,6 +800,7 @@ class CircleRegistry:
 
     def __init__(self, db: Optional[DatabaseService] = None):
         self._circles: Dict[str, GatheringCircle] = {}
+        self._circle_metadata: Dict[str, Dict[str, Any]] = {}  # Store DB metadata (project_id, etc.)
         self._db = db
         self._loaded = False
 
@@ -774,6 +927,11 @@ Si tu as des skills disponibles, utilise les outils appropriés pour accomplir l
                         circle.add_agent(handle)
 
                     self._circles[circle.name] = circle
+                    # Store metadata from DB (project_id, etc.)
+                    self._circle_metadata[circle.name] = {
+                        'id': circle_row.get('id'),
+                        'project_id': circle_row.get('project_id'),
+                    }
                     logger.info(f"Loaded circle '{circle.name}' with {len(circle.agents)} agents")
 
                 except Exception as e:
@@ -933,6 +1091,21 @@ Si tu as des skills disponibles, utilise les outils appropriés pour accomplir l
         """Get a circle by name."""
         self._ensure_loaded()
         return self._circles.get(name)
+
+    def get_metadata(self, name: str) -> Dict[str, Any]:
+        """Get circle metadata (project_id, etc.) by name."""
+        self._ensure_loaded()
+        return self._circle_metadata.get(name, {})
+
+    def get_project_name(self, name: str) -> Optional[str]:
+        """Get the project name associated with a circle."""
+        metadata = self.get_metadata(name)
+        project_id = metadata.get('project_id')
+        if project_id and self._db:
+            project = self._db.get_project(project_id)
+            if project:
+                return project.get('name')
+        return None
 
     def remove(self, name: str, persist: bool = True) -> bool:
         """Remove a circle from the registry and optionally from DB."""
@@ -1449,10 +1622,11 @@ def get_memory_service() -> MemoryService:
 
 @lru_cache()
 def get_agent_registry() -> AgentRegistry:
-    """Get or create the global agent registry."""
+    """Get or create the global agent registry with database loading."""
     global _agent_registry
     if _agent_registry is None:
-        _agent_registry = AgentRegistry()
+        db = get_database_service()
+        _agent_registry = AgentRegistry(db=db)
     return _agent_registry
 
 

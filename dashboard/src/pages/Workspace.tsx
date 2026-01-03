@@ -43,7 +43,7 @@ function ComponentLoader() {
     <div className="flex items-center justify-center h-full">
       <div className="text-center">
         <Loader2 className="w-6 h-6 text-purple-500 animate-spin mx-auto mb-2" />
-        <p className="text-zinc-500 text-xs">Chargement...</p>
+        <p className="text-zinc-500 text-xs">Loading...</p>
       </div>
     </div>
   );

@@ -1,0 +1,69 @@
+{
+  "app": {
+    "name": "GatheRing",
+    "version": "v0.15.0",
+    "tagline": "Multi-agent collaboration framework"
+  },
+  "status": {
+    "online": "Online",
+    "offline": "Offline",
+    "live": "Live",
+    "connected": "Connected",
+    "disconnected": "Disconnected",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success"
+  },
+  "actions": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "add": "Add",
+    "remove": "Remove",
+    "refresh": "Refresh",
+    "search": "Search",
+    "filter": "Filter",
+    "export": "Export",
+    "import": "Import",
+    "close": "Close",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "submit": "Submit",
+    "reset": "Reset",
+    "copy": "Copy",
+    "view": "View",
+    "viewAll": "View all"
+  },
+  "time": {
+    "now": "Just now",
+    "minutesAgo": "{{count}} minute ago",
+    "minutesAgo_other": "{{count}} minutes ago",
+    "hoursAgo": "{{count}} hour ago",
+    "hoursAgo_other": "{{count}} hours ago",
+    "daysAgo": "{{count}} day ago",
+    "daysAgo_other": "{{count}} days ago",
+    "today": "Today",
+    "yesterday": "Yesterday"
+  },
+  "empty": {
+    "noData": "No data available",
+    "noResults": "No results found",
+    "noItems": "No items"
+  },
+  "errors": {
+    "generic": "Something went wrong",
+    "notFound": "Not found",
+    "unauthorized": "Unauthorized",
+    "forbidden": "Access denied",
+    "serverError": "Server error",
+    "networkError": "Network error",
+    "validationError": "Validation error"
+  },
+  "confirm": {
+    "delete": "Are you sure you want to delete this?",
+    "unsavedChanges": "You have unsaved changes. Are you sure you want to leave?"
+  }
+}

@@ -1,0 +1,24 @@
+# Include package data
+include LICENSE
+include README.md
+include pyproject.toml
+
+# Include documentation
+recursive-include docs *.md *.rst *.py
+
+# Include database migrations
+recursive-include gathering/db/migrations *.sql
+
+# Include personas (if bundled)
+recursive-include personas *.md
+
+# Exclude development files
+exclude .readthedocs.yaml
+exclude .pre-commit-config.yaml
+prune tests
+prune docs/_build
+prune .git
+prune __pycache__
+global-exclude *.py[cod]
+global-exclude *.so
+global-exclude .DS_Store

@@ -20,7 +20,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Callable, Dict, List, Optional
-from collections import defaultdict
+from collections import defaultdict, deque
 
 
 class EventType(str, Enum):
@@ -167,9 +167,9 @@ class EventBus:
         # Subscribers: EventType -> List of (handler, filter_fn)
         self._subscribers: Dict[EventType, List[Dict[str, Any]]] = defaultdict(list)
 
-        # Event history (circular buffer, limited size)
-        self._event_history: List[Event] = []
+        # Event history using deque for O(1) append and automatic size limiting
         self._max_history = 1000
+        self._event_history: deque = deque(maxlen=self._max_history)
 
         # Statistics
         self._stats = {
@@ -262,10 +262,8 @@ class EventBus:
                 source_agent_id=1,
             ))
         """
-        # Record event in history
+        # Record event in history (deque handles size limit automatically)
         self._event_history.append(event)
-        if len(self._event_history) > self._max_history:
-            self._event_history = self._event_history[-self._max_history:]
 
         self._stats["events_published"] += 1
 
@@ -336,7 +334,8 @@ class EventBus:
             # Get circle 1 events
             events = event_bus.get_history(circle_id=1)
         """
-        events = self._event_history
+        # Convert deque to list for slicing operations
+        events = list(self._event_history)
 
         # Filter by type
         if event_type:

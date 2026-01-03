@@ -283,25 +283,46 @@ class AgentWrapper:
                     params["path"] = str(project_root / path)
 
         try:
-            result = await asyncio.wait_for(
-                skill.execute(tool_name, **params),
-                timeout=self.config.tool_timeout,
-            )
+            # Skills use execute(tool_name, tool_input) with dict, not **kwargs
+            # Use execute_async if available, otherwise wrap sync execute
+            if hasattr(skill, 'execute_async'):
+                result = await asyncio.wait_for(
+                    skill.execute_async(tool_name, params),
+                    timeout=self.config.tool_timeout,
+                )
+            else:
+                # Sync skill - run in executor
+                loop = asyncio.get_event_loop()
+                result = await asyncio.wait_for(
+                    loop.run_in_executor(None, skill.execute, tool_name, params),
+                    timeout=self.config.tool_timeout,
+                )
 
             # Publish tool execution event
+            # result can be SkillResponse object or dict
+            if hasattr(result, 'success'):
+                success = result.success
+            elif isinstance(result, dict):
+                success = "error" not in result
+            else:
+                success = True
+
             await event_bus.publish(Event(
                 type=EventType.AGENT_TOOL_EXECUTED,
                 data={
                     "tool_name": tool_name,
                     "skill_name": skill_name,
                     "params": params,
-                    "success": "error" not in result,
+                    "success": success,
                 },
                 source_agent_id=self.agent_id,
                 circle_id=getattr(self, '_circle_id', None),
                 project_id=self._project_id,
             ))
 
+            # Convert SkillResponse to dict for LLM consumption
+            if hasattr(result, 'to_dict'):
+                return result.to_dict()
             return result
         except asyncio.TimeoutError:
             return {"error": f"Tool {tool_name} timed out"}

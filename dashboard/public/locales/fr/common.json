@@ -1,0 +1,69 @@
+{
+  "app": {
+    "name": "GatheRing",
+    "version": "v0.15.0",
+    "tagline": "Framework de collaboration multi-agents"
+  },
+  "status": {
+    "online": "En ligne",
+    "offline": "Hors ligne",
+    "live": "En direct",
+    "connected": "Connecté",
+    "disconnected": "Déconnecté",
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès"
+  },
+  "actions": {
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "create": "Créer",
+    "add": "Ajouter",
+    "remove": "Retirer",
+    "refresh": "Actualiser",
+    "search": "Rechercher",
+    "filter": "Filtrer",
+    "export": "Exporter",
+    "import": "Importer",
+    "close": "Fermer",
+    "confirm": "Confirmer",
+    "back": "Retour",
+    "next": "Suivant",
+    "submit": "Soumettre",
+    "reset": "Réinitialiser",
+    "copy": "Copier",
+    "view": "Voir",
+    "viewAll": "Voir tout"
+  },
+  "time": {
+    "now": "À l'instant",
+    "minutesAgo": "Il y a {{count}} minute",
+    "minutesAgo_other": "Il y a {{count}} minutes",
+    "hoursAgo": "Il y a {{count}} heure",
+    "hoursAgo_other": "Il y a {{count}} heures",
+    "daysAgo": "Il y a {{count}} jour",
+    "daysAgo_other": "Il y a {{count}} jours",
+    "today": "Aujourd'hui",
+    "yesterday": "Hier"
+  },
+  "empty": {
+    "noData": "Aucune donnée disponible",
+    "noResults": "Aucun résultat trouvé",
+    "noItems": "Aucun élément"
+  },
+  "errors": {
+    "generic": "Une erreur est survenue",
+    "notFound": "Non trouvé",
+    "unauthorized": "Non autorisé",
+    "forbidden": "Accès refusé",
+    "serverError": "Erreur serveur",
+    "networkError": "Erreur réseau",
+    "validationError": "Erreur de validation"
+  },
+  "confirm": {
+    "delete": "Êtes-vous sûr de vouloir supprimer ceci ?",
+    "unsavedChanges": "Vous avez des modifications non enregistrées. Êtes-vous sûr de vouloir quitter ?"
+  }
+}

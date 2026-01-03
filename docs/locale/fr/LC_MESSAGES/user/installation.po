@@ -1,0 +1,339 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026, GatheRing Team
+# This file is distributed under the same license as the GatheRing package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: GatheRing 0.2.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-01-02 14:08+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.17.0\n"
+
+#: ../../user/installation.md:1 d07193cfcd994d97bfff87493a08c82e
+msgid "Installation"
+msgstr ""
+
+#: ../../user/installation.md:3 47861b3b05f24429bc66e7ed1b428de9
+msgid "This guide covers how to install GatheRing on your system."
+msgstr ""
+
+#: ../../user/installation.md:5 ee0aee17d89944fab5d99c461d2241f7
+msgid "Requirements"
+msgstr ""
+
+#: ../../user/installation.md 8c9c1125fbed4ab2993ca8db9d1b3d68
+msgid "Component"
+msgstr ""
+
+#: ../../user/installation.md d9f62c3d1c3e48469a327abcb1e21492
+msgid "Requirement"
+msgstr ""
+
+#: ../../user/installation.md 82de8304125e41c09410fb31e0f437f8
+msgid "Python"
+msgstr ""
+
+#: ../../user/installation.md bf98deb340b84c58991af11947d8daa7
+msgid "3.11 or higher"
+msgstr ""
+
+#: ../../user/installation.md 5f19899fac4f4ea2aac8b50603c61bf2
+msgid "Node.js"
+msgstr ""
+
+#: ../../user/installation.md e0349055101c4545afe961487e1980be
+msgid "18 or higher (for dashboard)"
+msgstr ""
+
+#: ../../user/installation.md 6a8c80a1a7d547d6b4a2191caac46631
+msgid "PostgreSQL"
+msgstr ""
+
+#: ../../user/installation.md cd48084075854b30afe708007a576a3e
+msgid "15 or higher (with pgvector)"
+msgstr ""
+
+#: ../../user/installation.md ../../user/installation.md:127
+#: 0d022628daf44cf8b86ef6dc35c22729 d6e78fdc22d2460aad5e966eb8aa5e81
+msgid "Redis"
+msgstr ""
+
+#: ../../user/installation.md 9f207246af4446b59334b0d253b6a84d
+msgid "7 or higher (optional, for caching)"
+msgstr ""
+
+#: ../../user/installation.md 7633ab11d99141f2844daff4146d9e60
+msgid "Memory"
+msgstr ""
+
+#: ../../user/installation.md e48a0b3410bc4cf2b4cad070cf62cc5f
+msgid "4GB minimum, 8GB recommended"
+msgstr ""
+
+#: ../../user/installation.md:15 a180db2f71b34e04badf38f1e9260955
+msgid "Quick Install"
+msgstr ""
+
+#: ../../user/installation.md:17 8172eaafefcf449f978a16208b20c147
+msgid "1. Clone the Repository"
+msgstr ""
+
+#: ../../user/installation.md:19 8ef7adb9439f4d77af9b5ae5fe2b2f87
+msgid ""
+"git clone https://github.com/alkimya/gathering.git\n"
+"cd gathering\n"
+msgstr ""
+
+#: ../../user/installation.md:24 4fed57b973cb43d98c37fc6301eb020c
+msgid "2. Create Virtual Environment"
+msgstr ""
+
+#: ../../user/installation.md:26 69feab7f63584dbd964ea8823e8f58c3
+msgid ""
+"python -m venv venv\n"
+"source venv/bin/activate  # Linux/macOS\n"
+"# or\n"
+"venv\\Scripts\\activate  # Windows\n"
+msgstr ""
+
+#: ../../user/installation.md:33 a04e52a135474a32b813aded32f37cb5
+msgid "3. Install Python Dependencies"
+msgstr ""
+
+#: ../../user/installation.md:35 4aabd7f3ec06462d81a398e7be389b2b
+msgid "pip install -r requirements.txt\n"
+msgstr ""
+
+#: ../../user/installation.md:39 611987f928894fef8579041efe50b7be
+msgid "For development:"
+msgstr ""
+
+#: ../../user/installation.md:41 99ec6e2cbae44f50b4edf68ea99750f5
+msgid ""
+"pip install -r requirements-dev.txt\n"
+"pip install -e .\n"
+msgstr ""
+
+#: ../../user/installation.md:46 2185e6a3d0c44bb599444ae8cfb1d8a8
+msgid "4. Install Dashboard Dependencies"
+msgstr ""
+
+#: ../../user/installation.md:48 1046851dc374461caab903ff5efc8e16
+msgid ""
+"cd dashboard\n"
+"npm install\n"
+"cd ..\n"
+msgstr ""
+
+#: ../../user/installation.md:54 334d87fea1604deaa808235f3c941b75
+msgid "5. Configure Environment"
+msgstr ""
+
+#: ../../user/installation.md:56 fe1af4bd09874b2981783d3bf170ade7
+msgid "Copy the example environment file:"
+msgstr ""
+
+#: ../../user/installation.md:58 54a200dd6399496295e3c8da4df8674c
+msgid "cp .env.example .env\n"
+msgstr ""
+
+#: ../../user/installation.md:62 ff48a3ac68ea499db84643ac390f71d3
+msgid "Edit `.env` with your settings:"
+msgstr ""
+
+#: ../../user/installation.md:64 d0ec4595f6724929bffbe0932d419870
+msgid ""
+"# Database\n"
+"DATABASE_URL=postgresql://user:password@localhost:5432/gathering\n"
+"\n"
+"# API Keys\n"
+"OPENAI_API_KEY=sk-...\n"
+"ANTHROPIC_API_KEY=sk-ant-...\n"
+"\n"
+"# Redis (optional)\n"
+"REDIS_URL=redis://localhost:6379\n"
+"\n"
+"# Server\n"
+"API_HOST=0.0.0.0\n"
+"API_PORT=8000\n"
+"\n"
+"# Authentication (required for production)\n"
+"SECRET_KEY=your-secret-key-min-32-characters\n"
+"ADMIN_EMAIL=admin@example.com\n"
+"ADMIN_PASSWORD_HASH=$2b$12$...  # Generate with: python -c \"from "
+"passlib.context import CryptContext; "
+"print(CryptContext(schemes=['bcrypt']).hash('your-password'))\"\n"
+msgstr ""
+
+#: ../../user/installation.md:85 6a41e31bcb594fe8913a7e369bdcfcf9
+msgid "6. Setup Database"
+msgstr ""
+
+#: ../../user/installation.md:87 e7bedad7596944e48ab02b0f627ed960
+msgid "Create the database and run migrations:"
+msgstr ""
+
+#: ../../user/installation.md:89 5549a117b6e74038a47f0d7a7268f0f2
+msgid ""
+"# Create database\n"
+"createdb gathering\n"
+"\n"
+"# Enable pgvector extension\n"
+"psql -d gathering -c \"CREATE EXTENSION IF NOT EXISTS vector;\"\n"
+"\n"
+"# Run migrations\n"
+"python -m gathering.db.migrate\n"
+msgstr ""
+
+#: ../../user/installation.md:100 e059ad251d4c4950ba8f91e832e65997
+msgid "7. Start the Application"
+msgstr ""
+
+#: ../../user/installation.md:102 2e11d125942748c5a9ac342d87415db3
+msgid "Using the start script:"
+msgstr ""
+
+#: ../../user/installation.md:104 22478b469b6c4eb7a96a1f7fbcfc83e4
+msgid "./scripts/start-workspace.sh\n"
+msgstr ""
+
+#: ../../user/installation.md:108 231c7d3df4f041b7905141b0b0261b6f
+msgid "Or manually:"
+msgstr ""
+
+#: ../../user/installation.md:110 9d14c444ac1f4336a22dd64aeb0bb545
+msgid ""
+"# Terminal 1: Start API\n"
+"uvicorn gathering.api:app --reload --port 8000\n"
+"\n"
+"# Terminal 2: Start Dashboard\n"
+"cd dashboard && npm run dev\n"
+msgstr ""
+
+#: ../../user/installation.md:118 9492f1b2b994449693c488a807608e64
+msgid "Docker Installation"
+msgstr ""
+
+#: ../../user/installation.md:120 4bedd4a31568479097e439d56357f83c
+msgid ""
+"# Build and run with docker-compose\n"
+"docker-compose up -d\n"
+msgstr ""
+
+#: ../../user/installation.md:125 92dae14ed68749c39c8bb68eb526eefa
+msgid "This starts:"
+msgstr ""
+
+#: ../../user/installation.md:126 2ddc7b10cfb74f8da50e3244ac128868
+msgid "PostgreSQL with pgvector"
+msgstr ""
+
+#: ../../user/installation.md:128 63824673cb284721adff15314e2d82a1
+msgid "GatheRing API"
+msgstr ""
+
+#: ../../user/installation.md:129 78297747db2d41808a7c202ccc89650a
+msgid "Dashboard"
+msgstr ""
+
+#: ../../user/installation.md:131 96d428c95e974801bb6304bb74b087b5
+msgid "Verifying Installation"
+msgstr ""
+
+#: ../../user/installation.md:133 478dd5ba73db43fa9939a9b36142146f
+msgid "Open http://localhost:8000/docs for API documentation"
+msgstr ""
+
+#: ../../user/installation.md:134 fdfd8b6c22384158adb6b9edb4e05c85
+msgid "Open http://localhost:3000 for the dashboard"
+msgstr ""
+
+#: ../../user/installation.md:135 32e24a12bd4f4a6a993939f63dcd8a1e
+msgid "Check the health endpoint:"
+msgstr ""
+
+#: ../../user/installation.md:137 0604db5aab8a4cb0869d7a9b236cd0d9
+msgid "curl http://localhost:8000/health\n"
+msgstr ""
+
+#: ../../user/installation.md:141 bc8e0931ac134d0aa13e28e32f6e5ded
+msgid "Or run tests:"
+msgstr ""
+
+#: ../../user/installation.md:143 c8b4fc89b9834819a8b9f5f8aeda91ab
+msgid "pytest tests/\n"
+msgstr ""
+
+#: ../../user/installation.md:147 178256c4f85b4f9795815a3d25d03b1c
+msgid "Troubleshooting"
+msgstr ""
+
+#: ../../user/installation.md:149 d47865310bf1415984aa1f9284afcf0c
+msgid "PostgreSQL Connection Issues"
+msgstr ""
+
+#: ../../user/installation.md:151 a955778af1e340739822dcd5eff4ff70
+msgid "Ensure PostgreSQL is running:"
+msgstr ""
+
+#: ../../user/installation.md:153 ce1a917067bf40d0a2fd04036d24785f
+msgid "sudo systemctl status postgresql\n"
+msgstr ""
+
+#: ../../user/installation.md:157 bda8cc83c63948958221a6cf93127a2d
+msgid "pgvector Extension Not Found"
+msgstr ""
+
+#: ../../user/installation.md:159 eb15c8eb192b4b9d8f4bea512254d259
+msgid "Install pgvector:"
+msgstr ""
+
+#: ../../user/installation.md:161 1fd1e8572d594aa0b7387a7c67b0ad8e
+msgid ""
+"# Ubuntu/Debian\n"
+"sudo apt install postgresql-15-pgvector\n"
+"\n"
+"# macOS with Homebrew\n"
+"brew install pgvector\n"
+msgstr ""
+
+#: ../../user/installation.md:169 2dde91d8633349609a24b24fbf9e60a5
+msgid "Node.js Version Issues"
+msgstr ""
+
+#: ../../user/installation.md:171 e9c845632b3942db8eeb6298f084d0b3
+msgid "Use nvm to manage Node versions:"
+msgstr ""
+
+#: ../../user/installation.md:173 572a87e137284178803be8a3cf13084f
+msgid ""
+"nvm install 18\n"
+"nvm use 18\n"
+msgstr ""
+
+#: ../../user/installation.md:178 23e603842c9643fe8637998eab3f5238
+msgid "Next Steps"
+msgstr ""
+
+#: ../../user/installation.md:180 ff8876f1b20744d383cfd46aa9f7cb1b
+msgid "Read the [Quickstart Guide](quickstart.md) to create your first circle"
+msgstr ""
+
+#: ../../user/installation.md:181 05e94ecc0a614f1fa18da3b385d2892c
+msgid "Explore the [User Guide](guide.md) for detailed usage"
+msgstr ""
+
+#: ../../user/installation.md:182 9bc472e140f14f5a9b06efd74ac4a934
+msgid "Check [FAQ](faq.md) for common questions"
+msgstr ""
+

@@ -434,6 +434,53 @@ class MemoryManager:
             threshold=threshold,
         )
 
+    async def list_knowledge(
+        self,
+        category: Optional[str] = None,
+        limit: int = 20,
+        offset: int = 0,
+    ) -> List[KnowledgeResult]:
+        """
+        List knowledge base entries with pagination.
+
+        Args:
+            category: Filter by category.
+            limit: Maximum results.
+            offset: Pagination offset.
+
+        Returns:
+            List of knowledge entries.
+        """
+        return self.store.list_knowledge(
+            category=category,
+            limit=limit,
+            offset=offset,
+        )
+
+    async def count_knowledge(
+        self,
+        category: Optional[str] = None,
+    ) -> int:
+        """
+        Count knowledge base entries.
+
+        Args:
+            category: Filter by category.
+
+        Returns:
+            Total count.
+        """
+        return self.store.count_knowledge(category=category)
+
+    async def get_knowledge_stats(self) -> Dict[str, Any]:
+        """
+        Get knowledge base statistics.
+
+        Returns:
+            Stats dict with total, by_category, and recent entries.
+        """
+        return self.store.get_knowledge_stats()
+
     # =========================================================================
     # BATCH OPERATIONS
     # =========================================================================

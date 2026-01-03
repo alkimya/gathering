@@ -8,7 +8,6 @@ import {
   CheckCircle,
   Clock,
   Zap,
-  TrendingUp,
   Activity,
   ArrowUpRight,
   Sparkles,
@@ -16,51 +15,31 @@ import {
 import { health, agents, circles, conversations } from '../services/api';
 import { Link } from 'react-router-dom';
 
-function StatCard({
-  title,
+// Compact stat item for the overview bar
+function StatItem({
+  label,
   value,
   icon,
-  gradient,
-  glowClass,
-  link,
-  change,
+  color,
+  to,
 }: {
-  title: string;
+  label: string;
   value: number | string;
   icon: React.ReactNode;
-  gradient: string;
-  glowClass: string;
-  link?: string;
-  change?: string;
+  color: string;
+  to?: string;
 }) {
   const content = (
-    <div className="stat-card p-6 group cursor-pointer">
-      <div className="flex items-start justify-between">
-        <div className="flex-1">
-          <p className="text-sm font-medium text-zinc-400">{title}</p>
-          <p className="text-4xl font-bold text-white mt-2 gradient-text">{value}</p>
-          {change && (
-            <div className="flex items-center gap-1 mt-2 text-emerald-400 text-sm">
-              <TrendingUp className="w-4 h-4" />
-              <span>{change}</span>
-            </div>
-          )}
-        </div>
-        <div className={`p-3 rounded-xl ${gradient} ${glowClass} group-hover:scale-110 transition-transform`}>
-          {icon}
-        </div>
-      </div>
-      {link && (
-        <div className="mt-4 pt-4 border-t border-white/5 flex items-center gap-2 text-sm text-zinc-500 group-hover:text-purple-400 transition-colors">
-          <span>View details</span>
-          <ArrowUpRight className="w-4 h-4" />
-        </div>
-      )}
+    <div className={`flex items-center gap-2 ${to ? 'hover:text-white cursor-pointer' : ''}`}>
+      <span className={color}>{icon}</span>
+      <span className="text-white font-semibold text-lg">{value}</span>
+      <span className="text-zinc-500 text-sm">{label}</span>
+      {to && <ArrowUpRight className="w-3 h-3 text-zinc-600" />}
     </div>
   );
 
-  if (link) {
-    return <Link to={link}>{content}</Link>;
+  if (to) {
+    return <Link to={to}>{content}</Link>;
   }
   return content;
 }
@@ -182,49 +161,44 @@ export function Dashboard() {
             <Sparkles className="w-6 h-6 text-purple-400 animate-pulse" />
           </div>
           <p className="text-zinc-500 mt-1">
-            Overview of your GatheRing workspace
+            Overview of your GatheRing environment
           </p>
         </div>
-
-        <button className="btn-gradient px-6 py-3 rounded-xl flex items-center gap-2">
-          <Zap className="w-5 h-5" />
-          <span>Quick Action</span>
-        </button>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard
-          title="Total Agents"
+      {/* Compact Stats Bar */}
+      <div className="glass-card rounded-xl px-5 py-3 flex flex-wrap items-center gap-x-8 gap-y-2">
+        <StatItem
+          label="agents"
           value={agentsData?.total ?? 0}
-          icon={<Bot className="w-6 h-6 text-white" />}
-          gradient="bg-gradient-to-br from-indigo-500 to-purple-500"
-          glowClass="glow-purple"
-          link="/agents"
+          icon={<Bot className="w-4 h-4" />}
+          color="text-purple-400"
+          to="/agents"
         />
-        <StatCard
-          title="Active Circles"
+        <StatItem
+          label="circles"
           value={runningCircles}
-          icon={<Circle className="w-6 h-6 text-white" />}
-          gradient="bg-gradient-to-br from-emerald-500 to-cyan-500"
-          glowClass="glow-cyan"
-          link="/circles"
+          icon={<Circle className="w-4 h-4" />}
+          color="text-cyan-400"
+          to="/circles"
         />
-        <StatCard
-          title="Conversations"
+        <StatItem
+          label="conversations"
           value={totalConversations}
-          icon={<MessageSquare className="w-6 h-6 text-white" />}
-          gradient="bg-gradient-to-br from-pink-500 to-rose-500"
-          glowClass="glow-pink"
-          link="/conversations"
+          icon={<MessageSquare className="w-4 h-4" />}
+          color="text-pink-400"
+          to="/conversations"
         />
-        <StatCard
-          title="Active Tasks"
+        <StatItem
+          label="tasks"
           value={activeTasks}
-          icon={<CheckCircle className="w-6 h-6 text-white" />}
-          gradient="bg-gradient-to-br from-amber-500 to-orange-500"
-          glowClass="glow-purple"
+          icon={<CheckCircle className="w-4 h-4" />}
+          color="text-amber-400"
         />
+        <div className="flex items-center gap-2 ml-auto">
+          <span className={`w-2 h-2 rounded-full ${healthData?.status === 'healthy' ? 'bg-emerald-400' : 'bg-zinc-500'}`} />
+          <span className="text-zinc-500 text-sm">v{healthData?.version ?? '?'}</span>
+        </div>
       </div>
 
       {/* Main content */}

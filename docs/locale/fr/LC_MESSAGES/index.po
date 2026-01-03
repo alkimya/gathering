@@ -1,0 +1,242 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026, GatheRing Team
+# This file is distributed under the same license as the GatheRing package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: GatheRing 0.2.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-01-02 14:08+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.17.0\n"
+
+#: ../../index.md:27 ../../index.md:51 9a7826d4e6c747119dff24cba71761ce
+msgid "User Guide"
+msgstr ""
+
+#: ../../index.md:34 ../../index.md:64 cb229c9dea3f403a8cc1355c2567646b
+msgid "Developer Guide"
+msgstr ""
+
+#: ../../index.md:41 ../../index.md:76 deb0a14de1b8482dbf8e94c4c7291047
+msgid "API Reference"
+msgstr ""
+
+#: ../../index.md:1 f35146dab7c44a24b82e91f45aa96f54
+msgid "GatheRing Documentation"
+msgstr ""
+
+#: ../../index.md:3 f202c55198e341338d7589a116814306
+msgid ""
+"**GatheRing** is a collaborative multi-agent AI framework that enables "
+"autonomous AI agents to work together in circles, share knowledge, and "
+"accomplish complex tasks."
+msgstr ""
+
+#: ../../index.md:5 a43a0911f56940399c778e775a0212ff
+msgid "Overview"
+msgstr ""
+
+#: ../../index.md:7 a6036f890bee4eeb9aab8230a4eba7f4
+msgid "GatheRing provides:"
+msgstr ""
+
+#: ../../index.md:9 17abba10391e4154ab70ea27cd8fd44c
+msgid ""
+"**Multi-Agent Collaboration**: AI agents with distinct personalities "
+"working together in circles"
+msgstr ""
+
+#: ../../index.md:10 a48733759d984cdfa41898460389237a
+msgid ""
+"**Persistent Memory**: Long-term memory with RAG (Retrieval-Augmented "
+"Generation)"
+msgstr ""
+
+#: ../../index.md:11 a8392c75e69d4216ab38d31e95475323
+msgid "**Real-time Communication**: WebSocket-based streaming and event bus"
+msgstr ""
+
+#: ../../index.md:12 b83fb26b27a645dfbc592918df20e778
+msgid ""
+"**Integrated Workspace**: Full-featured IDE with file explorer, code "
+"editor, terminal"
+msgstr ""
+
+#: ../../index.md:13 249523a3e0d34b8aa055d738e11cd8fc
+msgid "**Dashboard**: React-based monitoring and management interface"
+msgstr ""
+
+#: ../../index.md:15 e453583aa9eb495692a5f29e1b1305e4
+msgid "Quick Links"
+msgstr ""
+
+#: ../../index.md:20 c8817db399d44324be740cf5c4adfbc0
+msgid "Getting Started"
+msgstr ""
+
+#: ../../index.md:24 4263744a17084dc99da20c3f183da277
+msgid "Install GatheRing and run your first circle"
+msgstr ""
+
+#: ../../index.md:31 9ee41174914645569c0bc46f276f7a4a
+msgid "Learn how to use GatheRing effectively"
+msgstr ""
+
+#: ../../index.md:38 8d3a142745d3421c9b6df41c51df74cc
+msgid "Understand the architecture and contribute"
+msgstr ""
+
+#: ../../index.md:45 f6ea2044b9ce43e8a116b4234f9a83ad
+msgid "Complete API documentation"
+msgstr ""
+
+#: ../../index.md:49 29f1d886c1784ca2970551f15062c5d4
+msgid "Table of Contents"
+msgstr ""
+
+#: ../../index.md:85 07bad7a861f24a92959db409f46f4251
+msgid "Project Status"
+msgstr ""
+
+#: ../../index.md:87 cdf6aec6128c47d295fb0d4ca63e99ff
+msgid "**Version**: 0.2.0"
+msgstr ""
+
+#: ../../index.md:88 39026a0427134dba841f2e70ba6f90f1
+msgid "**License**: MIT"
+msgstr ""
+
+#: ../../index.md:89 c6e0f628828e4b229cb26e991b3d7398
+msgid "**Python**: 3.11+"
+msgstr ""
+
+#: ../../index.md:90 af4273ae070549ce8429fd4b03595013
+msgid "**Repository**: [GitHub](https://github.com/your-org/gathering)"
+msgstr ""
+
+#: ../../index.md:92 42ce7dbf70f34953a2c53c733e2220ab
+msgid "Features"
+msgstr ""
+
+#: ../../index.md:94 77442dae336e4937a7eb8fc7a0bccb14
+msgid "Agents & Circles"
+msgstr ""
+
+#: ../../index.md:96 8399749a1bcc44aca12b597d29c137a2
+msgid ""
+"Create AI agents with unique personalities that collaborate in thematic "
+"circles:"
+msgstr ""
+
+#: ../../index.md:98 4732f8cdf56b49f3b387519825a412c2
+msgid ""
+"from gathering import Agent, Circle\n"
+"\n"
+"# Create agents with different providers\n"
+"sophie = Agent(\n"
+"    name=\"Sophie\",\n"
+"    role=\"architect\",\n"
+"    provider=\"anthropic\",\n"
+"    model=\"claude-sonnet-4-20250514\"\n"
+")\n"
+"olivia = Agent(\n"
+"    name=\"Olivia\",\n"
+"    role=\"engineer\",\n"
+"    provider=\"openai\",\n"
+"    model=\"gpt-4o\"\n"
+")\n"
+"\n"
+"# Create a circle\n"
+"circle = Circle(name=\"Development Team\")\n"
+"circle.add_agents([sophie, olivia])\n"
+"\n"
+"# Start a conversation\n"
+"await circle.discuss(\"Design the new authentication system\")\n"
+msgstr ""
+
+#: ../../index.md:123 b1b3e57574794070b321e14d651df4b1
+msgid "Integrated Workspace"
+msgstr ""
+
+#: ../../index.md:125 03b277016b974c24b67bda47b8bb962b
+msgid "The workspace provides a complete development environment:"
+msgstr ""
+
+#: ../../index.md:127 1a016df07d7f4c0b8b38a809bd7e9ba1
+msgid "**File Explorer**: Navigate and manage project files"
+msgstr ""
+
+#: ../../index.md:128 91457f53a4a649788aa418c034e365c7
+msgid ""
+"**Code Editor**: Monaco-based editor with syntax highlighting and LSP "
+"support"
+msgstr ""
+
+#: ../../index.md:129 db98a5519ea54a6384bde385405db61b
+msgid "**Terminal**: Integrated terminal for command execution"
+msgstr ""
+
+#: ../../index.md:130 5a9e9d127099405eac742de5d10ca30e
+msgid "**Git Integration**: Visual git operations (status, diff, commit, push)"
+msgstr ""
+
+#: ../../index.md:131 a88db1ee0b7546b7b51cb75a5a54dd19
+msgid "**Media Viewers**: Support for images, audio, video, and PDF files"
+msgstr ""
+
+#: ../../index.md:133 f6cc940f05ca4cc7baefd9b1251ba77e
+msgid "Real-time Dashboard"
+msgstr ""
+
+#: ../../index.md:135 e2fc14399d484107a99eed32e74988b1
+msgid "Monitor and manage your agents through a modern React dashboard:"
+msgstr ""
+
+#: ../../index.md:137 bcf9f0c6f2af4bb4b7547bb0888dace1
+msgid "Live conversation streaming"
+msgstr ""
+
+#: ../../index.md:138 53db0fddb238400a9ddc647813903693
+msgid "Agent status and activity"
+msgstr ""
+
+#: ../../index.md:139 50aedfe6f58f4a73890deb7c8800b8d5
+msgid "Circle management"
+msgstr ""
+
+#: ../../index.md:140 a8f3586cbcb74698b90030e995be51a2
+msgid "Task tracking and calendar"
+msgstr ""
+
+#: ../../index.md:142 4e244cf6369b41a48d10404032c1cd5b
+msgid "Getting Help"
+msgstr ""
+
+#: ../../index.md:144 ca14899aecfb4357ba8cb0a493f38f63
+msgid "Check the [FAQ](user/faq.md) for common questions"
+msgstr ""
+
+#: ../../index.md:145 32266e01462d49c3b14ac7381443e9f4
+msgid ""
+"Report issues on [GitHub Issues](https://github.com/your-"
+"org/gathering/issues)"
+msgstr ""
+
+#: ../../index.md:146 8f72b6faf4ea44ab8b8ecd8cd7e85bce
+msgid "Join our community discussions"
+msgstr ""
+
+#: ../../index.md:150 bb536c22ae554a139d8b690321382b1e
+msgid "*Built with care by the GatheRing Team*"
+msgstr ""
+

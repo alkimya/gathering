@@ -8,6 +8,7 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
     port: 3000,
+    host: true, // Allow access from network (mobile testing)
     proxy: {
       '/api': {
         target: 'http://localhost:8000',

@@ -1,0 +1,247 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026, GatheRing Team
+# This file is distributed under the same license as the GatheRing package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: GatheRing 0.2.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-01-02 14:08+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.17.0\n"
+
+#: ../../user/quickstart.md:1 651f3dadd89f4b9bbe217833a4725ba1
+msgid "Quickstart"
+msgstr ""
+
+#: ../../user/quickstart.md:3 eb4fc026da8c4f969858207741d48678
+msgid "Get up and running with GatheRing in 5 minutes."
+msgstr ""
+
+#: ../../user/quickstart.md:5 e64fcba3ac5646bab9f98bda94d5b1bd
+msgid "Prerequisites"
+msgstr ""
+
+#: ../../user/quickstart.md:7 78469d31e367491face7fbc8444117a2
+msgid "Make sure you have completed the [Installation](installation.md) steps."
+msgstr ""
+
+#: ../../user/quickstart.md:9 25cfe1fbbce644a68a93ac299f92f7b9
+msgid "Your First Circle"
+msgstr ""
+
+#: ../../user/quickstart.md:11 2bf86c342b494edd9b9462da74ce584f
+msgid "1. Start the Services"
+msgstr ""
+
+#: ../../user/quickstart.md:13 aa7332c907044fdfb29b761914b1cdc6
+msgid "./scripts/start-workspace.sh\n"
+msgstr ""
+
+#: ../../user/quickstart.md:17 490254cbfe5c4d23968121ceef42ef4d
+msgid "2. Open the Dashboard"
+msgstr ""
+
+#: ../../user/quickstart.md:19 460ea1725d0240c68192bb79a21ad4e5
+msgid "Navigate to <http://localhost:3000> in your browser."
+msgstr ""
+
+#: ../../user/quickstart.md:21 912f05ff30da4864ad74dbc367945e77
+msgid "3. Create Your First Circle"
+msgstr ""
+
+#: ../../user/quickstart.md:23 005dbe363d144220980392adc1eb0cb0
+msgid ""
+"A **Circle** is a group of AI agents working together on a common theme "
+"or project."
+msgstr ""
+
+#: ../../user/quickstart.md:25 e04048a409294a30b8ae02e975cadb45
+msgid "Using the API:"
+msgstr ""
+
+#: ../../user/quickstart.md:27 78643b7045bb455ba0c8acf17a963d95
+#, python-brace-format
+msgid ""
+"curl -X POST http://localhost:8000/circles \\\n"
+"  -H \"Content-Type: application/json\" \\\n"
+"  -d '{\n"
+"    \"name\": \"dev-team\",\n"
+"    \"display_name\": \"Development Team\",\n"
+"    \"description\": \"A team of AI developers\"\n"
+"  }'\n"
+msgstr ""
+
+#: ../../user/quickstart.md:37 32d77a0bfe0943a786d63f08884227c0
+msgid "Or via Python:"
+msgstr ""
+
+#: ../../user/quickstart.md:39 5459908e6d164e2db3f52645c082b028
+#, python-brace-format
+msgid ""
+"import httpx\n"
+"\n"
+"async with httpx.AsyncClient() as client:\n"
+"    response = await client.post(\n"
+"        \"http://localhost:8000/circles\",\n"
+"        json={\n"
+"            \"name\": \"dev-team\",\n"
+"            \"display_name\": \"Development Team\",\n"
+"            \"description\": \"A team of AI developers\"\n"
+"        }\n"
+"    )\n"
+"    circle = response.json()\n"
+"    print(f\"Created circle: {circle['id']}\")\n"
+msgstr ""
+
+#: ../../user/quickstart.md:55 b82c157488c54f4298fb5b5bacd10171
+msgid "4. Add Agents to the Circle"
+msgstr ""
+
+#: ../../user/quickstart.md:57 959e2af46f5b4418bbe172b81b3a27ca
+msgid "Create agents with distinct personalities:"
+msgstr ""
+
+#: ../../user/quickstart.md:59 4cf4cb1ca58347fbbfac00fa85d93096
+#, python-brace-format
+msgid ""
+"# Create an architect agent\n"
+"curl -X POST http://localhost:8000/agents \\\n"
+"  -H \"Content-Type: application/json\" \\\n"
+"  -d '{\n"
+"    \"name\": \"Sophie\",\n"
+"    \"role\": \"Lead Architect\",\n"
+"    \"provider\": \"anthropic\",\n"
+"    \"model\": \"claude-sonnet-4-20250514\",\n"
+"    \"personality\": {\n"
+"      \"traits\": [\"analytical\", \"creative\", \"detail-oriented\"],\n"
+"      \"communication_style\": \"professional\"\n"
+"    }\n"
+"  }'\n"
+"\n"
+"# Create an engineer agent (using OpenAI)\n"
+"curl -X POST http://localhost:8000/agents \\\n"
+"  -H \"Content-Type: application/json\" \\\n"
+"  -d '{\n"
+"    \"name\": \"Olivia\",\n"
+"    \"role\": \"Senior Engineer\",\n"
+"    \"provider\": \"openai\",\n"
+"    \"model\": \"gpt-4o\",\n"
+"    \"personality\": {\n"
+"      \"traits\": [\"pragmatic\", \"efficient\", \"collaborative\"],\n"
+"      \"communication_style\": \"direct\"\n"
+"    }\n"
+"  }'\n"
+msgstr ""
+
+#: ../../user/quickstart.md:89 863ad3714ac64cfea51de396f5d05593
+msgid "5. Start a Conversation"
+msgstr ""
+
+#: ../../user/quickstart.md:91 9cda0231b39c471e803b437c81ce4577
+msgid "Start the circle and create a conversation:"
+msgstr ""
+
+#: ../../user/quickstart.md:93 b1b8aa285dc54c41b03eca51266a1ad4
+#, python-brace-format
+msgid ""
+"# Start the circle\n"
+"curl -X POST http://localhost:8000/circles/dev-team/start\n"
+"\n"
+"# Create a conversation\n"
+"curl -X POST http://localhost:8000/conversations \\\n"
+"  -H \"Content-Type: application/json\" \\\n"
+"  -d '{\n"
+"    \"circle_name\": \"dev-team\",\n"
+"    \"topic\": \"Design the authentication system\",\n"
+"    \"agent_ids\": [1, 2],\n"
+"    \"initial_prompt\": \"Let'\\''s discuss how to implement secure "
+"authentication\"\n"
+"  }'\n"
+msgstr ""
+
+#: ../../user/quickstart.md:108 95645bd85aa9491b95bb8406aa56b7df
+msgid "6. Watch the Conversation"
+msgstr ""
+
+#: ../../user/quickstart.md:110 f4e5e003c778405680fdbb60a14078f4
+msgid ""
+"Open the dashboard to see agents collaborating in real-time, or stream "
+"via WebSocket:"
+msgstr ""
+
+#: ../../user/quickstart.md:112 32e4c749abdc4323aba887d5370dc91a
+msgid ""
+"const ws = new WebSocket('ws://localhost:8000/ws/circles/dev-team');\n"
+"\n"
+"ws.onmessage = (event) => {\n"
+"  const message = JSON.parse(event.data);\n"
+"  console.log(`${message.agent}: ${message.content}`);\n"
+"};\n"
+msgstr ""
+
+#: ../../user/quickstart.md:121 117bf122a1ff4bf98aa862a648a57156
+msgid "Using the Workspace"
+msgstr ""
+
+#: ../../user/quickstart.md:123 58a7ba52fb9249b78fe4be0f367ff31e
+msgid "The workspace provides a complete development environment."
+msgstr ""
+
+#: ../../user/quickstart.md:125 ccfc7a97416f47f58db2f94db341a33e
+msgid "Access the Workspace"
+msgstr ""
+
+#: ../../user/quickstart.md:127 a6a8863e47cc40ec9773e03af9e9cfc2
+msgid "Navigate to <http://localhost:3000/workspace/1>"
+msgstr ""
+
+#: ../../user/quickstart.md:129 5a75c18f6f44401e8f5fde36529f0b58
+msgid "Features"
+msgstr ""
+
+#: ../../user/quickstart.md:131 de090acde17f4bc0a8751019edd2a627
+msgid "**File Explorer**: Browse and manage project files"
+msgstr ""
+
+#: ../../user/quickstart.md:132 585af8fba42448a5a0c8ba2816273f77
+msgid "**Code Editor**: Edit files with syntax highlighting"
+msgstr ""
+
+#: ../../user/quickstart.md:133 f3012798cb9c46e7a2b299f8ef11ae66
+msgid "**Terminal**: Run commands directly"
+msgstr ""
+
+#: ../../user/quickstart.md:134 b090ef3026b7478d99197b1794f5eb84
+msgid "**Git Panel**: View status, stage, commit, and push"
+msgstr ""
+
+#: ../../user/quickstart.md:136 1a5d8ee46a1845feaca996a4b09e293b
+msgid "What's Next?"
+msgstr ""
+
+#: ../../user/quickstart.md:138 bf95321df7cc42c5b7d6070824afc913
+msgid "Learn about [Circles](circles.md) in depth"
+msgstr ""
+
+#: ../../user/quickstart.md:139 0364427e90e041028df36d38fa43d195
+msgid "Understand [Agent personalities](agents.md)"
+msgstr ""
+
+#: ../../user/quickstart.md:140 ad7015b714554176913dcfb597d016e1
+msgid "Explore the [Workspace](workspace.md) features"
+msgstr ""
+
+#: ../../user/quickstart.md:141 27821fc771d248979b1b02f94c74682e
+msgid "Read the full [User Guide](guide.md)"
+msgstr ""
+

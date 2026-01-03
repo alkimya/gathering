@@ -176,6 +176,8 @@ class CircleResponse(BaseModel):
     auto_route: bool
     created_at: datetime
     started_at: Optional[datetime] = None
+    project_id: Optional[int] = Field(default=None, description="Associated project ID")
+    project_name: Optional[str] = Field(default=None, description="Associated project name")
 
 
 class CircleDetailResponse(CircleResponse):
@@ -370,6 +372,62 @@ class HealthResponse(BaseModel):
     agents_count: int
     circles_count: int
     active_tasks: int
+
+
+class CpuMetrics(BaseModel):
+    """CPU metrics."""
+    percent: float
+    count: int
+    frequency_mhz: Optional[float] = None
+
+
+class MemoryMetrics(BaseModel):
+    """Memory metrics."""
+    total_gb: float
+    available_gb: float
+    used_gb: float
+    percent: float
+
+
+class DiskMetrics(BaseModel):
+    """Disk metrics."""
+    total_gb: float
+    used_gb: float
+    free_gb: float
+    percent: float
+
+
+class LoadAverage(BaseModel):
+    """System load average."""
+    one_min: float = Field(alias="1min")
+    five_min: float = Field(alias="5min")
+    fifteen_min: float = Field(alias="15min")
+
+    model_config = {"populate_by_name": True}
+
+
+class SystemMetricsResponse(BaseModel):
+    """System metrics response."""
+    cpu: CpuMetrics
+    memory: MemoryMetrics
+    disk: DiskMetrics
+    load_average: LoadAverage
+    uptime_seconds: float
+
+
+class ServiceHealth(BaseModel):
+    """Individual service health check."""
+    name: str
+    status: str  # healthy, warning, critical
+    message: Optional[str] = None
+    value: Optional[str] = None
+    last_check: datetime
+
+
+class HealthChecksResponse(BaseModel):
+    """Health checks response."""
+    checks: List[ServiceHealth]
+    overall_status: str
 
 
 class ErrorResponse(BaseModel):

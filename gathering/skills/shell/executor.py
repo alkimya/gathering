@@ -51,26 +51,64 @@ class ShellConfig:
         "ln", "install",
     })
 
-    # Patterns that are ALWAYS blocked
+    # Patterns that are ALWAYS blocked (checked with re.IGNORECASE)
     blocked_patterns: List[str] = field(default_factory=lambda: [
+        # Destructive commands
         r"rm\s+(-[rf]+\s+)*(/|~|\$HOME)",  # rm -rf / or ~
         r">\s*/dev/",                        # Write to devices
         r"mkfs",                             # Format filesystems
         r"dd\s+if=",                         # Raw disk operations
         r"chmod\s+(777|a\+rwx)",             # Dangerous permissions
-        r":\(\)\s*\{",                       # Fork bomb
-        r"\|\s*sh\s*$",                      # Pipe to shell
+        # Fork bomb variants
+        r":\(\)\s*\{",                       # Classic fork bomb
+        r";\s*:\s*;",                        # Shorter fork bomb
+        # Shell injection via pipes
+        r"\|\s*sh\s*$",                      # Pipe to sh
         r"\|\s*bash\s*$",                    # Pipe to bash
-        r"curl.*\|\s*(sh|bash)",             # Curl pipe to shell
-        r"wget.*\|\s*(sh|bash)",             # Wget pipe to shell
-        r"eval\s*\(",                        # Eval
-        r"`.*`",                             # Command substitution (backticks)
-        r"\$\(.*\)",                         # Command substitution
-        r"sudo",                             # Sudo
-        r"su\s+",                            # Su
+        r"\|\s*zsh\s*$",                     # Pipe to zsh
+        r"\|\s*ksh\s*$",                     # Pipe to ksh
+        r"\|\s*dash\s*$",                    # Pipe to dash
+        r"\|\s*/bin/\w*sh",                  # Pipe to any /bin/*sh
+        # Remote code execution
+        r"curl.*\|\s*(sh|bash|zsh|python)",  # Curl pipe to interpreter
+        r"wget.*\|\s*(sh|bash|zsh|python)",  # Wget pipe to interpreter
+        r"curl.*-o\s*/tmp/.*&&",             # Download and execute pattern
+        # Code evaluation
+        r"\beval\b",                         # Eval anywhere
+        r"`[^`]+`",                          # Command substitution (backticks)
+        r"\$\([^)]+\)",                      # Command substitution $(...)
+        # Privilege escalation
+        r"\bsudo\b",                         # Sudo
+        r"\bsu\s+",                          # Su
+        r"\bdoas\b",                         # OpenBSD doas
+        r"\bpkexec\b",                       # Polkit
+        # Sensitive files
         r"/etc/passwd",                      # Password file
         r"/etc/shadow",                      # Shadow file
         r"\.ssh/",                           # SSH keys
+        r"\.gnupg/",                         # GPG keys
+        r"\.aws/",                           # AWS credentials
+        r"\.env\b",                          # Environment files
+        r"\.git/config",                     # Git config (may have tokens)
+        r"id_rsa",                           # SSH private keys
+        r"id_ed25519",                       # SSH ed25519 keys
+        # Environment variable injection
+        r";\s*export\s+",                    # Export injection
+        r"&&\s*export\s+",                   # Export after &&
+        r"\bLD_PRELOAD\b",                   # Library injection
+        r"\bLD_LIBRARY_PATH\b",              # Library path injection
+        r"\bPATH\s*=",                       # PATH manipulation
+        # Network exfiltration
+        r"nc\s+-[el]",                       # Netcat listener
+        r"\bncat\b",                         # Nmap netcat
+        r"\bsocat\b",                        # Socat
+        # Reverse shells
+        r"/dev/tcp/",                        # Bash TCP
+        r"/dev/udp/",                        # Bash UDP
+        # History/log access
+        r"\.bash_history",                   # Bash history
+        r"\.zsh_history",                    # Zsh history
+        r"/var/log/",                        # System logs
     ])
 
     # Max execution time

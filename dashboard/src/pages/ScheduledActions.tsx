@@ -330,11 +330,16 @@ function CreateActionModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="create-action-title"
+    >
       <div className="absolute inset-0 modal-overlay" onClick={onClose} />
       <div className="relative glass-card rounded-2xl w-full max-w-lg max-h-[90vh] overflow-auto">
         <div className="p-6 border-b border-white/5">
-          <h2 className="text-xl font-bold text-white">Create Scheduled Action</h2>
+          <h2 id="create-action-title" className="text-xl font-bold text-white">Create Scheduled Action</h2>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
@@ -638,54 +643,27 @@ export function ScheduledActions() {
         </button>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="glass-card rounded-xl p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
-              <Calendar className="w-5 h-5 text-purple-400" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-white">{stats.total}</p>
-              <p className="text-xs text-zinc-500">Total Actions</p>
-            </div>
-          </div>
+      {/* Compact Stats Bar */}
+      <div className="glass-card rounded-xl px-5 py-3 flex flex-wrap items-center gap-x-8 gap-y-2">
+        <div className="flex items-center gap-2">
+          <Calendar className="w-4 h-4 text-purple-400" />
+          <span className="text-white font-semibold">{stats.total}</span>
+          <span className="text-zinc-500 text-sm">actions</span>
         </div>
-
-        <div className="glass-card rounded-xl p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
-              <Play className="w-5 h-5 text-emerald-400" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-white">{stats.active}</p>
-              <p className="text-xs text-zinc-500">Active</p>
-            </div>
-          </div>
+        <div className="flex items-center gap-2">
+          <Play className="w-4 h-4 text-emerald-400" />
+          <span className="text-white font-semibold">{stats.active}</span>
+          <span className="text-zinc-500 text-sm">active</span>
         </div>
-
-        <div className="glass-card rounded-xl p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center">
-              <Pause className="w-5 h-5 text-amber-400" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-white">{stats.paused}</p>
-              <p className="text-xs text-zinc-500">Paused</p>
-            </div>
-          </div>
+        <div className="flex items-center gap-2">
+          <Pause className="w-4 h-4 text-amber-400" />
+          <span className="text-white font-semibold">{stats.paused}</span>
+          <span className="text-zinc-500 text-sm">paused</span>
         </div>
-
-        <div className="glass-card rounded-xl p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-red-500/20 flex items-center justify-center">
-              <XCircle className="w-5 h-5 text-red-400" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-white">{stats.expired}</p>
-              <p className="text-xs text-zinc-500">Expired</p>
-            </div>
-          </div>
+        <div className="flex items-center gap-2">
+          <XCircle className="w-4 h-4 text-red-400" />
+          <span className="text-white font-semibold">{stats.expired}</span>
+          <span className="text-zinc-500 text-sm">expired</span>
         </div>
       </div>
 

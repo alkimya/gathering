@@ -286,7 +286,20 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     """
     Middleware to add security headers to all responses.
+
+    Implements OWASP security headers best practices.
     """
+
+    def __init__(self, app, enable_hsts: bool = True):
+        """
+        Initialize security headers middleware.
+
+        Args:
+            app: FastAPI application
+            enable_hsts: Enable HSTS header (disable for local development)
+        """
+        super().__init__(app)
+        self.enable_hsts = enable_hsts
 
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
         # Skip for WebSocket connections
@@ -295,13 +308,72 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 
         response = await call_next(request)
 
-        # Security headers
+        # =================================================================
+        # Basic Security Headers
+        # =================================================================
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["X-Frame-Options"] = "DENY"
         response.headers["X-XSS-Protection"] = "1; mode=block"
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
 
-        # Cache control for API responses
+        # =================================================================
+        # Content-Security-Policy (CSP)
+        # =================================================================
+        # Restrictive CSP for API responses
+        # More permissive for docs pages (Swagger/ReDoc)
+        if request.url.path.startswith(("/docs", "/redoc")):
+            # Allow Swagger/ReDoc to work
+            csp = (
+                "default-src 'self'; "
+                "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+                "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+                "img-src 'self' data: https://fastapi.tiangolo.com; "
+                "font-src 'self' https://cdn.jsdelivr.net; "
+                "connect-src 'self'"
+            )
+        else:
+            # Strict CSP for API endpoints
+            csp = (
+                "default-src 'none'; "
+                "frame-ancestors 'none'; "
+                "form-action 'none'"
+            )
+        response.headers["Content-Security-Policy"] = csp
+
+        # =================================================================
+        # HTTP Strict Transport Security (HSTS)
+        # =================================================================
+        # Only add HSTS in production (when enabled)
+        # max-age=31536000 = 1 year
+        if self.enable_hsts:
+            response.headers["Strict-Transport-Security"] = (
+                "max-age=31536000; includeSubDomains; preload"
+            )
+
+        # =================================================================
+        # Permissions-Policy (formerly Feature-Policy)
+        # =================================================================
+        # Disable sensitive browser features
+        response.headers["Permissions-Policy"] = (
+            "accelerometer=(), "
+            "camera=(), "
+            "geolocation=(), "
+            "gyroscope=(), "
+            "magnetometer=(), "
+            "microphone=(), "
+            "payment=(), "
+            "usb=()"
+        )
+
+        # =================================================================
+        # Cross-Origin Policies
+        # =================================================================
+        response.headers["Cross-Origin-Opener-Policy"] = "same-origin"
+        response.headers["Cross-Origin-Resource-Policy"] = "same-origin"
+
+        # =================================================================
+        # Cache Control for API responses
+        # =================================================================
         if not request.url.path.startswith("/docs"):
             response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate"
             response.headers["Pragma"] = "no-cache"

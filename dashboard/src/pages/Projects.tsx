@@ -134,15 +134,20 @@ function ProjectSettingsModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+    <div
+      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="project-settings-title"
+    >
       <div className="bg-zinc-900 rounded-xl w-full max-w-2xl max-h-[85vh] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-zinc-700">
-          <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+          <h2 id="project-settings-title" className="text-lg font-semibold text-white flex items-center gap-2">
             <Settings2 className="w-5 h-5 text-purple-400" />
             Project Settings
           </h2>
-          <button onClick={onClose} className="p-1 text-zinc-400 hover:text-white">
+          <button onClick={onClose} aria-label="Close dialog" className="p-1 text-zinc-400 hover:text-white">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -507,13 +512,15 @@ function ProjectCard({
           >
             <RefreshCw className="w-4 h-4" />
           </button>
-          <Link
-            to={`/workspace/${project.id}`}
+          <a
+            href={`/workspace/${project.id}`}
+            target="_blank"
+            rel="noopener noreferrer"
             className="p-2 text-zinc-400 hover:text-cyan-400 hover:bg-zinc-700 rounded-lg transition-colors"
             title="Open Workspace"
           >
             <Code2 className="w-4 h-4" />
-          </Link>
+          </a>
           <Link
             to={`/projects/${project.id}`}
             className="p-2 text-zinc-400 hover:text-purple-400 hover:bg-zinc-700 rounded-lg transition-colors"
@@ -599,15 +606,20 @@ function FolderBrowser({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+    <div
+      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="browse-folders-title"
+    >
       <div className="bg-zinc-900 rounded-xl w-full max-w-2xl max-h-[80vh] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-zinc-700">
-          <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+          <h2 id="browse-folders-title" className="text-lg font-semibold text-white flex items-center gap-2">
             <FolderOpen className="w-5 h-5 text-purple-400" />
             Browse Folders
           </h2>
-          <button onClick={onClose} className="p-1 text-zinc-400 hover:text-white">
+          <button onClick={onClose} aria-label="Close dialog" className="p-1 text-zinc-400 hover:text-white">
             <X className="w-5 h-5" />
           </button>
         </div>

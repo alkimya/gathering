@@ -18,6 +18,8 @@ import {
   CircleDot,
   AlertCircle,
   Send,
+  Menu,
+  ArrowLeft,
 } from 'lucide-react';
 import { conversations, agents, circles } from '../services/api';
 import type { Conversation, ConversationMessage } from '../types';
@@ -279,6 +281,7 @@ function ConversationDetail({ conversation }: { conversation: Conversation }) {
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             placeholder="Optional prompt for next turn..."
+            aria-label="Prompt for next conversation turn"
             disabled={advanceMutation.isPending}
             className="flex-1 px-5 py-3.5 input-glass rounded-xl disabled:opacity-50"
           />
@@ -410,17 +413,23 @@ function CreateConversationModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 modal-overlay flex items-center justify-center z-50 p-4">
+    <div
+      className="fixed inset-0 modal-overlay flex items-center justify-center z-50 p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="start-conversation-title"
+    >
       <div className="glass-card rounded-2xl p-6 w-full max-w-md">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center glow-purple">
               <Plus className="w-5 h-5 text-white" />
             </div>
-            <h2 className="text-xl font-bold text-white">Start Conversation</h2>
+            <h2 id="start-conversation-title" className="text-xl font-bold text-white">Start Conversation</h2>
           </div>
           <button
             onClick={onClose}
+            aria-label="Close dialog"
             className="p-2 text-zinc-400 hover:text-white hover:bg-white/5 rounded-lg transition-all"
           >
             <X className="w-5 h-5" />
@@ -669,6 +678,7 @@ function CreateConversationModal({
 export function Conversations() {
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showSidebar, setShowSidebar] = useState(true);
   const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery({
@@ -691,13 +701,46 @@ export function Conversations() {
     },
   });
 
+  // On mobile, hide sidebar when a conversation is selected
+  const handleSelectConversation = (conv: Conversation) => {
+    setSelectedConversation(conv);
+    if (window.innerWidth < 768) {
+      setShowSidebar(false);
+    }
+  };
+
   return (
-    <div className="h-full flex gap-6">
-      {/* Conversations list */}
-      <div className="w-80 flex-shrink-0 flex flex-col">
-        <div className="flex items-center justify-between mb-6">
+    <div className="h-full flex flex-col md:flex-row gap-4 md:gap-6">
+      {/* Mobile header with toggle */}
+      <div className="md:hidden flex items-center justify-between">
+        <button
+          onClick={() => setShowSidebar(!showSidebar)}
+          className="flex items-center gap-2 p-2 text-zinc-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
+        >
+          {showSidebar ? (
+            <>
+              <ArrowLeft className="w-5 h-5" />
+              <span className="text-sm">Hide list</span>
+            </>
+          ) : (
+            <>
+              <Menu className="w-5 h-5" />
+              <span className="text-sm">Show conversations</span>
+            </>
+          )}
+        </button>
+        {selectedConversation && !showSidebar && (
+          <span className="text-sm text-zinc-400 truncate max-w-[150px]">
+            {selectedConversation.topic}
+          </span>
+        )}
+      </div>
+
+      {/* Conversations list - collapsible on mobile */}
+      <div className={`${showSidebar ? 'flex' : 'hidden'} md:flex w-full md:w-80 flex-shrink-0 flex-col`}>
+        <div className="flex items-center justify-between mb-4 md:mb-6">
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-white">Conversations</h1>
+            <h1 className="text-xl md:text-2xl font-bold text-white">Conversations</h1>
             <Sparkles className="w-5 h-5 text-purple-400 animate-pulse" />
           </div>
           <button
@@ -729,7 +772,7 @@ export function Conversations() {
                 key={conv.id}
                 conversation={conv}
                 isSelected={selectedConversation?.id === conv.id}
-                onSelect={() => setSelectedConversation(conv)}
+                onSelect={() => handleSelectConversation(conv)}
                 onDelete={() => deleteMutation.mutate(conv.id)}
               />
             ))
@@ -737,12 +780,12 @@ export function Conversations() {
         </div>
       </div>
 
-      {/* Conversation detail */}
-      <div className="flex-1 glass-card rounded-2xl overflow-hidden">
+      {/* Conversation detail - show on mobile when sidebar is hidden or a conversation is selected */}
+      <div className={`${!showSidebar || selectedConversation ? 'flex' : 'hidden md:flex'} flex-1 glass-card rounded-2xl overflow-hidden min-h-[300px]`}>
         {selectedConversation ? (
           <ConversationDetail conversation={selectedConversation} />
         ) : (
-          <div className="h-full flex items-center justify-center">
+          <div className="h-full flex items-center justify-center w-full">
             <div className="text-center">
               <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/20 flex items-center justify-center mx-auto mb-6">
                 <MessageSquare className="w-10 h-10 text-purple-400" />

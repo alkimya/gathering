@@ -6,6 +6,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 import { Layout } from './components/Layout';
 import { ToastProvider } from './components/Toast';
+import { ErrorBoundary } from './components/ui';
 import { Dashboard } from './pages/Dashboard';
 import { Agents } from './pages/Agents';
 import { Models } from './pages/Models';
@@ -41,8 +42,9 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ToastProvider>
-        <BrowserRouter>
-          <Routes>
+        <ErrorBoundary>
+          <BrowserRouter>
+            <Routes>
             {/* Workspace route outside Layout for full-screen experience */}
             <Route path="/workspace/:projectId" element={<Workspace />} />
 
@@ -66,10 +68,11 @@ function App() {
               <Route path="projects/:projectId" element={<ProjectDetail />} />
               <Route path="settings" element={<Settings />} />
               <Route path="monitoring" element={<Monitoring />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Route>
-          </Routes>
-        </BrowserRouter>
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Route>
+            </Routes>
+          </BrowserRouter>
+        </ErrorBoundary>
         <ReactQueryDevtools initialIsOpen={false} />
       </ToastProvider>
     </QueryClientProvider>

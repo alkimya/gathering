@@ -1,0 +1,1623 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026, GatheRing Team
+# This file is distributed under the same license as the GatheRing package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: GatheRing 0.2.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-01-02 14:08+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.17.0\n"
+
+#: ../../api/endpoints.md:1 7566d50c838d4f3eb8094c6f0412d191
+msgid "API Endpoints"
+msgstr ""
+
+#: ../../api/endpoints.md:3 cf4250d455f0415b99a03fc882aff688
+msgid "Complete reference for all GatheRing REST API endpoints."
+msgstr ""
+
+#: ../../api/endpoints.md:5 db9fda3506ef4a14b6eb2e1d4c4f6215
+msgid "Base URL: `http://localhost:8000`"
+msgstr ""
+
+#: ../../api/endpoints.md:7 766aff80eefe4b30a1e7384bff8a4250
+msgid "Health & Status"
+msgstr ""
+
+#: ../../api/endpoints.md:9 73193691ca7140789b17e322c4dea720
+msgid "GET /health"
+msgstr ""
+
+#: ../../api/endpoints.md:11 e6af8dc531ce40eb848909b760be2502
+msgid "Check API health status with system overview."
+msgstr ""
+
+#: ../../api/endpoints.md:13 ../../api/endpoints.md:30
+#: ../../api/endpoints.md:64 ../../api/endpoints.md:124
+#: ../../api/endpoints.md:136 ../../api/endpoints.md:158
+#: ../../api/endpoints.md:214 ../../api/endpoints.md:270
+#: ../../api/endpoints.md:411 ../../api/endpoints.md:438
+#: ../../api/endpoints.md:481 ../../api/endpoints.md:567
+#: ../../api/endpoints.md:625 ../../api/endpoints.md:701
+#: ../../api/endpoints.md:727 ../../api/endpoints.md:783
+#: ../../api/endpoints.md:819 ../../api/endpoints.md:835
+#: ../../api/endpoints.md:871 ../../api/endpoints.md:895
+#: ../../api/endpoints.md:916 ../../api/endpoints.md:941
+#: 0504893a90fe4f089d564021ffc62a67 0a8567bb9e08450f94671158f5d9cccf
+#: 124eb495324f4b8f80edbbde28b7d240 28784d3fdadb4929a6839f801e16a557
+#: 3373dfe7a14b476aa56ea4e36c22863e 340c145b7a1f41a0acdf5f6e17d4a2e8
+#: 35d2bf6a24604ce99c457b4c347c5fbf 4bc1130afd3947a3901e96a27eead816
+#: 51afb4b370fe4c699b1e182620e3abc2 5528952ae9bb4b24addc37155a8b9dd4
+#: 57d57144e7b647de899416e5bf7c3451 658d7b1a1dcb419882d67c55786538b3
+#: 6dce5de9c60044cc9753114d17b69f25 8b84b65ed10446fb9ad7758d6f9afffc
+#: 9551dab492124a5f97faf716446692ca b6ea9a81991f47b186b24de296a3ae9f
+#: beeaf65e84af426fa782631f4d18be23 c37adef120ee40dfb9851e36de0cf7b4
+#: d615460d01d54315b1803bd892ea25f7 dab3200be4e14efea9bb9dde01a1e309
+#: e96c5ef771ee454bb49de6a975ca5d3b f5d38390cb424f0da11f2a10dac57b70
+msgid "**Response:**"
+msgstr ""
+
+#: ../../api/endpoints.md:15 510c914687304672ae87e6492de416ac
+#, python-brace-format
+msgid ""
+"{\n"
+"  \"status\": \"healthy\",\n"
+"  \"version\": \"0.4.0\",\n"
+"  \"uptime_seconds\": 3600.5,\n"
+"  \"agents_count\": 5,\n"
+"  \"circles_count\": 2,\n"
+"  \"active_tasks\": 3\n"
+"}\n"
+msgstr ""
+
+#: ../../api/endpoints.md:26 316ed61550b74c009f63524321b039af
+msgid "GET /health/system"
+msgstr ""
+
+#: ../../api/endpoints.md:28 311b498312e34fe48f1e2dda121b2855
+msgid "Get real-time system metrics (CPU, memory, disk, load average)."
+msgstr ""
+
+#: ../../api/endpoints.md:32 20d6bd18e7de4bce8ba20d6d16f9688a
+#, python-brace-format
+msgid ""
+"{\n"
+"  \"cpu\": {\n"
+"    \"percent\": 25.5,\n"
+"    \"count\": 8,\n"
+"    \"frequency_mhz\": 3200.0\n"
+"  },\n"
+"  \"memory\": {\n"
+"    \"total_gb\": 32.0,\n"
+"    \"available_gb\": 18.5,\n"
+"    \"used_gb\": 13.5,\n"
+"    \"percent\": 42.2\n"
+"  },\n"
+"  \"disk\": {\n"
+"    \"total_gb\": 500.0,\n"
+"    \"used_gb\": 250.0,\n"
+"    \"free_gb\": 250.0,\n"
+"    \"percent\": 50.0\n"
+"  },\n"
+"  \"load_average\": {\n"
+"    \"1min\": 1.5,\n"
+"    \"5min\": 1.2,\n"
+"    \"15min\": 0.9\n"
+"  },\n"
+"  \"uptime_seconds\": 3600.5\n"
+"}\n"
+msgstr ""
+
+#: ../../api/endpoints.md:60 746b008a8d394c3eb69333520b019145
+msgid "GET /health/checks"
+msgstr ""
+
+#: ../../api/endpoints.md:62 88e534a6e0914440a7eb3f9e42e547ad
+msgid "Get detailed health checks for all services."
+msgstr ""
+
+#: ../../api/endpoints.md:66 84aeecd6c82a49daa28120a7b38f9cde
+#, python-brace-format
+msgid ""
+"{\n"
+"  \"checks\": [\n"
+"    {\n"
+"      \"name\": \"API Server\",\n"
+"      \"status\": \"healthy\",\n"
+"      \"message\": \"Responding normally\",\n"
+"      \"last_check\": \"2025-01-01T12:00:00Z\"\n"
+"    },\n"
+"    {\n"
+"      \"name\": \"Database\",\n"
+"      \"status\": \"healthy\",\n"
+"      \"message\": \"PostgreSQL connected\",\n"
+"      \"last_check\": \"2025-01-01T12:00:00Z\"\n"
+"    },\n"
+"    {\n"
+"      \"name\": \"Memory Usage\",\n"
+"      \"status\": \"healthy\",\n"
+"      \"value\": \"42.2%\",\n"
+"      \"message\": \"Normal\",\n"
+"      \"last_check\": \"2025-01-01T12:00:00Z\"\n"
+"    },\n"
+"    {\n"
+"      \"name\": \"Disk Space\",\n"
+"      \"status\": \"healthy\",\n"
+"      \"value\": \"50.0%\",\n"
+"      \"message\": \"Sufficient space\",\n"
+"      \"last_check\": \"2025-01-01T12:00:00Z\"\n"
+"    },\n"
+"    {\n"
+"      \"name\": \"Agents\",\n"
+"      \"status\": \"healthy\",\n"
+"      \"value\": \"5\",\n"
+"      \"message\": \"5 agent(s) registered\",\n"
+"      \"last_check\": \"2025-01-01T12:00:00Z\"\n"
+"    },\n"
+"    {\n"
+"      \"name\": \"Circles\",\n"
+"      \"status\": \"healthy\",\n"
+"      \"value\": \"1/2\",\n"
+"      \"message\": \"1 running, 2 total\",\n"
+"      \"last_check\": \"2025-01-01T12:00:00Z\"\n"
+"    }\n"
+"  ],\n"
+"  \"overall_status\": \"healthy\"\n"
+"}\n"
+msgstr ""
+
+#: ../../api/endpoints.md:114 dea4413bf67b42ba8359888eb35c5456
+msgid "**Status Values:**"
+msgstr ""
+
+#: ../../api/endpoints.md:116 60268239e3304ad3b64c560688e93dba
+msgid "`healthy`: Service operating normally"
+msgstr ""
+
+#: ../../api/endpoints.md:117 a880dc8f62ba456cb868e01329b61e19
+msgid "`warning`: Service degraded (memory >70%, disk >80%)"
+msgstr ""
+
+#: ../../api/endpoints.md:118 8b39deddf8b64aa49b84021962e3b651
+msgid "`critical`: Service critical (memory >90%, disk >90%, connection failed)"
+msgstr ""
+
+#: ../../api/endpoints.md:120 cac21dc88d634e0faaa96ac68437df1d
+msgid "GET /health/ready"
+msgstr ""
+
+#: ../../api/endpoints.md:122 0e3286f4aaee4dee93241171c82aac9b
+msgid "Kubernetes readiness probe."
+msgstr ""
+
+#: ../../api/endpoints.md:126 f58110219c93499e83f6b653c3fe5a54
+#, python-brace-format
+msgid ""
+"{\n"
+"  \"ready\": true\n"
+"}\n"
+msgstr ""
+
+#: ../../api/endpoints.md:132 f20009aec20f41cdbbe4da5ce7e12e77
+msgid "GET /health/live"
+msgstr ""
+
+#: ../../api/endpoints.md:134 5e6c21e3eeb048aebe0a07ccbaf54c2b
+msgid "Kubernetes liveness probe."
+msgstr ""
+
+#: ../../api/endpoints.md:138 350c142d2a3e49daa68934d010f49cec
+#, python-brace-format
+msgid ""
+"{\n"
+"  \"alive\": true\n"
+"}\n"
+msgstr ""
+
+#: ../../api/endpoints.md:144 3fd65b0cec40474686e5af1c17f9397a
+msgid "Agents"
+msgstr ""
+
+#: ../../api/endpoints.md:146 76d23c7bd2214c8791bef8cfd3c0f1c0
+msgid "GET /agents"
+msgstr ""
+
+#: ../../api/endpoints.md:148 b933294a93c2472e886392a84fcf835b
+msgid "List all agents."
+msgstr ""
+
+#: ../../api/endpoints.md:150 ../../api/endpoints.md:357
+#: ../../api/endpoints.md:427 ../../api/endpoints.md:498
+#: ../../api/endpoints.md:545 ../../api/endpoints.md:558
+#: ../../api/endpoints.md:777 ../../api/endpoints.md:910
+#: ../../api/endpoints.md:931 039947508367494da43a20770cbed7b9
+#: 0454b9c60eb7493099c6bd6b3bb5056b 0ca1d1d74bcc4e9bbeba45e79350990e
+#: 14d698640290497eb56ff05a749559c3 29246c79155845e4be5a9c3410b9bef3
+#: 2fecf6f58e764e879dd20e5cf58ff482 63876ef43de3482b9d55a29de97be42f
+#: 8b8b49b2bb5b4c5d9a189fd1bc6be7bf cd3b4971991243d4926ef227ffee3056
+msgid "**Query Parameters:**"
+msgstr ""
+
+#: ../../api/endpoints.md 1184fa4450ed426b98ea7a6778b07093
+#: 8152b85d54734f21ba2b706784519d9d 89461bbf97564d2abe450860d1040803
+#: 8cbf9faeafa244409af2eab242620a73 93a5429de3834d7c92f6d4731e4d1409
+#: c2c4204dbc1244caa99c356f0dce070c c2ecaa9a85c7402d99ff048c43d684e6
+#: db6389251702487d994125454ace6e28 e01bf37d1e6e4b9d9c992e82d98e888c
+#: e29e02b0c6b4420cae1dd8829d4aaa3e
+msgid "Parameter"
+msgstr ""
+
+#: ../../api/endpoints.md 0ab5447e5faa4a42829771bd83cf9aba
+#: 1400d257c6874d0b83738d870ccdb40e 2ce1f7e6200546fd93fc9a7d3a3fe9ba
+#: 4569c5cd8690499ca4307a2235d50f5c 4861cac4ffac479b87ffcb2c8747e939
+#: 601d5e5f68da4ae3b58ae4f6e96b8939 7e8411847d6844ffaa6ababb469f93a4
+#: 9902881da0544b85a1f5ddfe3bd3723f 99a01e17fcce4173b8fd399343fb3e44
+#: e73d4fee8c594b66ae3e362120f97570
+msgid "Type"
+msgstr ""
+
+#: ../../api/endpoints.md 312e1ca14d174673841c0f70af0518a2
+#: a90efde3cd964bf1848a2a2780ec8054
+msgid "Default"
+msgstr ""
+
+#: ../../api/endpoints.md 05a49b2a121c41559e40ddf3370f0c8c
+#: 20ef4284caf74f9189ce0e6a7a92b195 400be1a53aa54d548c386c7a643501d8
+#: a85ab317d50c4d52b72a3e4476e10d22 b1bc3bb1ee6c4a9f80482e3dc7913265
+#: c57b91c6e4bb42858e42c047aec56c2c cbf16ccf26b74293978e5c7b0186548c
+#: e619d0db53384521b91349a03e887f32 ee9097c00c6249b39b816b3a911f48e1
+msgid "Description"
+msgstr ""
+
+#: ../../api/endpoints.md 089731e7d60b4a85a46fc2afe0ca4b00
+#: d1686a53119546199e8f1d78d09f6550
+msgid "`status`"
+msgstr ""
+
+#: ../../api/endpoints.md 06384888cdfe471c8c8116dee4349e6b
+#: 15bcb8ec1ded4953b61aafef64cb13fa 1c9f3cc196ee4f49aa70e1c7d57e7f4a
+#: 405d33ec9bec4229ab4753c6d8baf170 45bab16eab1343d3983625695854722f
+#: 47384b69ab494ea6aaea7e63ef438851 562c7c65ce7d4ca6b89a9cb2a51eb68a
+#: 6378ed195f4749e2861bcffb405fe172 802f1252c079450b979df0db2de34795
+#: 861c075f2c484cf4817570e2e587741e 997b28e511a646bc8176586cbb1da2bd
+#: c4c269679f994224940037b457f6a877
+msgid "string"
+msgstr ""
+
+#: ../../api/endpoints.md 3c0cf85972494b45b8fbb610bb9a4b70
+msgid "-"
+msgstr ""
+
+#: ../../api/endpoints.md 26bdd7d0ef04413ea5988bbf10093c8d
+#: 636eba46d3084c6e9446e87368c1eed1
+msgid "Filter by status"
+msgstr ""
+
+#: ../../api/endpoints.md 070707318c5a4131ad072de25bb1a1d3
+#: 8c0b35dd82cb418b9e2bf65e450f7c84 a9936654ddb744b7b5806654469316ca
+#: c6e7552b45c34672b3e4258f3fd83f65
+msgid "`limit`"
+msgstr ""
+
+#: ../../api/endpoints.md 36ae73d98d684f6d9ac6e3f12b82af19
+#: 3ca42d332c284a2b991f1fe93e850205 839bcf7e74c24644945a74be09c3fb9e
+#: ac605e81821d43409d75ee0c9107e139 afcf61d8ad684bc59a10290bf921fb0b
+#: cf165e46fbeb42c5a7d836638daa87be
+msgid "int"
+msgstr ""
+
+#: ../../api/endpoints.md c46b78e6dc0043f1bd7b3dc31b46c9a8
+msgid "50"
+msgstr ""
+
+#: ../../api/endpoints.md 8f7ca15b11e348da8b6f48bf1d8fbc43
+#: ac49a2057f16479b80964bc8df687dd7 bb554b9778134adc907423189d43617f
+msgid "Max results"
+msgstr ""
+
+#: ../../api/endpoints.md d704cf00633a46df83f1c7e263e5106d
+msgid "`offset`"
+msgstr ""
+
+#: ../../api/endpoints.md bdd7158367c842b989d3c635f6916866
+msgid "0"
+msgstr ""
+
+#: ../../api/endpoints.md e503eff4b5aa415a8e7f1ebee553d453
+msgid "Pagination offset"
+msgstr ""
+
+#: ../../api/endpoints.md:160 6331af601c2f4905bcef702b07e0b60a
+#, python-brace-format
+msgid ""
+"[\n"
+"  {\n"
+"    \"id\": 1,\n"
+"    \"name\": \"Sophie\",\n"
+"    \"role\": \"Architect\",\n"
+"    \"provider\": \"anthropic\",\n"
+"    \"model\": \"claude-sonnet-4-20250514\",\n"
+"    \"status\": \"idle\",\n"
+"    \"created_at\": \"2025-01-01T00:00:00Z\"\n"
+"  }\n"
+"]\n"
+msgstr ""
+
+#: ../../api/endpoints.md:174 0d29edb2e0ff4cfaac73190c1eaf5476
+msgid "POST /agents"
+msgstr ""
+
+#: ../../api/endpoints.md:176 bce88e4e492e438b88eb335d6b04a614
+msgid "Create a new agent."
+msgstr ""
+
+#: ../../api/endpoints.md:178 ../../api/endpoints.md:235
+#: ../../api/endpoints.md:288 ../../api/endpoints.md:338
+#: ../../api/endpoints.md:369 ../../api/endpoints.md:393
+#: ../../api/endpoints.md:453 ../../api/endpoints.md:469
+#: ../../api/endpoints.md:509 ../../api/endpoints.md:525
+#: ../../api/endpoints.md:585 ../../api/endpoints.md:691
+#: ../../api/endpoints.md:716 ../../api/endpoints.md:863
+#: ../../api/endpoints.md:886 062df527857348559eb8bf70a3899281
+#: 2263b550a72c408a91ee84d8f39fb234 25abf5c45a2a436b85889ebcc30aa1ac
+#: 2e2ac21ed98f4004948d37d80936073f 60bfa84fb714420cbbb49926bbecba72
+#: 6a0079fc335944fb8613389081ef80da 6bb23259b9684cf89094c06a3b0488be
+#: 711d260a3b504d9da3216d424730e933 8f70032c1ff54853ad57f033aa18a85b
+#: aac598fb74934139bcf6d5835fdf9db5 b820c49ea7e84ca3a4d97a975c5fa565
+#: bfe464947cec4dffb95b60f657d3d733 d00a2a9d66cf48e8988abaa0ded1d004
+#: f1090e08f11345388c5d148d12f38c8c f667067393cd4a8a8b6af6984a597bcb
+msgid "**Request Body:**"
+msgstr ""
+
+#: ../../api/endpoints.md:180 c7bd44dd49ed4502a1cbb3acff5b1db0
+#, python-brace-format
+msgid ""
+"{\n"
+"  \"name\": \"Sophie\",\n"
+"  \"role\": \"Lead Architect\",\n"
+"  \"provider\": \"anthropic\",\n"
+"  \"model\": \"claude-sonnet-4-20250514\",\n"
+"  \"personality\": {\n"
+"    \"traits\": [\"analytical\", \"creative\"],\n"
+"    \"communication_style\": \"professional\"\n"
+"  },\n"
+"  \"config\": {\n"
+"    \"temperature\": 0.7\n"
+"  }\n"
+"}\n"
+msgstr ""
+
+#: ../../api/endpoints.md:196 a7ffd5661937435f85db03dc1a25a5cc
+msgid "**Response:** `201 Created`"
+msgstr ""
+
+#: ../../api/endpoints.md:198 455a658b75564404bef6f53263c085c1
+#, python-brace-format
+msgid ""
+"{\n"
+"  \"id\": 1,\n"
+"  \"name\": \"Sophie\",\n"
+"  \"role\": \"Lead Architect\",\n"
+"  \"provider\": \"anthropic\",\n"
+"  \"model\": \"claude-sonnet-4-20250514\",\n"
+"  \"status\": \"idle\",\n"
+"  \"created_at\": \"2025-01-01T00:00:00Z\"\n"
+"}\n"
+msgstr ""
+
+#: ../../api/endpoints.md:210 3c5c1ae3f4ae4e4c8e6742cd061f55c6
+#, python-brace-format
+msgid "GET /agents/{id}"
+msgstr ""
+
+#: ../../api/endpoints.md:212 b96dbdc07bc940338863fe0b52ed6f2b
+msgid "Get agent by ID."
+msgstr ""
+
+#: ../../api/endpoints.md:216 cd965d0cc10c48c1a0e583dac77b5b19
+#, python-brace-format
+msgid ""
+"{\n"
+"  \"id\": 1,\n"
+"  \"name\": \"Sophie\",\n"
+"  \"role\": \"Lead Architect\",\n"
+"  \"provider\": \"anthropic\",\n"
+"  \"model\": \"claude-sonnet-4-20250514\",\n"
+"  \"personality\": {...},\n"
+"  \"config\": {...},\n"
+"  \"status\": \"idle\",\n"
+"  \"created_at\": \"2025-01-01T00:00:00Z\",\n"
+"  \"updated_at\": \"2025-01-01T00:00:00Z\"\n"
+"}\n"
+msgstr ""
+
+#: ../../api/endpoints.md:231 3310f6d838cf464f9128432f7252ce7b
+#, python-brace-format
+msgid "PATCH /agents/{id}"
+msgstr ""
+
+#: ../../api/endpoints.md:233 a3b7c6677f9a4f858a5b7fa36014663c
+msgid "Update an agent."
+msgstr ""
+
+#: ../../api/endpoints.md:237 45f9d9afee8f4110865ecc45ab864dfc
+#, python-brace-format
+msgid ""
+"{\n"
+"  \"role\": \"Senior Architect\",\n"
+"  \"config\": {\n"
+"    \"temperature\": 0.8\n"
+"  }\n"
+"}\n"
+msgstr ""
+
+#: ../../api/endpoints.md:246 419dc49d91ca48c883c7b0b6b5869991
+#, python-brace-format
+msgid "DELETE /agents/{id}"
+msgstr ""
+
+#: ../../api/endpoints.md:248 fcd83b0281194fb58926ed59496b80d1
+msgid "Delete an agent."
+msgstr ""
+
+#: ../../api/endpoints.md:250 3111399cba574732bf2ed394b5a00017
+msgid "**Response:** `204 No Content`"
+msgstr ""
+
+#: ../../api/endpoints.md:252 346ec0827bd84333b04d108e56381d18
+#, python-brace-format
+msgid "GET /agents/{id}/sessions"
+msgstr ""
+
+#: ../../api/endpoints.md:254 c2131ed66af5477d81d7e3f0c680da76
+msgid "Get agent sessions."
+msgstr ""
+
+#: ../../api/endpoints.md:256 fcf26da6aa5c42b2b245113faccc1cde
+#, python-brace-format
+msgid "POST /agents/{id}/sessions"
+msgstr ""
+
+#: ../../api/endpoints.md:258 5c213df2e4da48209b487f67798e259d
+msgid "Start a new session."
+msgstr ""
+
+#: ../../api/endpoints.md:260 61571ff821704bb0976827baf2868a07
+#, python-brace-format
+msgid "GET /agents/{id}/memories"
+msgstr ""
+
+#: ../../api/endpoints.md:262 85ceda9a446b47f4bd73f93b08588b6a
+msgid "Get agent memories."
+msgstr ""
+
+#: ../../api/endpoints.md:264 df7498cc2a504aa783d0949b219e32b6
+msgid "Circles"
+msgstr ""
+
+#: ../../api/endpoints.md:266 65c2503473b047f99dc6f34cbb27b2a7
+msgid "GET /circles"
+msgstr ""
+
+#: ../../api/endpoints.md:268 cd497e99df0f4365b949a75a81963efc
+msgid "List all circles."
+msgstr ""
+
+#: ../../api/endpoints.md:272 f1c2e5cb8cf44a2bad52f4f865cb3c55
+#, python-brace-format
+msgid ""
+"[\n"
+"  {\n"
+"    \"id\": 1,\n"
+"    \"name\": \"dev-team\",\n"
+"    \"display_name\": \"Development Team\",\n"
+"    \"status\": \"active\",\n"
+"    \"agent_count\": 3\n"
+"  }\n"
+"]\n"
+msgstr ""
+
+#: ../../api/endpoints.md:284 229e7e134e8f41acaddda1883f003399
+msgid "POST /circles"
+msgstr ""
+
+#: ../../api/endpoints.md:286 b9b5ff0c2c8849baa13c11a06e5d86b5
+msgid "Create a new circle."
+msgstr ""
+
+#: ../../api/endpoints.md:290 fca216c9f8324ef3b4443ca514ba96e3
+#, python-brace-format
+msgid ""
+"{\n"
+"  \"name\": \"dev-team\",\n"
+"  \"display_name\": \"Development Team\",\n"
+"  \"description\": \"Frontend and backend developers\",\n"
+"  \"config\": {\n"
+"    \"max_agents\": 10,\n"
+"    \"conversation_mode\": \"round_robin\"\n"
+"  }\n"
+"}\n"
+msgstr ""
+
+#: ../../api/endpoints.md:302 f81f4b7acc6f4d6eb798d81f3b21404e
+#, python-brace-format
+msgid "GET /circles/{name}"
+msgstr ""
+
+#: ../../api/endpoints.md:304 90319c11cb8649759756e4277c3ab402
+msgid "Get circle by name."
+msgstr ""
+
+#: ../../api/endpoints.md:306 339bd855870442adb2809ac79bbfbf80
+#, python-brace-format
+msgid "PATCH /circles/{name}"
+msgstr ""
+
+#: ../../api/endpoints.md:308 d250838cb74549fda431a751356d493f
+msgid "Update a circle."
+msgstr ""
+
+#: ../../api/endpoints.md:310 243fa51e7e014f57aae80f9cf2c0358a
+#, python-brace-format
+msgid "DELETE /circles/{name}"
+msgstr ""
+
+#: ../../api/endpoints.md:312 3acbcfac0537409db5a742c7944ede0a
+msgid "Delete a circle."
+msgstr ""
+
+#: ../../api/endpoints.md:314 0e743fefa85e4742b7412429dc8af9bc
+#, python-brace-format
+msgid "POST /circles/{name}/start"
+msgstr ""
+
+#: ../../api/endpoints.md:316 659c8ef3d41e4356a8aeff7172651837
+msgid "Start a circle."
+msgstr ""
+
+#: ../../api/endpoints.md:318 67c5a36f623242519a20710bfae87eb6
+#, python-brace-format
+msgid "POST /circles/{name}/pause"
+msgstr ""
+
+#: ../../api/endpoints.md:320 e2456676d2af4bb88def76dc2bff57f1
+msgid "Pause a circle."
+msgstr ""
+
+#: ../../api/endpoints.md:322 d1efc64c6d274012be9ac4ac4f3eeaa1
+#, python-brace-format
+msgid "POST /circles/{name}/resume"
+msgstr ""
+
+#: ../../api/endpoints.md:324 d197705c27c84333a64abed2d31e7ce2
+msgid "Resume a paused circle."
+msgstr ""
+
+#: ../../api/endpoints.md:326 79424671439e4dc5b6934b2c6e88fa16
+#, python-brace-format
+msgid "POST /circles/{name}/archive"
+msgstr ""
+
+#: ../../api/endpoints.md:328 db27e1a93083410793e7aab74336758a
+msgid "Archive a circle."
+msgstr ""
+
+#: ../../api/endpoints.md:330 3a6927d6ba8f428bb9dd751d70406d0c
+#, python-brace-format
+msgid "GET /circles/{name}/agents"
+msgstr ""
+
+#: ../../api/endpoints.md:332 fa579337c4b34de89eecdaefc828584d
+msgid "List agents in a circle."
+msgstr ""
+
+#: ../../api/endpoints.md:334 790414a0248b4055a954d612bccbb4f0
+#, python-brace-format
+msgid "POST /circles/{name}/agents"
+msgstr ""
+
+#: ../../api/endpoints.md:336 2bdaecb587dc401cae8fc64c45d4192a
+msgid "Add agent to circle."
+msgstr ""
+
+#: ../../api/endpoints.md:340 95a17ecac9624d3db482787c74a71531
+#, python-brace-format
+msgid ""
+"{\n"
+"  \"agent_id\": 1,\n"
+"  \"role\": \"member\"\n"
+"}\n"
+msgstr ""
+
+#: ../../api/endpoints.md:347 3cf1a2d1abbe4127852f487039c69983
+#, python-brace-format
+msgid "DELETE /circles/{name}/agents/{agent_id}"
+msgstr ""
+
+#: ../../api/endpoints.md:349 6ed6fc8ff7824d9da95317237159e2aa
+msgid "Remove agent from circle."
+msgstr ""
+
+#: ../../api/endpoints.md:351 6095c853f4cb4c23940db7c18c08b8a4
+msgid "Conversations"
+msgstr ""
+
+#: ../../api/endpoints.md:353 ff5bb477c44a4c61901b17701a8a34f3
+msgid "GET /conversations"
+msgstr ""
+
+#: ../../api/endpoints.md:355 cb56349010564169b90d75933d1c5c3b
+msgid "List conversations."
+msgstr ""
+
+#: ../../api/endpoints.md 98d351b4fb624205a4580206ee2a6fad
+msgid "`circle_name`"
+msgstr ""
+
+#: ../../api/endpoints.md 6a7ba229ee7b4e048890644a83af3421
+msgid "Filter by circle"
+msgstr ""
+
+#: ../../api/endpoints.md:365 42b8a84663ad4bb8b02451c18ffa8d1b
+msgid "POST /conversations"
+msgstr ""
+
+#: ../../api/endpoints.md:367 fec852f19c0b44c7a0906bcc7e465c8a
+msgid "Create a new conversation."
+msgstr ""
+
+#: ../../api/endpoints.md:371 b88fa6e8f05246768aa4c84d6dba3074
+#, python-brace-format
+msgid ""
+"{\n"
+"  \"circle_name\": \"dev-team\",\n"
+"  \"topic\": \"API Design Review\",\n"
+"  \"agent_ids\": [1, 2, 3],\n"
+"  \"initial_prompt\": \"Let's review the new API design\",\n"
+"  \"max_turns\": 20\n"
+"}\n"
+msgstr ""
+
+#: ../../api/endpoints.md:381 a55758e3d7ff483292b4ab417d9b160c
+#, python-brace-format
+msgid "GET /conversations/{id}"
+msgstr ""
+
+#: ../../api/endpoints.md:383 8c23b5dd29e040a4a168d8b3a9e8d9ad
+msgid "Get conversation details."
+msgstr ""
+
+#: ../../api/endpoints.md:385 d5f3bacd2c784dbe8488384ae3dc331f
+#, python-brace-format
+msgid "GET /conversations/{id}/messages"
+msgstr ""
+
+#: ../../api/endpoints.md:387 9f143b8cf5b74bfbac025e3ce24a5974
+msgid "Get conversation messages."
+msgstr ""
+
+#: ../../api/endpoints.md:389 52d1e5a3766a4e2f83b78c0b316eff18
+#, python-brace-format
+msgid "POST /conversations/{id}/advance"
+msgstr ""
+
+#: ../../api/endpoints.md:391 5da65ca195bc4226993c0608f2cec0c0
+msgid "Advance the conversation."
+msgstr ""
+
+#: ../../api/endpoints.md:395 2e81e9ee005b40a59b0ff33fc65986c7
+#, python-brace-format
+msgid ""
+"{\n"
+"  \"prompt\": \"What about error handling?\"\n"
+"}\n"
+msgstr ""
+
+#: ../../api/endpoints.md:401 f58ed65e5c1d44ac98122d358aa46b4f
+#, python-brace-format
+msgid "POST /conversations/{id}/end"
+msgstr ""
+
+#: ../../api/endpoints.md:403 2dd3642bff314446af7f64e1a8418086
+msgid "End the conversation."
+msgstr ""
+
+#: ../../api/endpoints.md:405 227dcbfd379e4f74b56c44623bc4da50
+msgid "Workspace"
+msgstr ""
+
+#: ../../api/endpoints.md:407 f27f7a88c5d3450db1f3cf40169e11af
+#, python-brace-format
+msgid "GET /workspace/{id}/info"
+msgstr ""
+
+#: ../../api/endpoints.md:409 354ff2345d134584813b6c3c0f27af71
+msgid "Get workspace information."
+msgstr ""
+
+#: ../../api/endpoints.md:413 ceff29f4222d463ab369cd9416338ee6
+#, python-brace-format
+msgid ""
+"{\n"
+"  \"id\": 1,\n"
+"  \"path\": \"/home/user/project\",\n"
+"  \"name\": \"my-project\",\n"
+"  \"git_enabled\": true,\n"
+"  \"current_branch\": \"main\"\n"
+"}\n"
+msgstr ""
+
+#: ../../api/endpoints.md:423 e14d31e6bc2f4c21ab9cfe22cafa614b
+#, python-brace-format
+msgid "GET /workspace/{id}/files"
+msgstr ""
+
+#: ../../api/endpoints.md:425 f9072f9f7e354ea1969a1a79b9f4550e
+msgid "List files in workspace."
+msgstr ""
+
+#: ../../api/endpoints.md 9302c468e9f34f1da9facb64c776c1a3
+msgid "`path`"
+msgstr ""
+
+#: ../../api/endpoints.md 692490af4f27456a8737a9fb30d2f9d1
+msgid "Directory path"
+msgstr ""
+
+#: ../../api/endpoints.md 22cae034e9a34e348bc493c14be74a8f
+msgid "`recursive`"
+msgstr ""
+
+#: ../../api/endpoints.md 31f77ff71a4b4d30bd36fa2b75030c5f
+#: 974384dfbb32485c99d5d80047dd2ea8
+msgid "bool"
+msgstr ""
+
+#: ../../api/endpoints.md 3025ad2d064145168c011fee45ae8d71
+msgid "Include subdirectories"
+msgstr ""
+
+#: ../../api/endpoints.md:434 d03ccecdc95b47069cac369e073fc3a1
+#, python-brace-format
+msgid "GET /workspace/{id}/files/{path}"
+msgstr ""
+
+#: ../../api/endpoints.md:436 1e2a6b5b895544ed843516421fe4aae2
+msgid "Read file content."
+msgstr ""
+
+#: ../../api/endpoints.md:440 37931f4d6862488eb2c0d932fc54f6e8
+#, python-brace-format
+msgid ""
+"{\n"
+"  \"path\": \"src/main.py\",\n"
+"  \"content\": \"print('hello')\",\n"
+"  \"language\": \"python\",\n"
+"  \"size\": 15\n"
+"}\n"
+msgstr ""
+
+#: ../../api/endpoints.md:449 b9a35855bc9b430bae49033b9b714c59
+#, python-brace-format
+msgid "PUT /workspace/{id}/files/{path}"
+msgstr ""
+
+#: ../../api/endpoints.md:451 5113d6b50ab74d5d986457e58cb1895d
+msgid "Write file content."
+msgstr ""
+
+#: ../../api/endpoints.md:455 22048a62cedc48f381100bd4b997ae62
+#, python-brace-format
+msgid ""
+"{\n"
+"  \"content\": \"print('updated')\"\n"
+"}\n"
+msgstr ""
+
+#: ../../api/endpoints.md:461 31cbbabc8e8d4335b14004f1284ada64
+#, python-brace-format
+msgid "DELETE /workspace/{id}/files/{path}"
+msgstr ""
+
+#: ../../api/endpoints.md:463 b97d903d9261412bb2e9ac378dad28b5
+msgid "Delete a file."
+msgstr ""
+
+#: ../../api/endpoints.md:465 f1d112d185aa4f16ae8da3029a4f9a4f
+#, python-brace-format
+msgid "POST /workspace/{id}/files/{path}/rename"
+msgstr ""
+
+#: ../../api/endpoints.md:467 848933fa5e6942dfb334f241d45b4116
+msgid "Rename a file."
+msgstr ""
+
+#: ../../api/endpoints.md:471 67f2117101174c6498ef113f60f908c5
+#, python-brace-format
+msgid ""
+"{\n"
+"  \"new_path\": \"src/app.py\"\n"
+"}\n"
+msgstr ""
+
+#: ../../api/endpoints.md:477 8e03ce1df1d942ebbd94c1b796ccb8d5
+#, python-brace-format
+msgid "GET /workspace/{id}/git/status"
+msgstr ""
+
+#: ../../api/endpoints.md:479 9da3744cde1c469d84a2972355d41f24
+msgid "Get git status."
+msgstr ""
+
+#: ../../api/endpoints.md:483 a4a47944bd4e48d98ddfa752de76e21b
+#, python-brace-format
+msgid ""
+"{\n"
+"  \"branch\": \"main\",\n"
+"  \"ahead\": 2,\n"
+"  \"behind\": 0,\n"
+"  \"staged\": [\"src/main.py\"],\n"
+"  \"modified\": [\"README.md\"],\n"
+"  \"untracked\": [\"new_file.py\"]\n"
+"}\n"
+msgstr ""
+
+#: ../../api/endpoints.md:494 ac93bd2b750f49448b7397e828c7b924
+#, python-brace-format
+msgid "GET /workspace/{id}/git/commits"
+msgstr ""
+
+#: ../../api/endpoints.md:496 731e2716bae74c23815408a520c2949b
+msgid "Get commit history."
+msgstr ""
+
+#: ../../api/endpoints.md e8b22e1d662f4765b7a0f3f87e85070c
+msgid "20"
+msgstr ""
+
+#: ../../api/endpoints.md 4f17106369c14280aeb44ce8fcac34fa
+msgid "`branch`"
+msgstr ""
+
+#: ../../api/endpoints.md 90848dbb1fb943df9fccf878468182c1
+msgid "current"
+msgstr ""
+
+#: ../../api/endpoints.md:505 0673409de27c4760ad44c9d638c96e7d
+#, python-brace-format
+msgid "POST /workspace/{id}/git/stage"
+msgstr ""
+
+#: ../../api/endpoints.md:507 7191e4e442f047558507ed4353285bf1
+msgid "Stage files."
+msgstr ""
+
+#: ../../api/endpoints.md:511 926609643e5f484ab85a232272b5178d
+#, python-brace-format
+msgid ""
+"{\n"
+"  \"files\": [\"src/main.py\", \"README.md\"]\n"
+"}\n"
+msgstr ""
+
+#: ../../api/endpoints.md:517 aead29dac405449796ff8de5d398973d
+#, python-brace-format
+msgid "POST /workspace/{id}/git/unstage"
+msgstr ""
+
+#: ../../api/endpoints.md:519 2e2c30eba27a4c7081bd93aade885c0b
+msgid "Unstage files."
+msgstr ""
+
+#: ../../api/endpoints.md:521 ef09ff132e834f5dae29a8d6bf05cd92
+#, python-brace-format
+msgid "POST /workspace/{id}/git/commit"
+msgstr ""
+
+#: ../../api/endpoints.md:523 3559294bc41946d2b99586a57dee8969
+msgid "Create a commit."
+msgstr ""
+
+#: ../../api/endpoints.md:527 11d8f2c0f943453983ba88b1dfeee38d
+#, python-brace-format
+msgid ""
+"{\n"
+"  \"message\": \"Add new feature\"\n"
+"}\n"
+msgstr ""
+
+#: ../../api/endpoints.md:533 debac2397daf4fb5b8b75b990660ea5c
+#, python-brace-format
+msgid "POST /workspace/{id}/git/push"
+msgstr ""
+
+#: ../../api/endpoints.md:535 e7bfd60541754404b717f414a6b33b4e
+msgid "Push to remote."
+msgstr ""
+
+#: ../../api/endpoints.md:537 fdf76801509d4016a134bdf8148e6a77
+#, python-brace-format
+msgid "POST /workspace/{id}/git/pull"
+msgstr ""
+
+#: ../../api/endpoints.md:539 9f73552aa98b4c7ea090d54eef198aad
+msgid "Pull from remote."
+msgstr ""
+
+#: ../../api/endpoints.md:541 34d87e936366427fba256a058997e054
+#, python-brace-format
+msgid "GET /workspace/{id}/git/diff"
+msgstr ""
+
+#: ../../api/endpoints.md:543 86953e4d8f054e4f81732407e1e44cca
+msgid "Get file diff."
+msgstr ""
+
+#: ../../api/endpoints.md ce1697398f0c4457a155570e129a2357
+msgid "`file`"
+msgstr ""
+
+#: ../../api/endpoints.md c3e8ec5781964fc4b243172b5322d2fd
+msgid "File path"
+msgstr ""
+
+#: ../../api/endpoints.md 8dd7f4c881034711a799709eb9f177bc
+msgid "`staged`"
+msgstr ""
+
+#: ../../api/endpoints.md 306dec50d70544f8b0fcfe1235f67afd
+msgid "Staged diff"
+msgstr ""
+
+#: ../../api/endpoints.md:552 318a50e1c40e4a5da7fb7f59040b0553
+msgid "Memory"
+msgstr ""
+
+#: ../../api/endpoints.md:554 721f7c70c5a042c791f1a584716c52b1
+msgid "GET /memory/search"
+msgstr ""
+
+#: ../../api/endpoints.md:556 024e6325dfea446aa6fc78371d627ba1
+msgid "Semantic memory search."
+msgstr ""
+
+#: ../../api/endpoints.md 187ac86a94e847649b819a986aae198c
+msgid "`query`"
+msgstr ""
+
+#: ../../api/endpoints.md 1c7d08473a554993be8bd446fb489ed4
+msgid "Search query"
+msgstr ""
+
+#: ../../api/endpoints.md abbb4b1618e94a04b355447ca06a0545
+msgid "`agent_id`"
+msgstr ""
+
+#: ../../api/endpoints.md 58c8866d2e514113bf375b88170e7b63
+msgid "Filter by agent"
+msgstr ""
+
+#: ../../api/endpoints.md 255b03fd551d4abbace1e8adfb81a0ea
+msgid "`scope`"
+msgstr ""
+
+#: ../../api/endpoints.md 997a712d28c94c209bac9ea656490f1c
+msgid "Memory scope"
+msgstr ""
+
+#: ../../api/endpoints.md:569 3c7c8932543b43beb92582e4afd8e6ee
+#, python-brace-format
+msgid ""
+"[\n"
+"  {\n"
+"    \"id\": 1,\n"
+"    \"key\": \"user_name\",\n"
+"    \"value\": \"Alice\",\n"
+"    \"similarity\": 0.92,\n"
+"    \"scope\": \"agent\"\n"
+"  }\n"
+"]\n"
+msgstr ""
+
+#: ../../api/endpoints.md:581 c9d71729609d472ba4fac7dcfe01692a
+msgid "POST /memory"
+msgstr ""
+
+#: ../../api/endpoints.md:583 0c57e28527b0465691f8972c26ad979f
+msgid "Create a memory."
+msgstr ""
+
+#: ../../api/endpoints.md:587 201de87277e246e1b577e3e6a197339f
+#, python-brace-format
+msgid ""
+"{\n"
+"  \"agent_id\": 1,\n"
+"  \"scope\": \"agent\",\n"
+"  \"key\": \"preference\",\n"
+"  \"value\": \"Likes detailed explanations\",\n"
+"  \"memory_type\": \"fact\"\n"
+"}\n"
+msgstr ""
+
+#: ../../api/endpoints.md:597 5062752f36c64d5888c96d142a25dc7b
+#, python-brace-format
+msgid "DELETE /memory/{id}"
+msgstr ""
+
+#: ../../api/endpoints.md:599 22f18e3c6a584ea7ae4727ded73472cd
+msgid "Delete a memory."
+msgstr ""
+
+#: ../../api/endpoints.md:601 b04b0780594240b1a703156781b06f69
+msgid "Dashboard"
+msgstr ""
+
+#: ../../api/endpoints.md:603 f21b2cec2902468a820f8e9d09563407
+msgid "GET /dashboard/circles"
+msgstr ""
+
+#: ../../api/endpoints.md:605 3802008bd5104c049e7023146ecdf37b
+msgid "Get dashboard circle summary."
+msgstr ""
+
+#: ../../api/endpoints.md:607 92ab8f4ed5ee4068b45461ff47904e18
+msgid "GET /dashboard/agents"
+msgstr ""
+
+#: ../../api/endpoints.md:609 c4a021839f6641c3bb430b7195312239
+msgid "Get dashboard agent summary."
+msgstr ""
+
+#: ../../api/endpoints.md:611 a8309599168242ff82988f773e443ca2
+msgid "GET /dashboard/activity"
+msgstr ""
+
+#: ../../api/endpoints.md:613 ced21d1e17104178a5bf5d44f51130f3
+msgid "Get recent activity feed."
+msgstr ""
+
+#: ../../api/endpoints.md:615 4716c89be5d84a7d9c2e75b4833dd0f1
+msgid "GET /dashboard/stats"
+msgstr ""
+
+#: ../../api/endpoints.md:617 0a51d5d2eab546259effad6f6f80ffe8
+msgid "Get system statistics."
+msgstr ""
+
+#: ../../api/endpoints.md:619 b93d968229c142e9abba3321b5fc866a
+msgid "Settings"
+msgstr ""
+
+#: ../../api/endpoints.md:621 533705c0ce5340b6a1b1712316ade651
+msgid "GET /settings"
+msgstr ""
+
+#: ../../api/endpoints.md:623 da6e0a89bc1b4943abf5037678865a07
+msgid ""
+"Get all application settings including LLM providers, database, and "
+"application configuration."
+msgstr ""
+
+#: ../../api/endpoints.md:627 5f6e5742089147c0907d2fa33967d3f1
+#, python-brace-format
+msgid ""
+"{\n"
+"  \"providers\": {\n"
+"    \"anthropic\": {\n"
+"      \"api_key\": \"sk-a...xyz\",\n"
+"      \"default_model\": \"claude-sonnet-4-5\",\n"
+"      \"is_configured\": true,\n"
+"      \"models\": [\n"
+"        {\n"
+"          \"id\": 1,\n"
+"          \"model_name\": \"claude-sonnet-4-20250514\",\n"
+"          \"model_alias\": \"claude-4-sonnet\",\n"
+"          \"vision\": true,\n"
+"          \"extended_thinking\": false\n"
+"        }\n"
+"      ]\n"
+"    },\n"
+"    \"openai\": {\n"
+"      \"api_key\": null,\n"
+"      \"default_model\": \"gpt-4\",\n"
+"      \"is_configured\": false,\n"
+"      \"models\": []\n"
+"    },\n"
+"    \"ollama\": {\n"
+"      \"base_url\": \"http://localhost:11434\",\n"
+"      \"default_model\": \"llama3.2\",\n"
+"      \"is_configured\": true,\n"
+"      \"models\": []\n"
+"    }\n"
+"  },\n"
+"  \"database\": {\n"
+"    \"host\": \"localhost\",\n"
+"    \"port\": 5432,\n"
+"    \"name\": \"gathering\",\n"
+"    \"user\": \"gathering\",\n"
+"    \"is_connected\": true\n"
+"  },\n"
+"  \"application\": {\n"
+"    \"environment\": \"development\",\n"
+"    \"debug\": true,\n"
+"    \"log_level\": \"INFO\"\n"
+"  }\n"
+"}\n"
+msgstr ""
+
+#: ../../api/endpoints.md:672 367fb99e2a9341a19a6f50c75f0e1287
+msgid "**Supported Providers:**"
+msgstr ""
+
+#: ../../api/endpoints.md:674 89ac1700e6e84ae5b68d9c955724cc8b
+msgid "`anthropic`: Anthropic Claude models"
+msgstr ""
+
+#: ../../api/endpoints.md:675 24f50469fc22466da6d73cc2a1a34f1c
+msgid "`openai`: OpenAI GPT models"
+msgstr ""
+
+#: ../../api/endpoints.md:676 8b7d744d99f643e3870b48926416fa02
+msgid "`deepseek`: DeepSeek models"
+msgstr ""
+
+#: ../../api/endpoints.md:677 deecbc57a8e64a43a3613eb95b80752b
+msgid "`mistral`: Mistral AI models"
+msgstr ""
+
+#: ../../api/endpoints.md:678 2adae8e639f748e4b0781ea06c92d1e9
+msgid "`google`: Google Gemini models"
+msgstr ""
+
+#: ../../api/endpoints.md:679 36965c18493b46e2b31c456b3967ac7d
+msgid "`ollama`: Local Ollama models"
+msgstr ""
+
+#: ../../api/endpoints.md:681 b1ae49e3b3654520bc95fc8a2bd675d3
+#, python-brace-format
+msgid "PATCH /settings/providers/{provider}"
+msgstr ""
+
+#: ../../api/endpoints.md:683 4d6b203905e8469a8fe8053cb6fb4215
+msgid "Update a provider's settings."
+msgstr ""
+
+#: ../../api/endpoints.md:685 b32c141530514372ab109d97ee31b38c
+msgid "**Path Parameters:**"
+msgstr ""
+
+#: ../../api/endpoints.md 2685ab0f87d7471184b38ec1902e810f
+msgid "`provider`"
+msgstr ""
+
+#: ../../api/endpoints.md c17da876642e4605aa84fb2932c3fa9d
+msgid "Provider name (anthropic, openai, etc.)"
+msgstr ""
+
+#: ../../api/endpoints.md:693 43b6dbdf36cb4b9693a4c9e3a68d3d96
+#, python-brace-format
+msgid ""
+"{\n"
+"  \"api_key\": \"sk-new-key...\",\n"
+"  \"default_model\": \"claude-sonnet-4-5\",\n"
+"  \"base_url\": \"http://localhost:11434\"\n"
+"}\n"
+msgstr ""
+
+#: ../../api/endpoints.md:703 32dec556ee73427ab71783d2389536b1
+#, python-brace-format
+msgid ""
+"{\n"
+"  \"api_key\": \"sk-n...key\",\n"
+"  \"default_model\": \"claude-sonnet-4-5\",\n"
+"  \"is_configured\": true,\n"
+"  \"models\": []\n"
+"}\n"
+msgstr ""
+
+#: ../../api/endpoints.md:712 3de783de7589432495e579c1a869fcee
+msgid "PATCH /settings/application"
+msgstr ""
+
+#: ../../api/endpoints.md:714 a57f74a36d5e43fea1cf306b777ec918
+msgid "Update application settings."
+msgstr ""
+
+#: ../../api/endpoints.md:718 5076b35beffd41fd8c5331081f9ebe8b
+#, python-brace-format
+msgid ""
+"{\n"
+"  \"debug\": false,\n"
+"  \"log_level\": \"WARNING\"\n"
+"}\n"
+msgstr ""
+
+#: ../../api/endpoints.md:725 a2010ffcb69e4c3dbe8cc4136153c09c
+msgid "**Valid log levels:** `DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`"
+msgstr ""
+
+#: ../../api/endpoints.md:729 7641e6d7812e4e10bfd15e047211ced3
+#, python-brace-format
+msgid ""
+"{\n"
+"  \"environment\": \"development\",\n"
+"  \"debug\": false,\n"
+"  \"log_level\": \"WARNING\"\n"
+"}\n"
+msgstr ""
+
+#: ../../api/endpoints.md:737 fe6ddf50d37443f3b4ee2825d2d3c6be
+#, python-brace-format
+msgid "POST /settings/providers/{provider}/test"
+msgstr ""
+
+#: ../../api/endpoints.md:739 0dd328553dcb4f1b9adb7db003d8a6d9
+msgid "Test connection to a provider."
+msgstr ""
+
+#: ../../api/endpoints.md:741 1311129102c64c9494f03b6d8ed3e27b
+msgid "**Response (success):**"
+msgstr ""
+
+#: ../../api/endpoints.md:743 64e35e2240564b19a8c28f85d2aaf7ab
+#, python-brace-format
+msgid ""
+"{\n"
+"  \"success\": true,\n"
+"  \"message\": \"Anthropic API key is valid\"\n"
+"}\n"
+msgstr ""
+
+#: ../../api/endpoints.md:750 ae0f71c4411048f3ad08d4f058cf1fd9
+msgid "**Response (failure):**"
+msgstr ""
+
+#: ../../api/endpoints.md:752 a2da78ea5df0465cbd8e58e4f279b151
+#, python-brace-format
+msgid ""
+"{\n"
+"  \"success\": false,\n"
+"  \"message\": \"Invalid API key\"\n"
+"}\n"
+msgstr ""
+
+#: ../../api/endpoints.md:759 cbc18a492bb644928456e2b16eaa0417
+msgid "**Ollama response:**"
+msgstr ""
+
+#: ../../api/endpoints.md:761 0be1f4a667964c409b61049a881cd003
+#, python-brace-format
+msgid ""
+"{\n"
+"  \"success\": true,\n"
+"  \"message\": \"Connected to Ollama. 5 models available.\",\n"
+"  \"models\": [\"llama3.2\", \"codellama\", \"mistral\"]\n"
+"}\n"
+msgstr ""
+
+#: ../../api/endpoints.md:769 b4f65259e60b46b5b47122e767ed510a
+msgid "Tools (Agent Capabilities)"
+msgstr ""
+
+#: ../../api/endpoints.md:771 25d14d7997ba407f8aed327adabced89
+msgid "Manage which skills/tools are enabled for each agent."
+msgstr ""
+
+#: ../../api/endpoints.md:773 90aece98ea0a4ad28421369eb429b391
+msgid "GET /tools/skills"
+msgstr ""
+
+#: ../../api/endpoints.md:775 ba15012e912048f3af57ed2ee4398475
+msgid "List all available skills."
+msgstr ""
+
+#: ../../api/endpoints.md 17a05168b18542be8fbffa20b8f987d6
+#: 9fd1ef37c97643ebbdf37fc65de075f1 a0240d5d9e2647d189fed4a985e35a8d
+msgid "`category`"
+msgstr ""
+
+#: ../../api/endpoints.md b6ec45f191d349f6bf7844a7e22d635c
+msgid "Filter by category"
+msgstr ""
+
+#: ../../api/endpoints.md:785 8cd5e18f4c0d478d8167c22c0b77ed01
+#, python-brace-format
+msgid ""
+"[\n"
+"  {\n"
+"    \"id\": 1,\n"
+"    \"name\": \"git\",\n"
+"    \"display_name\": \"Git\",\n"
+"    \"description\": \"Repository management, commits, branches, PRs\",\n"
+"    \"category\": \"core\",\n"
+"    \"required_permissions\": [\"git\", \"read\", \"write\"],\n"
+"    \"is_dangerous\": false,\n"
+"    \"is_enabled\": true,\n"
+"    \"version\": \"1.0.0\",\n"
+"    \"tools_count\": 5\n"
+"  }\n"
+"]\n"
+msgstr ""
+
+#: ../../api/endpoints.md:802 65006eafee414becb39f470c83c89766
+msgid "**Skill Categories:**"
+msgstr ""
+
+#: ../../api/endpoints.md:804 75317ea730b044798776416edffd34e4
+msgid "`core`: Git, Test, Filesystem"
+msgstr ""
+
+#: ../../api/endpoints.md:805 c8ea39f0b84a4cef8a2bbf5a901deb1d
+msgid "`code`: Code Execution, Analysis"
+msgstr ""
+
+#: ../../api/endpoints.md:806 5a4068802d1b4ef48ee6eaf17f2c031c
+msgid "`system`: Shell, Database, Deploy"
+msgstr ""
+
+#: ../../api/endpoints.md:807 2a52d025eb6c4ddeb2b6482bd1d21658
+msgid "`web`: Web Search, Scraper, HTTP"
+msgstr ""
+
+#: ../../api/endpoints.md:808 a9a5e57bae6a4e42bd1eccd993500e33
+msgid "`ai`: AI/ML operations"
+msgstr ""
+
+#: ../../api/endpoints.md:809 170d2d0ce9b449bfb779d007f9f7dc35
+msgid "`communication`: Email, Notifications, Social"
+msgstr ""
+
+#: ../../api/endpoints.md:810 470fb11b65974895a07a2963285b3616
+msgid "`productivity`: Calendar, Docs"
+msgstr ""
+
+#: ../../api/endpoints.md:811 3643314b02f44ad99ba2e0c3e16dbb67
+msgid "`media`: Image, PDF"
+msgstr ""
+
+#: ../../api/endpoints.md:812 312309eca28a4d0d89a8465ae6dfba48
+msgid "`cloud`: Cloud providers, Monitoring"
+msgstr ""
+
+#: ../../api/endpoints.md:813 3088483fb2974490b93715fed3c41bbb
+msgid "`gathering`: Goals, Pipelines, Tasks, Schedules"
+msgstr ""
+
+#: ../../api/endpoints.md:815 2bf6c242742b4c2a8281ee7648496980
+msgid "GET /tools/skills/categories"
+msgstr ""
+
+#: ../../api/endpoints.md:817 55301f6964b44bbdac5bf05376368074
+msgid "Get skill categories with counts."
+msgstr ""
+
+#: ../../api/endpoints.md:821 b43a84eb720044b08dc78b3fa0c748af
+#, python-brace-format
+msgid ""
+"{\n"
+"  \"core\": 5,\n"
+"  \"code\": 2,\n"
+"  \"system\": 3,\n"
+"  \"web\": 3,\n"
+"  \"gathering\": 6\n"
+"}\n"
+msgstr ""
+
+#: ../../api/endpoints.md:831 f649479947824b08810840818b337e94
+#, python-brace-format
+msgid "GET /tools/agents/{agent_id}"
+msgstr ""
+
+#: ../../api/endpoints.md:833 78569338781c417bba90eebe10199667
+msgid "Get all tools for an agent with enabled/disabled status."
+msgstr ""
+
+#: ../../api/endpoints.md:837 f4cb075bdee344d196bcfffb886996e6
+#, python-brace-format
+msgid ""
+"{\n"
+"  \"agent_id\": 1,\n"
+"  \"agent_name\": \"Sophie\",\n"
+"  \"tools\": [\n"
+"    {\n"
+"      \"skill_id\": 1,\n"
+"      \"skill_name\": \"git\",\n"
+"      \"skill_display_name\": \"Git\",\n"
+"      \"skill_category\": \"core\",\n"
+"      \"required_permissions\": [\"git\", \"read\", \"write\"],\n"
+"      \"is_dangerous\": false,\n"
+"      \"is_enabled\": true,\n"
+"      \"usage_count\": 42,\n"
+"      \"last_used_at\": \"2025-01-01T12:00:00Z\"\n"
+"    }\n"
+"  ],\n"
+"  \"enabled_count\": 12,\n"
+"  \"total_count\": 24\n"
+"}\n"
+msgstr ""
+
+#: ../../api/endpoints.md:859 ce51cb672abf4ea18d4866b9c4b16476
+#, python-brace-format
+msgid "PATCH /tools/agents/{agent_id}/skills/{skill_name}"
+msgstr ""
+
+#: ../../api/endpoints.md:861 92ca98f28d864f23833ce8c962aa21f3
+msgid "Enable or disable a tool for an agent."
+msgstr ""
+
+#: ../../api/endpoints.md:865 24a1359f19814521af6a171098e24be3
+#, python-brace-format
+msgid ""
+"{\n"
+"  \"is_enabled\": true\n"
+"}\n"
+msgstr ""
+
+#: ../../api/endpoints.md:873 569f3900b59b4a988ac8abeb6db12752
+#, python-brace-format
+msgid ""
+"{\n"
+"  \"agent_id\": 1,\n"
+"  \"skill_name\": \"git\",\n"
+"  \"is_enabled\": true,\n"
+"  \"message\": \"Tool 'git' enabled for agent 1\"\n"
+"}\n"
+msgstr ""
+
+#: ../../api/endpoints.md:882 057532401e8d4b869bf65989b5e06096
+#, python-brace-format
+msgid "POST /tools/agents/{agent_id}/skills/bulk"
+msgstr ""
+
+#: ../../api/endpoints.md:884 92a58c73faac44b18285ab70f87110dc
+msgid "Bulk enable/disable multiple tools."
+msgstr ""
+
+#: ../../api/endpoints.md:888 26bfe9e2e67b4a7887d77095e1a9cf65
+#, python-brace-format
+msgid ""
+"{\n"
+"  \"skill_names\": [\"git\", \"test\", \"shell\"],\n"
+"  \"is_enabled\": true\n"
+"}\n"
+msgstr ""
+
+#: ../../api/endpoints.md:897 01b36d85c1cc47f2805a197b12c38aad
+#, python-brace-format
+msgid ""
+"{\n"
+"  \"agent_id\": 1,\n"
+"  \"updated_count\": 3,\n"
+"  \"is_enabled\": true,\n"
+"  \"message\": \"3 tools enabled\"\n"
+"}\n"
+msgstr ""
+
+#: ../../api/endpoints.md:906 c22791ff658c4b85bd73de96e62fd27c
+#, python-brace-format
+msgid "POST /tools/agents/{agent_id}/skills/enable-all"
+msgstr ""
+
+#: ../../api/endpoints.md:908 aa851a13ae044c3d9337a5e909ce8d1f
+msgid "Enable all tools for an agent."
+msgstr ""
+
+#: ../../api/endpoints.md 1de88440808f465fb7bb1b20469d0e03
+msgid "Only enable tools in this category"
+msgstr ""
+
+#: ../../api/endpoints.md:918 a174ba866ac44fe88214fd3249d59071
+#, python-brace-format
+msgid ""
+"{\n"
+"  \"agent_id\": 1,\n"
+"  \"enabled_count\": 24,\n"
+"  \"category\": null,\n"
+"  \"message\": \"Enabled 24 tools\"\n"
+"}\n"
+msgstr ""
+
+#: ../../api/endpoints.md:927 1f76beebfd3541f888fe2b6dd968c4fd
+#, python-brace-format
+msgid "POST /tools/agents/{agent_id}/skills/disable-all"
+msgstr ""
+
+#: ../../api/endpoints.md:929 6fa9c04b743647faabcf347e40ab1e0a
+msgid "Disable all tools for an agent."
+msgstr ""
+
+#: ../../api/endpoints.md 580e5e3919724f5186f9f30c0d99b5f6
+msgid "Only disable tools in this category"
+msgstr ""
+
+#: ../../api/endpoints.md:937 4502e7a299894f9ca70e011cbe79dee2
+#, python-brace-format
+msgid "GET /tools/agents/{agent_id}/enabled"
+msgstr ""
+
+#: ../../api/endpoints.md:939 1b265b780c754b258e81579af2afe49b
+msgid "Get list of enabled skill names for an agent."
+msgstr ""
+
+#: ../../api/endpoints.md:943 fdecb071053f4acd849a104f98547f9f
+#, python-brace-format
+msgid ""
+"{\n"
+"  \"agent_id\": 1,\n"
+"  \"enabled_skills\": [\"git\", \"test\", \"filesystem\", \"code\"]\n"
+"}\n"
+msgstr ""
+
+#: ../../api/endpoints.md:950 a16fccd83e9545c2b346dfb9bc5a0370
+msgid "Error Responses"
+msgstr ""
+
+#: ../../api/endpoints.md:952 8aa4fb33bdcb4c58ad3e4ce7b17ef9c0
+msgid "All endpoints may return:"
+msgstr ""
+
+#: ../../api/endpoints.md:954 74bc1aa260c746ec82e6ee4e7045afb0
+msgid "400 Bad Request"
+msgstr ""
+
+#: ../../api/endpoints.md:956 6f9f8d7f993d4f40bb184967a2db4480
+#, python-brace-format
+msgid ""
+"{\n"
+"  \"detail\": \"Invalid request body\"\n"
+"}\n"
+msgstr ""
+
+#: ../../api/endpoints.md:962 ff034dd62a4f4182a0f112fe0e595878
+msgid "404 Not Found"
+msgstr ""
+
+#: ../../api/endpoints.md:964 d64bf68cbe3e44c0857d797c6bc51dd4
+#, python-brace-format
+msgid ""
+"{\n"
+"  \"detail\": \"Resource not found\"\n"
+"}\n"
+msgstr ""
+
+#: ../../api/endpoints.md:970 e41859226a8c48cf9512389f14fd4310
+msgid "422 Validation Error"
+msgstr ""
+
+#: ../../api/endpoints.md:972 c1c8cb31c8394cc3a2d0865985801b31
+#, python-brace-format
+msgid ""
+"{\n"
+"  \"detail\": [\n"
+"    {\n"
+"      \"loc\": [\"body\", \"name\"],\n"
+"      \"msg\": \"field required\",\n"
+"      \"type\": \"value_error.missing\"\n"
+"    }\n"
+"  ]\n"
+"}\n"
+msgstr ""
+
+#: ../../api/endpoints.md:984 3a45fd5de8c24a3fa3172e6c12a5cf40
+msgid "500 Internal Server Error"
+msgstr ""
+
+#: ../../api/endpoints.md:986 72d5450b8f294eab8502ab0fe9b4a8e1
+#, python-brace-format
+msgid ""
+"{\n"
+"  \"detail\": \"Internal server error\"\n"
+"}\n"
+msgstr ""
+

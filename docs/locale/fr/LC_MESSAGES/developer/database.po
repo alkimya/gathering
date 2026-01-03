@@ -1,0 +1,638 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026, GatheRing Team
+# This file is distributed under the same license as the GatheRing package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: GatheRing 0.2.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-01-02 14:08+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.17.0\n"
+
+#: ../../developer/database.md:1 93e6a3493bf84d3a8c61a07171f7460f
+msgid "Database"
+msgstr ""
+
+#: ../../developer/database.md:3 9ce1dab6c94d44a8ace3699bacffbc96
+msgid "GatheRing uses PostgreSQL with pgvector for vector similarity search."
+msgstr ""
+
+#: ../../developer/database.md:5 497bf7094ce440dc897e3020ee51a81f
+msgid "pycopg - Database Layer"
+msgstr ""
+
+#: ../../developer/database.md:7 9e9e2400758a460083a59438d586b372
+msgid ""
+"GatheRing uses [pycopg](../../pycopg/README.md), a high-level Python API "
+"for PostgreSQL/PostGIS/TimescaleDB. It wraps `asyncpg` (async) and "
+"`psycopg2` (sync) with a unified, pythonic interface."
+msgstr ""
+
+#: ../../developer/database.md:9 0e6974b0ef024b5ca2c32c2ddef80310
+#, python-format
+msgid ""
+"from pycopg import Database, AsyncDatabase\n"
+"\n"
+"# Sync usage\n"
+"db = Database.from_env()\n"
+"db.list_schemas()\n"
+"db.list_tables(\"agent\")\n"
+"\n"
+"# Async usage (recommended for API)\n"
+"db = AsyncDatabase.from_env()\n"
+"schemas = await db.list_schemas()\n"
+"users = await db.execute(\"SELECT * FROM agent.agents WHERE status = "
+"%s\", [\"active\"])\n"
+"\n"
+"# Connection pooling\n"
+"from pycopg import PooledDatabase\n"
+"\n"
+"db = PooledDatabase.from_env(min_size=5, max_size=20)\n"
+"with db.connection() as conn:\n"
+"    result = conn.execute(\"SELECT * FROM agent.agents\")\n"
+"\n"
+"# Migrations\n"
+"from pycopg import Migrator\n"
+"\n"
+"migrator = Migrator(db, \"gathering/db/migrations/\")\n"
+"migrator.migrate()\n"
+msgstr ""
+
+#: ../../developer/database.md:36 e29cd173635b4d5aaf1b5819a0908956
+msgid "See [pycopg README](../../pycopg/README.md) for full API documentation."
+msgstr ""
+
+#: ../../developer/database.md:38 33286e148916425db87a7c63f6f7ea7a
+msgid "Low-Level Drivers"
+msgstr ""
+
+#: ../../developer/database.md:40 02e94aca86bd4f2fa3112df32d5dc47d
+msgid "Under the hood, pycopg uses:"
+msgstr ""
+
+#: ../../developer/database.md 58473f5cf7be45ba84296b5523b150ea
+msgid "Driver"
+msgstr ""
+
+#: ../../developer/database.md acd80a6181bf46ac9bd441a4fd34a140
+msgid "Type"
+msgstr ""
+
+#: ../../developer/database.md 5474776716dd43aeb97dd600b7ff112a
+msgid "Usage"
+msgstr ""
+
+#: ../../developer/database.md 3deaa9358e5e4938a7bd0f2827bb33bc
+msgid "`asyncpg`"
+msgstr ""
+
+#: ../../developer/database.md 22bac4ea96d447b9b40452a1e3ed183d
+msgid "Async"
+msgstr ""
+
+#: ../../developer/database.md 50945a578b3c4152b42c65b6fe36e839
+msgid "Main database operations (API, queries)"
+msgstr ""
+
+#: ../../developer/database.md c5d68bbb4f7742ba91c488e993875690
+msgid "`psycopg2`"
+msgstr ""
+
+#: ../../developer/database.md 0dc3e965903b4a03b0d250477bb9e535
+msgid "Sync"
+msgstr ""
+
+#: ../../developer/database.md f97853930e1f4d31b06a2bc530050579
+msgid "Migrations, CLI tools, blocking operations"
+msgstr ""
+
+#: ../../developer/database.md:47 b14932db66e6402894e5dde7e9fb0bf1
+msgid "Database Diagram"
+msgstr ""
+
+#: ../../developer/database.md:49 415fcd4ab38c4c3792393db221d4dce5
+msgid "![Database Schema](../_static/database/gathering.svg)"
+msgstr ""
+
+#: ../../developer/database.md:49 09f52fa46645444d8e7d218cff2b8e1c
+msgid "Database Schema"
+msgstr ""
+
+#: ../../developer/database.md:49 09f52fa46645444d8e7d218cff2b8e1c
+msgid ".. image:: ../_static/database/gathering.svg"
+msgstr ""
+
+#: ../../developer/database.md:51 d1ecb924eeb348f2b4184f0515d67645
+msgid ""
+"*Full database model available in "
+"[gathering.dbm](../_static/database/gathering.dbm) (pgModeler format)*"
+msgstr ""
+
+#: ../../developer/database.md:53 8ae6c80aa2464dbe9f86631250024fa1
+msgid "Overview"
+msgstr ""
+
+#: ../../developer/database.md:55 57cf616e5aed45c8985c87eb4a801c5c
+msgid "The database is organized into schemas:"
+msgstr ""
+
+#: ../../developer/database.md 3f3cb356c32e458180b6903bc4c5e2c3
+msgid "Schema"
+msgstr ""
+
+#: ../../developer/database.md 104d835f2b1b4c72850066352b316c38
+msgid "Purpose"
+msgstr ""
+
+#: ../../developer/database.md 7475a872f73f4dd0b2e0cf216c8a460a
+msgid "`public`"
+msgstr ""
+
+#: ../../developer/database.md a14495263373411f958f1999b3bcd8a5
+msgid "Common types, functions, extensions"
+msgstr ""
+
+#: ../../developer/database.md 4da058792cfb4cad99db70630870bcf7
+msgid "`agent`"
+msgstr ""
+
+#: ../../developer/database.md 0f8da3d1e467432cbfd0707e7e31163d
+msgid "Agent definitions and sessions"
+msgstr ""
+
+#: ../../developer/database.md f38b77d125624a4192aceb11f4e3c04e
+msgid "`circle`"
+msgstr ""
+
+#: ../../developer/database.md f0e75d915cbf47eea01504e16dc9241c
+msgid "Circle management"
+msgstr ""
+
+#: ../../developer/database.md 3694c3c87fa64338833c46b45afec4ae
+msgid "`conversation`"
+msgstr ""
+
+#: ../../developer/database.md 46f8ec7413994ede99b3ffbb09279327
+msgid "Conversations and messages"
+msgstr ""
+
+#: ../../developer/database.md 7b617c9e9c3840548647a76f836fedb3
+msgid "`memory`"
+msgstr ""
+
+#: ../../developer/database.md 24a4985d3dbe4f68bc977f492f4a7280
+msgid "Long-term memory and RAG"
+msgstr ""
+
+#: ../../developer/database.md 864da2d4a1024d88ae436218daa44fdc
+msgid "`project`"
+msgstr ""
+
+#: ../../developer/database.md 102716abeaba4667b6edb290f5d657a3
+msgid "Project and task management"
+msgstr ""
+
+#: ../../developer/database.md c7ac20c9780a4818a8096559aefd2fd1
+msgid "`schedule`"
+msgstr ""
+
+#: ../../developer/database.md ad16c6e8a9774a34a247911d30e2ea67
+msgid "Scheduled actions"
+msgstr ""
+
+#: ../../developer/database.md:67 ccf489e5eb39418ab42e5c1734cf7e57
+msgid "Setup"
+msgstr ""
+
+#: ../../developer/database.md:69 49c2fc2717894de1b979c097b616920d
+msgid "Prerequisites"
+msgstr ""
+
+#: ../../developer/database.md:71 d37f1bb8c4fc4592aea9e32452d8d8e0
+msgid ""
+"# Install PostgreSQL 15+\n"
+"sudo apt install postgresql-15\n"
+"\n"
+"# Install pgvector\n"
+"sudo apt install postgresql-15-pgvector\n"
+msgstr ""
+
+#: ../../developer/database.md:79 7e9889fed5784ebfb8bf3690b284c6ec
+msgid "Create Database"
+msgstr ""
+
+#: ../../developer/database.md:81 133f686659614228a7883f5ee5f905d4
+msgid ""
+"# Create user and database\n"
+"sudo -u postgres createuser gathering\n"
+"sudo -u postgres createdb gathering -O gathering\n"
+"\n"
+"# Set password\n"
+"sudo -u postgres psql -c \"ALTER USER gathering PASSWORD "
+"'your_password';\"\n"
+msgstr ""
+
+#: ../../developer/database.md:90 57e3cc0afab742dba3d730ccc76d3b3e
+msgid "Enable Extensions"
+msgstr ""
+
+#: ../../developer/database.md:92 f1dff7e44968479882809e1837097e37
+msgid ""
+"-- Connect to database\n"
+"\\c gathering\n"
+"\n"
+"-- Enable required extensions\n"
+"CREATE EXTENSION IF NOT EXISTS vector;\n"
+"CREATE EXTENSION IF NOT EXISTS pg_trgm;\n"
+msgstr ""
+
+#: ../../developer/database.md:101 9dbf6239e95f4f0a9a7265cb81b22aa3
+msgid "Run Migrations"
+msgstr ""
+
+#: ../../developer/database.md:103 466cae9d326d46d08b0da3b65ba3009b
+msgid "python -m gathering.db.migrate\n"
+msgstr ""
+
+#: ../../developer/database.md:107 44723ff7622e4df8af77da067092f2aa
+msgid "Or manually:"
+msgstr ""
+
+#: ../../developer/database.md:109 4420983765a04e34936ba421fc80b2b9
+msgid ""
+"for f in gathering/db/migrations/*.sql; do\n"
+"  psql -d gathering -f \"$f\"\n"
+"done\n"
+msgstr ""
+
+#: ../../developer/database.md:115 80e8817c8dca4a31b35c503b45cece6f
+msgid "Schema Details"
+msgstr ""
+
+#: ../../developer/database.md:117 5cb1b7cba66d41e385b5311f8bee36cf
+msgid "Agent Schema"
+msgstr ""
+
+#: ../../developer/database.md:119 26d2a31604424cc4b6f2f1947d35fafd
+#, python-brace-format
+msgid ""
+"-- agent.agents\n"
+"CREATE TABLE agent.agents (\n"
+"    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,\n"
+"    name VARCHAR(100) NOT NULL,\n"
+"    role VARCHAR(100),\n"
+"    provider VARCHAR(50) DEFAULT 'anthropic',  -- openai, anthropic, "
+"ollama\n"
+"    model VARCHAR(100) DEFAULT 'claude-sonnet-4-20250514',\n"
+"    personality JSONB DEFAULT '{}',\n"
+"    config JSONB DEFAULT '{}',\n"
+"    status agent_status DEFAULT 'idle',\n"
+"    created_at TIMESTAMPTZ DEFAULT NOW(),\n"
+"    updated_at TIMESTAMPTZ DEFAULT NOW()\n"
+");\n"
+"\n"
+"-- agent.sessions\n"
+"CREATE TABLE agent.sessions (\n"
+"    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,\n"
+"    agent_id BIGINT REFERENCES agent.agents(id),\n"
+"    started_at TIMESTAMPTZ DEFAULT NOW(),\n"
+"    ended_at TIMESTAMPTZ,\n"
+"    context JSONB DEFAULT '{}'\n"
+");\n"
+msgstr ""
+
+#: ../../developer/database.md:144 1d6326d2cd9c478a90409e558c4b0348
+msgid "Circle Schema"
+msgstr ""
+
+#: ../../developer/database.md:146 96bd9d06b051425abeb0d30dab41d60a
+#, python-brace-format
+msgid ""
+"-- circle.circles\n"
+"CREATE TABLE circle.circles (\n"
+"    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,\n"
+"    name VARCHAR(100) UNIQUE NOT NULL,\n"
+"    display_name VARCHAR(200),\n"
+"    description TEXT,\n"
+"    config JSONB DEFAULT '{}',\n"
+"    status circle_status DEFAULT 'created',\n"
+"    created_at TIMESTAMPTZ DEFAULT NOW()\n"
+");\n"
+"\n"
+"-- circle.memberships\n"
+"CREATE TABLE circle.memberships (\n"
+"    circle_id BIGINT REFERENCES circle.circles(id),\n"
+"    agent_id BIGINT REFERENCES agent.agents(id),\n"
+"    role VARCHAR(50) DEFAULT 'member',\n"
+"    joined_at TIMESTAMPTZ DEFAULT NOW(),\n"
+"    PRIMARY KEY (circle_id, agent_id)\n"
+");\n"
+msgstr ""
+
+#: ../../developer/database.md:168 96113510a157496291f2fad133c6adbb
+msgid "Memory Schema"
+msgstr ""
+
+#: ../../developer/database.md:170 45e8696a06834d298aa6fa102ab15c3f
+msgid ""
+"-- memory.memories\n"
+"CREATE TABLE memory.memories (\n"
+"    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,\n"
+"    scope memory_scope NOT NULL,\n"
+"    scope_id BIGINT,\n"
+"    agent_id BIGINT REFERENCES agent.agents(id),\n"
+"    memory_type memory_type DEFAULT 'fact',\n"
+"    key VARCHAR(200) NOT NULL,\n"
+"    value TEXT NOT NULL,\n"
+"    embedding vector(1536),  -- pgvector\n"
+"    importance FLOAT DEFAULT 0.5,\n"
+"    created_at TIMESTAMPTZ DEFAULT NOW()\n"
+");\n"
+"\n"
+"-- Vector similarity index\n"
+"CREATE INDEX idx_memories_embedding\n"
+"ON memory.memories USING ivfflat (embedding vector_cosine_ops)\n"
+"WITH (lists = 100);\n"
+msgstr ""
+
+#: ../../developer/database.md:191 692f5b75560242459921d730659ded61
+msgid "Vector Search"
+msgstr ""
+
+#: ../../developer/database.md:193 5958858bb1ce440bafe412543cd1faf1
+msgid "Creating Embeddings"
+msgstr ""
+
+#: ../../developer/database.md:195 c3417833ac2f4bae9610500968aa8692
+msgid ""
+"from gathering.memory import EmbeddingService\n"
+"\n"
+"service = EmbeddingService()\n"
+"embedding = await service.create_embedding(\"Some text to embed\")\n"
+msgstr ""
+
+#: ../../developer/database.md:202 3f768aeaf5c142e685fb402a83158963
+msgid "Similarity Search"
+msgstr ""
+
+#: ../../developer/database.md:204 62d63b54816c456490eeb7f043ab641b
+msgid ""
+"-- Find similar memories\n"
+"SELECT id, key, value,\n"
+"       1 - (embedding <=> query_embedding) AS similarity\n"
+"FROM memory.memories\n"
+"WHERE embedding IS NOT NULL\n"
+"  AND agent_id = $1\n"
+"ORDER BY embedding <=> query_embedding\n"
+"LIMIT 10;\n"
+msgstr ""
+
+#: ../../developer/database.md:215 5072568d65b54d2db2eae491dea9f1fa
+msgid "Using the helper function:"
+msgstr ""
+
+#: ../../developer/database.md:217 279416b74d1044f6a80ac334bf90bd69
+msgid ""
+"from gathering.memory import search_similar_memories\n"
+"\n"
+"results = await search_similar_memories(\n"
+"    query=\"What is the user's name?\",\n"
+"    agent_id=1,\n"
+"    limit=5,\n"
+"    threshold=0.7\n"
+")\n"
+msgstr ""
+
+#: ../../developer/database.md:228 320c1363a50a47deafd35967c860f630
+msgid "Migrations"
+msgstr ""
+
+#: ../../developer/database.md:230 d45cb14a4bd2452688c2a12564ee9bcc
+msgid "Creating a Migration"
+msgstr ""
+
+#: ../../developer/database.md:232 931c9a9f398c4efe9afd8f6034496cb0
+msgid "Create a new file in `gathering/db/migrations/`:"
+msgstr ""
+
+#: ../../developer/database.md:234 717632c28ea346a392d693c4009340c4
+msgid ""
+"-- 010_add_new_feature.sql\n"
+"\n"
+"-- Add new column\n"
+"ALTER TABLE agent.agents ADD COLUMN new_field VARCHAR(100);\n"
+"\n"
+"-- Create new table\n"
+"CREATE TABLE agent.new_table (\n"
+"    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,\n"
+"    -- ...\n"
+");\n"
+"\n"
+"-- Create indexes\n"
+"CREATE INDEX idx_new_field ON agent.agents(new_field);\n"
+msgstr ""
+
+#: ../../developer/database.md:250 c6d55c3b9206466592b64e496d451df5
+msgid "Migration Best Practices"
+msgstr ""
+
+#: ../../developer/database.md:252 ba064ea142ff4c7cab13e1e5d67c3656
+msgid "**Incremental changes**: One feature per migration"
+msgstr ""
+
+#: ../../developer/database.md:253 393672a262a2430ba0bfff8a62c4f6c4
+msgid "**Backward compatible**: Don't break existing code"
+msgstr ""
+
+#: ../../developer/database.md:254 cc4d4f6a3caa4df393ff08b889fb347f
+msgid "**Idempotent**: Safe to run multiple times"
+msgstr ""
+
+#: ../../developer/database.md:255 b2dc3dcb7fa945cf837ae78b58a1149a
+msgid "**Documented**: Comment complex changes"
+msgstr ""
+
+#: ../../developer/database.md:257 c576050f67df44879c790d489e835ce9
+msgid "Connection Pooling"
+msgstr ""
+
+#: ../../developer/database.md:259 89148b223ac54edba5260615d0ff366d
+msgid "GatheRing uses connection pooling for efficiency:"
+msgstr ""
+
+#: ../../developer/database.md:261 e54968ec151b4f948a23229f5c79b222
+msgid ""
+"from gathering.db import DatabasePool\n"
+"\n"
+"# Get pool\n"
+"pool = await DatabasePool.get_pool()\n"
+"\n"
+"# Use connection\n"
+"async with pool.acquire() as conn:\n"
+"    result = await conn.fetch(\"SELECT * FROM agent.agents\")\n"
+msgstr ""
+
+#: ../../developer/database.md:272 f1190af53a6a427bb9bf4ca51acdd6f7
+msgid "Configuration"
+msgstr ""
+
+#: ../../developer/database.md:274 52a85883a1ad4082b9be835ccd986723
+msgid ""
+"# .env\n"
+"DATABASE_URL=postgresql://user:pass@localhost:5432/gathering\n"
+"DATABASE_POOL_MIN=5\n"
+"DATABASE_POOL_MAX=20\n"
+msgstr ""
+
+#: ../../developer/database.md:281 1c496212a97f4b5484e91206d6cbe053
+msgid "Backup and Restore"
+msgstr ""
+
+#: ../../developer/database.md:283 301a7cb92b4546e6b965a807280df68d
+msgid "Backup"
+msgstr ""
+
+#: ../../developer/database.md:285 4ab236438ad645789cd1039c84648277
+msgid ""
+"# Full backup\n"
+"pg_dump -Fc gathering > backup.dump\n"
+"\n"
+"# Schema only\n"
+"pg_dump -s gathering > schema.sql\n"
+"\n"
+"# Data only\n"
+"pg_dump -a gathering > data.sql\n"
+msgstr ""
+
+#: ../../developer/database.md:296 c7afea2234364e5e9515132f36cc6078
+msgid "Restore"
+msgstr ""
+
+#: ../../developer/database.md:298 25e0e270e36547f380ecfb1d17ce2647
+msgid ""
+"# Restore full backup\n"
+"pg_restore -d gathering backup.dump\n"
+"\n"
+"# Restore from SQL\n"
+"psql -d gathering -f schema.sql\n"
+msgstr ""
+
+#: ../../developer/database.md:306 03ee1d7a048c447d92080166fce317b7
+msgid "Performance"
+msgstr ""
+
+#: ../../developer/database.md:308 87baf03c67d747e486a9c268a01aae61
+msgid "Indexes"
+msgstr ""
+
+#: ../../developer/database.md:310 db5b23a56f114cba9bc3f86868047aba
+msgid "Key indexes for performance:"
+msgstr ""
+
+#: ../../developer/database.md:312 b469946903b14dc0bedce08e35321b19
+msgid ""
+"-- Agent queries\n"
+"CREATE INDEX idx_agents_status ON agent.agents(status);\n"
+"CREATE INDEX idx_agents_name ON agent.agents(name);\n"
+"\n"
+"-- Memory search\n"
+"CREATE INDEX idx_memories_agent ON memory.memories(agent_id);\n"
+"CREATE INDEX idx_memories_scope ON memory.memories(scope, scope_id);\n"
+"\n"
+"-- Full-text search\n"
+"CREATE INDEX idx_memories_value_fts\n"
+"ON memory.memories USING gin(to_tsvector('english', value));\n"
+msgstr ""
+
+#: ../../developer/database.md:326 453a366d9dfd4124ad11b9a405c5947d
+msgid "Query Optimization"
+msgstr ""
+
+#: ../../developer/database.md:328 781198da12c84504819646b99a611b32
+msgid ""
+"-- Explain analyze for debugging\n"
+"EXPLAIN ANALYZE\n"
+"SELECT * FROM memory.memories\n"
+"WHERE agent_id = 1 AND scope = 'agent';\n"
+"\n"
+"-- Check index usage\n"
+"SELECT indexrelname, idx_scan, idx_tup_read\n"
+"FROM pg_stat_user_indexes\n"
+"WHERE schemaname = 'memory';\n"
+msgstr ""
+
+#: ../../developer/database.md:340 062c3c8c9c0b4dccacc1ff0ae2801b19
+msgid "Troubleshooting"
+msgstr ""
+
+#: ../../developer/database.md:342 8b5baf719e7e409cb685c973ba28dce8
+msgid "Connection Issues"
+msgstr ""
+
+#: ../../developer/database.md:344 ec57bceda45245f583788021237dcffa
+msgid ""
+"# Check PostgreSQL is running\n"
+"sudo systemctl status postgresql\n"
+"\n"
+"# Check logs\n"
+"sudo tail -f /var/log/postgresql/postgresql-15-main.log\n"
+"\n"
+"# Test connection\n"
+"psql -h localhost -U gathering -d gathering -c \"SELECT 1\"\n"
+msgstr ""
+
+#: ../../developer/database.md:355 2eb3696db45a4b929932a6ac4811aec0
+msgid "pgvector Issues"
+msgstr ""
+
+#: ../../developer/database.md:357 1f3a2ec2ee304163b33aa350b2c03d09
+msgid ""
+"-- Check extension is installed\n"
+"SELECT * FROM pg_extension WHERE extname = 'vector';\n"
+"\n"
+"-- Reinstall if needed\n"
+"DROP EXTENSION IF EXISTS vector CASCADE;\n"
+"CREATE EXTENSION vector;\n"
+msgstr ""
+
+#: ../../developer/database.md:366 d8c637e8e033440c91441ef2d1c0d7d4
+msgid "Performance Issues"
+msgstr ""
+
+#: ../../developer/database.md:368 4e28b1957f16447994cd459417ae06b6
+msgid ""
+"-- Check table sizes\n"
+"SELECT relname, pg_size_pretty(pg_total_relation_size(relid))\n"
+"FROM pg_stat_user_tables\n"
+"ORDER BY pg_total_relation_size(relid) DESC;\n"
+"\n"
+"-- Vacuum and analyze\n"
+"VACUUM ANALYZE memory.memories;\n"
+msgstr ""
+
+#: ../../developer/database.md:378 7adc3d8f676e42e49e7b5cdc668ba708
+msgid "Related Topics"
+msgstr ""
+
+#: ../../developer/database.md:380 bb89156f20b24815878db5028d350eca
+msgid "[Architecture](architecture.md) - System architecture"
+msgstr ""
+
+#: ../../developer/database.md:381 0292f98f7876423a87ad535e63849daf
+msgid "[API](api.md) - API development"
+msgstr ""
+
+#: ../../developer/database.md:382 86821947162d448891f5b6c6278e749f
+msgid "[Testing](testing.md) - Database testing"
+msgstr ""
+

@@ -1,0 +1,157 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026, GatheRing Team
+# This file is distributed under the same license as the GatheRing package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: GatheRing 0.2.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-01-02 14:08+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.17.0\n"
+
+#: ../../developer/contributing.md:1 f0eb81f28e454a4f80ec108ac7887f10
+msgid "Contributing"
+msgstr ""
+
+#: ../../developer/contributing.md:3 93a1729f630c45ccbd3fa91e55adcb50
+msgid "Thank you for considering contributing to GatheRing!"
+msgstr ""
+
+#: ../../developer/contributing.md:5 e4e6319ebd32434bb6e21f19c55f3a3a
+msgid ""
+"For the complete contributing guide, see "
+"[CONTRIBUTING.md](../../CONTRIBUTING.md) in the project root."
+msgstr ""
+
+#: ../../developer/contributing.md:7 8b9d7431c73c4bba83a33b269989c460
+msgid "Quick Start"
+msgstr ""
+
+#: ../../developer/contributing.md:9 cbe7e801be634970898ad876bf5f89ac
+msgid "1. Fork and Clone"
+msgstr ""
+
+#: ../../developer/contributing.md:11 58ac7ad8c5624708aa99ba27b018e16b
+msgid ""
+"git clone https://github.com/your-username/gathering.git\n"
+"cd gathering\n"
+"git remote add upstream https://github.com/alkimya/gathering.git\n"
+msgstr ""
+
+#: ../../developer/contributing.md:17 a740c240a3864acaae9df14825fc3af2
+msgid "2. Setup Development Environment"
+msgstr ""
+
+#: ../../developer/contributing.md:19 2ac63b9d2bfc4219a31fa5bbf20b6864
+msgid ""
+"python -m venv venv\n"
+"source venv/bin/activate\n"
+"pip install -r requirements-dev.txt\n"
+"pip install -e .\n"
+msgstr ""
+
+#: ../../developer/contributing.md:26 b6f8711bc8a44b88a770202bcfcd1e65
+msgid "3. Create a Branch"
+msgstr ""
+
+#: ../../developer/contributing.md:28 05a9b293f680491bad3eeef6868a416d
+msgid "git checkout -b feature/your-feature-name\n"
+msgstr ""
+
+#: ../../developer/contributing.md:32 babe571e3ad84628a4e62d2e0d7fec4c
+msgid "4. Make Changes"
+msgstr ""
+
+#: ../../developer/contributing.md:34 1457f98dd17f40f788d26b4c62409e58
+msgid "Write tests first (TDD)"
+msgstr ""
+
+#: ../../developer/contributing.md:35 f95b68d45fe74ae49d450fa8498460b1
+msgid "Follow code style guidelines"
+msgstr ""
+
+#: ../../developer/contributing.md:36 3bf89a3fa9b84fb5bd5ee12c6a27f1b4
+msgid "Update documentation"
+msgstr ""
+
+#: ../../developer/contributing.md:38 07542fb21d964053aca722c56eaa7ab5
+msgid "5. Run Tests"
+msgstr ""
+
+#: ../../developer/contributing.md:40 46587574e8174c46878f14cc4cf091ab
+msgid "pytest\n"
+msgstr ""
+
+#: ../../developer/contributing.md:44 841fb3934da5465b9bc777a7f4afaaec
+msgid "6. Submit PR"
+msgstr ""
+
+#: ../../developer/contributing.md:46 9cf2991365a24bcda372af943bfb7042
+msgid "git push origin feature/your-feature-name\n"
+msgstr ""
+
+#: ../../developer/contributing.md:50 b777ee4822994577857e223a5158f09a
+msgid "Then create a Pull Request on GitHub."
+msgstr ""
+
+#: ../../developer/contributing.md:52 f13b307dcd0f48298e21f27e8f2a637d
+msgid "Code Style"
+msgstr ""
+
+#: ../../developer/contributing.md:54 7bcb134ba90e4914820dabd026128e39
+msgid "**Black** for formatting"
+msgstr ""
+
+#: ../../developer/contributing.md:55 4b9cd41642d547e1a0b87ff470bcd1bc
+msgid "**Flake8** for linting"
+msgstr ""
+
+#: ../../developer/contributing.md:56 2a63706d1b504476aba860cd2195ab34
+msgid "**MyPy** for type checking"
+msgstr ""
+
+#: ../../developer/contributing.md:57 50ea4829071f43b2aa64d34ff23610d2
+msgid "Google-style docstrings"
+msgstr ""
+
+#: ../../developer/contributing.md:59 7ac074eb7c7c41f58fd0a51184830ed3
+msgid "Commit Messages"
+msgstr ""
+
+#: ../../developer/contributing.md:61 7cbc9ba7b51b4fca8dab535c07f3e7d8
+msgid "Follow [Conventional Commits](https://www.conventionalcommits.org/):"
+msgstr ""
+
+#: ../../developer/contributing.md:63 bd5f46c6c735403bbf96d0b464394596
+msgid ""
+"feat(agents): add emotional state tracking\n"
+"fix(memory): prevent memory overflow\n"
+"docs(api): update examples\n"
+msgstr ""
+
+#: ../../developer/contributing.md:69 4b56a45fd49d43aa857b81d6df745171
+msgid "Getting Help"
+msgstr ""
+
+#: ../../developer/contributing.md:71 a964d42ee46a40568683c69029249325
+msgid "GitHub Issues for bugs"
+msgstr ""
+
+#: ../../developer/contributing.md:72 18007ac1103d41d4b6b1ab7e3687b1b2
+msgid "GitHub Discussions for questions"
+msgstr ""
+
+#: ../../developer/contributing.md:73 8bc6fac99120429394128b604ca1da32
+msgid "Check [CONTRIBUTING.md](../../CONTRIBUTING.md) for details"
+msgstr ""
+

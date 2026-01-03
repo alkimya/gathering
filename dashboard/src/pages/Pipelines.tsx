@@ -230,7 +230,12 @@ function PipelineDetailModal({
   const runs = runsData?.runs || [];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="pipeline-detail-title"
+    >
       <div className="w-full max-w-4xl max-h-[90vh] overflow-hidden glass-card rounded-2xl">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-white/10">
@@ -239,7 +244,7 @@ function PipelineDetailModal({
               <GitBranch className="w-6 h-6 text-purple-400" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-white">{pipeline.name}</h2>
+              <h2 id="pipeline-detail-title" className="text-xl font-bold text-white">{pipeline.name}</h2>
               {pipeline.description && (
                 <p className="text-sm text-zinc-400">{pipeline.description}</p>
               )}
@@ -247,6 +252,7 @@ function PipelineDetailModal({
           </div>
           <button
             onClick={onClose}
+            aria-label="Close dialog"
             className="p-2 text-zinc-400 hover:text-white transition-colors"
           >
             <X className="w-5 h-5" />
@@ -575,51 +581,27 @@ export function Pipelines() {
         </button>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-4 gap-4">
-        <div className="glass-card rounded-xl p-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-purple-500/20">
-              <GitBranch className="w-5 h-5 text-purple-400" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-white">{stats.total}</p>
-              <p className="text-xs text-zinc-500">Total Pipelines</p>
-            </div>
-          </div>
+      {/* Compact Stats Bar */}
+      <div className="glass-card rounded-xl px-5 py-3 flex flex-wrap items-center gap-x-8 gap-y-2">
+        <div className="flex items-center gap-2">
+          <GitBranch className="w-4 h-4 text-purple-400" />
+          <span className="text-white font-semibold">{stats.total}</span>
+          <span className="text-zinc-500 text-sm">pipelines</span>
         </div>
-        <div className="glass-card rounded-xl p-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-emerald-500/20">
-              <Play className="w-5 h-5 text-emerald-400" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-white">{stats.active}</p>
-              <p className="text-xs text-zinc-500">Active</p>
-            </div>
-          </div>
+        <div className="flex items-center gap-2">
+          <Play className="w-4 h-4 text-emerald-400" />
+          <span className="text-white font-semibold">{stats.active}</span>
+          <span className="text-zinc-500 text-sm">active</span>
         </div>
-        <div className="glass-card rounded-xl p-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-blue-500/20">
-              <Zap className="w-5 h-5 text-blue-400" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-white">{stats.totalRuns}</p>
-              <p className="text-xs text-zinc-500">Total Runs</p>
-            </div>
-          </div>
+        <div className="flex items-center gap-2">
+          <Zap className="w-4 h-4 text-blue-400" />
+          <span className="text-white font-semibold">{stats.totalRuns}</span>
+          <span className="text-zinc-500 text-sm">runs</span>
         </div>
-        <div className="glass-card rounded-xl p-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-cyan-500/20">
-              <CheckCircle className="w-5 h-5 text-cyan-400" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-white">{stats.successRate.toFixed(0)}%</p>
-              <p className="text-xs text-zinc-500">Success Rate</p>
-            </div>
-          </div>
+        <div className="flex items-center gap-2">
+          <CheckCircle className="w-4 h-4 text-cyan-400" />
+          <span className="text-white font-semibold">{stats.successRate.toFixed(0)}%</span>
+          <span className="text-zinc-500 text-sm">success</span>
         </div>
       </div>
 

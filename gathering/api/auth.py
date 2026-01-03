@@ -4,6 +4,7 @@ Implements JWT-based authentication with admin from .env and users from database
 """
 
 import os
+import secrets
 from datetime import datetime, timedelta, timezone
 from typing import Optional, Annotated
 
@@ -137,12 +138,13 @@ def create_access_token(
     return encoded_jwt
 
 
-def decode_token(token: str) -> Optional[TokenData]:
+def decode_token(token: str, check_blacklist: bool = True) -> Optional[TokenData]:
     """
     Decode and validate a JWT token.
 
     Args:
         token: JWT token string
+        check_blacklist: Whether to check if token is blacklisted
 
     Returns:
         TokenData if valid, None otherwise
@@ -154,6 +156,10 @@ def decode_token(token: str) -> Optional[TokenData]:
         if user_id is None:
             return None
 
+        # Check if token is blacklisted (for logout)
+        if check_blacklist and is_token_blacklisted(token):
+            return None
+
         return TokenData(
             sub=user_id,
             email=payload.get("email"),
@@ -162,6 +168,104 @@ def decode_token(token: str) -> Optional[TokenData]:
         )
     except JWTError:
         return None
+
+
+# =============================================================================
+# Token Blacklist (for logout/revocation)
+# =============================================================================
+
+# In-memory blacklist with automatic cleanup
+# Format: {token_hash: expiry_timestamp}
+_token_blacklist: dict[str, float] = {}
+_blacklist_cleanup_interval = 3600  # Clean up every hour
+_last_cleanup = 0.0
+
+
+def _get_token_hash(token: str) -> str:
+    """Get a hash of the token for storage (don't store full tokens)."""
+    import hashlib
+    return hashlib.sha256(token.encode()).hexdigest()[:32]
+
+
+def _cleanup_blacklist() -> None:
+    """Remove expired tokens from blacklist."""
+    global _last_cleanup
+    now = datetime.now(timezone.utc).timestamp()
+
+    if now - _last_cleanup < _blacklist_cleanup_interval:
+        return
+
+    expired = [h for h, exp in _token_blacklist.items() if exp < now]
+    for h in expired:
+        _token_blacklist.pop(h, None)
+
+    _last_cleanup = now
+
+
+def blacklist_token(token: str) -> bool:
+    """
+    Add a token to the blacklist (for logout).
+
+    The token will remain blacklisted until its original expiry time.
+
+    Args:
+        token: JWT token to blacklist
+
+    Returns:
+        True if blacklisted successfully
+    """
+    try:
+        # Decode without checking blacklist to get expiry
+        payload = jwt.decode(token, get_secret_key(), algorithms=[ALGORITHM])
+        exp = payload.get("exp", 0)
+
+        # Only blacklist if not already expired
+        now = datetime.now(timezone.utc).timestamp()
+        if exp > now:
+            token_hash = _get_token_hash(token)
+            _token_blacklist[token_hash] = exp
+
+            # Periodic cleanup
+            _cleanup_blacklist()
+
+        return True
+    except JWTError:
+        return False
+
+
+def is_token_blacklisted(token: str) -> bool:
+    """
+    Check if a token is blacklisted.
+
+    Args:
+        token: JWT token to check
+
+    Returns:
+        True if blacklisted, False otherwise
+    """
+    token_hash = _get_token_hash(token)
+    exp = _token_blacklist.get(token_hash)
+
+    if exp is None:
+        return False
+
+    # Check if blacklist entry has expired
+    now = datetime.now(timezone.utc).timestamp()
+    if exp < now:
+        # Clean up expired entry
+        _token_blacklist.pop(token_hash, None)
+        return False
+
+    return True
+
+
+def get_blacklist_stats() -> dict:
+    """Get statistics about the token blacklist."""
+    _cleanup_blacklist()
+    return {
+        "blacklisted_tokens": len(_token_blacklist),
+        "last_cleanup": datetime.fromtimestamp(_last_cleanup, tz=timezone.utc).isoformat() if _last_cleanup else None,
+    }
 
 
 # =============================================================================
@@ -193,6 +297,8 @@ def verify_admin_credentials(email: str, password: str) -> Optional[AdminUser]:
     """
     Verify admin credentials from environment variables.
 
+    Uses constant-time comparison to prevent timing attacks.
+
     Args:
         email: Admin email
         password: Plain text password
@@ -200,19 +306,32 @@ def verify_admin_credentials(email: str, password: str) -> Optional[AdminUser]:
     Returns:
         AdminUser if valid, None otherwise
     """
-    admin_email = os.getenv("ADMIN_EMAIL")
-    admin_password_hash = os.getenv("ADMIN_PASSWORD_HASH")
+    admin_email = os.getenv("ADMIN_EMAIL", "")
+    admin_password_hash = os.getenv("ADMIN_PASSWORD_HASH", "")
+
+    # Use a dummy hash for timing-safe comparison when no admin configured
+    # This prevents timing attacks from revealing if admin email exists
+    dummy_hash = "$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/X4.VTtYWWQIe0u0S."
 
     if not admin_email or not admin_password_hash:
+        # Still do password verification to maintain constant time
+        verify_password(password, dummy_hash)
         return None
 
-    if email.lower() != admin_email.lower():
-        return None
+    # Constant-time email comparison (case-insensitive)
+    email_match = secrets.compare_digest(
+        email.lower().encode("utf-8"),
+        admin_email.lower().encode("utf-8")
+    )
 
-    if not verify_password(password, admin_password_hash):
-        return None
+    # Always verify password to prevent timing attacks
+    password_valid = verify_password(password, admin_password_hash)
 
-    return AdminUser(email=admin_email)
+    # Only return admin if BOTH email and password match
+    if email_match and password_valid:
+        return AdminUser(email=admin_email)
+
+    return None
 
 
 # =============================================================================

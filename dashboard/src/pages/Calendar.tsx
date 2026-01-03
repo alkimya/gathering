@@ -385,7 +385,7 @@ export function Calendar() {
                 </div>
               ) : (
                 <p className="text-sm text-zinc-500 text-center py-4">
-                  Aucun événement pour cette date
+                  No events for this date
                 </p>
               )}
             </div>
@@ -395,7 +395,7 @@ export function Calendar() {
           <div className="glass-card rounded-2xl p-6">
             <h3 className="font-semibold text-white mb-4 flex items-center gap-2">
               <Clock className="w-5 h-5 text-purple-400" />
-              Prochains événements
+              Upcoming Events
             </h3>
             {upcomingEvents.length > 0 ? (
               <div className="space-y-3">
@@ -420,7 +420,7 @@ export function Calendar() {
               </div>
             ) : (
               <p className="text-sm text-zinc-500 text-center py-4">
-                Aucun événement prévu
+                  No upcoming events
               </p>
             )}
           </div>
@@ -429,7 +429,7 @@ export function Calendar() {
           <div className="glass-card rounded-2xl p-6">
             <h3 className="font-semibold text-white mb-4 flex items-center gap-2">
               <Play className="w-5 h-5 text-purple-400" />
-              Actions rapides
+              Quick Actions
             </h3>
             <div className="space-y-2">
               <button className="w-full flex items-center gap-3 p-3 rounded-xl bg-zinc-800/30 hover:bg-zinc-700/50 transition-colors text-left">

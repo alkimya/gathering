@@ -11,6 +11,7 @@ This test demonstrates the complete workflow:
 
 import os
 import tempfile
+import uuid
 from pathlib import Path
 from unittest.mock import patch
 
@@ -58,16 +59,19 @@ class TestProjectIntegration:
         """Test creating a circle without project link."""
         store = CircleStore.from_env()
 
+        # Use unique name to avoid conflicts
+        circle_name = f"test-circle-project-{uuid.uuid4().hex[:8]}"
+
         # Create circle without project_id (to avoid FK constraint)
         circle_id = store.create_circle(
-            name="test-circle-project",
+            name=circle_name,
             display_name="Test Circle with Project",
         )
 
         # Verify
         circle = store.get_circle(circle_id)
         assert circle is not None
-        assert circle["name"] == "test-circle-project"
+        assert circle["name"] == circle_name
 
         # Cleanup
         store.delete_circle(circle_id)
@@ -77,8 +81,11 @@ class TestProjectIntegration:
         """Test creating a task without project link."""
         store = CircleStore.from_env()
 
+        # Use unique name to avoid conflicts
+        circle_name = f"test-circle-task-{uuid.uuid4().hex[:8]}"
+
         # Create circle and task
-        circle_id = store.create_circle(name="test-circle-task")
+        circle_id = store.create_circle(name=circle_name)
         task_id = store.create_task(
             circle_id=circle_id,
             title="Test task with project",
@@ -97,10 +104,13 @@ class TestProjectIntegration:
         """Test listing circles filtered by project_id."""
         store = CircleStore.from_env()
 
+        # Use unique names to avoid conflicts
+        suffix = uuid.uuid4().hex[:8]
+
         # Create circles without project_id (no FK constraint)
-        circle1_id = store.create_circle(name="circle-proj-1")
-        circle2_id = store.create_circle(name="circle-proj-2")
-        circle3_id = store.create_circle(name="circle-proj-none")
+        circle1_id = store.create_circle(name=f"circle-proj-1-{suffix}")
+        circle2_id = store.create_circle(name=f"circle-proj-2-{suffix}")
+        circle3_id = store.create_circle(name=f"circle-proj-none-{suffix}")
 
         # List all circles (without project filter)
         all_circles = store.list_circles()

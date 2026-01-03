@@ -110,13 +110,19 @@ class Database:
     def engine(self):
         """Lazy-initialize SQLAlchemy engine."""
         if self._engine is None:
+            # Pool configuration - can be overridden via env vars
+            pool_size = int(os.getenv("DB_POOL_SIZE", "20"))
+            max_overflow = int(os.getenv("DB_MAX_OVERFLOW", "20"))
+            pool_timeout = int(os.getenv("DB_POOL_TIMEOUT", "30"))
+            pool_recycle = int(os.getenv("DB_POOL_RECYCLE", "1800"))
+
             self._engine = create_engine(
                 self._connection_string,
                 poolclass=QueuePool,
-                pool_size=5,
-                max_overflow=10,
-                pool_timeout=30,
-                pool_recycle=1800,
+                pool_size=pool_size,  # Default: 20 connections (was 5)
+                max_overflow=max_overflow,  # Default: +20 overflow (was 10)
+                pool_timeout=pool_timeout,
+                pool_recycle=pool_recycle,
                 pool_pre_ping=True,
                 echo=os.getenv("SQL_ECHO", "").lower() == "true",
             )

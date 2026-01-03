@@ -13,17 +13,17 @@ interface AgentTypingIndicatorProps {
 const phaseConfig: Record<ThinkingPhase, { icon: React.ReactNode; text: string; color: string }> = {
   thinking: {
     icon: <Brain className="w-4 h-4" />,
-    text: 'réfléchit',
+    text: 'is thinking',
     color: 'text-purple-400',
   },
   processing: {
     icon: <Cpu className="w-4 h-4" />,
-    text: 'traite',
+    text: 'is processing',
     color: 'text-cyan-400',
   },
   generating: {
     icon: <Sparkles className="w-4 h-4" />,
-    text: 'génère une réponse',
+    text: 'is generating a response',
     color: 'text-amber-400',
   },
   idle: {

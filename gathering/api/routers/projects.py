@@ -588,8 +588,9 @@ async def list_project_circles(
         )
 
     rows = db.fetch_all("""
-        SELECT cp.circle_id, cp.is_primary, cp.linked_at
+        SELECT cp.circle_id, c.name as circle_name, cp.is_primary, cp.linked_at
         FROM project.circle_projects cp
+        JOIN circle.circles c ON c.id = cp.circle_id
         WHERE cp.project_id = %(project_id)s
         ORDER BY cp.is_primary DESC, cp.linked_at DESC
     """, {"project_id": project_id})
@@ -600,6 +601,7 @@ async def list_project_circles(
         "circles": [
             {
                 "circle_id": row["circle_id"],
+                "circle_name": row["circle_name"],
                 "is_primary": row["is_primary"],
                 "linked_at": row["linked_at"],
             }

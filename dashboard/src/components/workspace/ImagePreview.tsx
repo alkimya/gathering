@@ -107,6 +107,8 @@ export function ImagePreview({ filePath, projectId }: ImagePreviewProps) {
           <img
             src={imageUrl}
             alt={filePath}
+            loading="lazy"
+            decoding="async"
             className="max-w-full h-auto rounded-lg shadow-2xl border border-white/10"
             style={{
               imageRendering: zoom > 200 ? 'pixelated' : 'auto',

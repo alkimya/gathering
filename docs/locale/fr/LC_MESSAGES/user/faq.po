@@ -1,0 +1,601 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026, GatheRing Team
+# This file is distributed under the same license as the GatheRing package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: GatheRing 0.2.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-01-02 14:08+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.17.0\n"
+
+#: ../../user/faq.md:1 ecc3126ebb94470d90cda23177048e42
+msgid "Frequently Asked Questions"
+msgstr ""
+
+#: ../../user/faq.md:3 12c39f4ac0cf4d05bb600113be586af7
+msgid "General"
+msgstr ""
+
+#: ../../user/faq.md:5 64a87367c9f44f35b9184c06d1315134
+msgid "What is GatheRing?"
+msgstr ""
+
+#: ../../user/faq.md:7 7312d9733c5c40deb6ceb9afd167cc87
+msgid ""
+"GatheRing is a collaborative multi-agent AI framework that enables "
+"autonomous AI agents to work together in circles, share knowledge, and "
+"accomplish complex tasks."
+msgstr ""
+
+#: ../../user/faq.md:9 462185c3109b43a58fd19b60eb7a8d9a
+msgid "What can I do with GatheRing?"
+msgstr ""
+
+#: ../../user/faq.md:11 dc8eb3aa5ac44fd6abc4b9fd008ae416
+msgid "Create AI agents with unique personalities"
+msgstr ""
+
+#: ../../user/faq.md:12 6b8cc280aad8416fa4021a34b28b9bbf
+msgid "Organize agents into collaborative circles"
+msgstr ""
+
+#: ../../user/faq.md:13 27215dfbdd054b7085362957f060d97a
+msgid "Run multi-agent conversations"
+msgstr ""
+
+#: ../../user/faq.md:14 7845abbc563f48408c1bb99d3d68881e
+msgid "Manage projects through an integrated workspace"
+msgstr ""
+
+#: ../../user/faq.md:15 63777209d95a4b7e9f67cf1482c8ce32
+msgid "Build AI-powered development teams"
+msgstr ""
+
+#: ../../user/faq.md:17 6056e94013304f5f83818704294c5a92
+msgid "What AI models are supported?"
+msgstr ""
+
+#: ../../user/faq.md:19 6078735f7a194907a44eb0711b3defc5
+msgid "GatheRing supports Claude models from Anthropic:"
+msgstr ""
+
+#: ../../user/faq.md:21 a38a5f3d8e034673903a486940bb23dc
+msgid "**Opus**: Most capable, best for complex reasoning"
+msgstr ""
+
+#: ../../user/faq.md:22 bde585f7ee714af5b21ae21f7800b106
+msgid "**Sonnet**: Balanced performance and speed"
+msgstr ""
+
+#: ../../user/faq.md:23 914a352fdf3d4f2fb6006d2adf92885a
+msgid "**Haiku**: Fastest, best for simple tasks"
+msgstr ""
+
+#: ../../user/faq.md:25 832457dc02984b32b12e0fb0ddadfc8a
+msgid "Is GatheRing free?"
+msgstr ""
+
+#: ../../user/faq.md:27 3b3773be95254ddaba12d1aedf67237c
+msgid ""
+"GatheRing is open source. However, you'll need API keys for the AI "
+"providers (Anthropic, OpenAI) which have their own pricing."
+msgstr ""
+
+#: ../../user/faq.md:29 ba976fe0c2514ae688ed7d71d2006959
+msgid "Installation"
+msgstr ""
+
+#: ../../user/faq.md:31 d05bc5f613134292a2dd34fd3811a740
+msgid "What are the system requirements?"
+msgstr ""
+
+#: ../../user/faq.md:33 6bca72b484f44a56b7bab25adfc6dd7c
+msgid "Python 3.11+"
+msgstr ""
+
+#: ../../user/faq.md:34 ca48b4e0facc43f980cf783efe6e18ff
+msgid "Node.js 18+"
+msgstr ""
+
+#: ../../user/faq.md:35 fccec1cf94714a8bbe1d416918079df3
+msgid "PostgreSQL 15+ with pgvector"
+msgstr ""
+
+#: ../../user/faq.md:36 4e2cb7ca1f1f4a028a3524c8cdba4099
+msgid "4GB RAM minimum, 8GB recommended"
+msgstr ""
+
+#: ../../user/faq.md:38 9781e44c820c4abeb14b044db28bd172
+msgid "How do I install pgvector?"
+msgstr ""
+
+#: ../../user/faq.md:40 87f3e1961e9d4c75a6dbf2479bf750a3
+msgid ""
+"# Ubuntu/Debian\n"
+"sudo apt install postgresql-15-pgvector\n"
+"\n"
+"# macOS\n"
+"brew install pgvector\n"
+"\n"
+"# From source\n"
+"git clone https://github.com/pgvector/pgvector.git\n"
+"cd pgvector\n"
+"make && sudo make install\n"
+msgstr ""
+
+#: ../../user/faq.md:53 4d83c20d736f4d7dbb46dd261779b199
+msgid "Why am I getting database connection errors?"
+msgstr ""
+
+#: ../../user/faq.md:55 833192cbd8d54fa1b601eca4dabad1e7
+msgid "Ensure PostgreSQL is running: `sudo systemctl status postgresql`"
+msgstr ""
+
+#: ../../user/faq.md:56 17a6353560374ad5bbfe8f716781b36b
+msgid "Check your `DATABASE_URL` in `.env`"
+msgstr ""
+
+#: ../../user/faq.md:57 c1760c69a50042e29cce100872677c55
+msgid "Verify the database exists: `psql -l`"
+msgstr ""
+
+#: ../../user/faq.md:58 e01c9159a04f49a9b28e44a2c2166d0a
+msgid "Run migrations: `python -m gathering.db.migrate`"
+msgstr ""
+
+#: ../../user/faq.md:60 3afe73456a194e46ad41ebc7d1333393
+msgid "The dashboard won't start. What should I do?"
+msgstr ""
+
+#: ../../user/faq.md:62 a2983c38b3c2488fbf7ba0428f28c55f
+msgid "Check Node.js version: `node --version` (should be 18+)"
+msgstr ""
+
+#: ../../user/faq.md:63 e987844ea7984a9b8a00262948b19cc5
+msgid "Install dependencies: `cd dashboard && npm install`"
+msgstr ""
+
+#: ../../user/faq.md:64 13d2dd75fb3d4ca7bc5792474881c661
+msgid "Check for port conflicts: `lsof -i :3000`"
+msgstr ""
+
+#: ../../user/faq.md:65 b41115d5b4fd458a858abc0d94506874
+msgid "View logs: `npm run dev` without background"
+msgstr ""
+
+#: ../../user/faq.md:67 b8e0bc463cdf48759bb208d84755325b
+msgid "Agents"
+msgstr ""
+
+#: ../../user/faq.md:69 17a47322a98e4b7182979772e89e1d77
+msgid "How many agents can I create?"
+msgstr ""
+
+#: ../../user/faq.md:71 bb86c86387504d1f8200a7e0c78e6a2c
+msgid "There's no hard limit. However, for best performance:"
+msgstr ""
+
+#: ../../user/faq.md:73 c4a4bc451fcb43b5945091f2820d841d
+msgid "Keep circles to 3-7 agents"
+msgstr ""
+
+#: ../../user/faq.md:74 75ec8398deaf442f9a6aa7730e9c245a
+msgid "Use appropriate models for each agent"
+msgstr ""
+
+#: ../../user/faq.md:75 d9ba6bd0ccbf43a282aea1ceae91c977
+msgid "Consider API rate limits"
+msgstr ""
+
+#: ../../user/faq.md:77 f1e27483aa8e4da3913e4abc8c307e0d
+msgid "Can agents learn over time?"
+msgstr ""
+
+#: ../../user/faq.md:79 f336f3f199b340a1834f92ed198b2f3a
+msgid "Yes! Agents have persistent memory:"
+msgstr ""
+
+#: ../../user/faq.md:81 57885b76a2204304afe095daed9232e5
+msgid "**Short-term**: Conversation context"
+msgstr ""
+
+#: ../../user/faq.md:82 748baec4d68944eca1380b7c365871a3
+msgid "**Long-term**: Stored memories and learnings"
+msgstr ""
+
+#: ../../user/faq.md:83 435c60696b254b6fb8d969307e302b1f
+msgid "**Shared**: Circle-level knowledge base"
+msgstr ""
+
+#: ../../user/faq.md:85 b15bd0f9104d4d158e2aed39666570e3
+msgid "How do I customize agent personalities?"
+msgstr ""
+
+#: ../../user/faq.md:87 45f6c2935bbd455883714ca17f5f44bf
+msgid "Use personality traits and communication styles:"
+msgstr ""
+
+#: ../../user/faq.md:89 4a1079471b914173a592bd6a2f0b721e
+#, python-brace-format
+msgid ""
+"{\n"
+"  \"personality\": {\n"
+"    \"traits\": [\"analytical\", \"creative\"],\n"
+"    \"communication_style\": \"professional\"\n"
+"  }\n"
+"}\n"
+msgstr ""
+
+#: ../../user/faq.md:98 6589740c68504f2fac96ef1cba924cf6
+msgid "Can agents use external tools?"
+msgstr ""
+
+#: ../../user/faq.md:100 bd18717625ee4c6c9f4141237e7cbf7c
+msgid "Yes, agents can use:"
+msgstr ""
+
+#: ../../user/faq.md:102 01bb7e4686c7476b947824e4040ba36a
+msgid "Filesystem (read/write files)"
+msgstr ""
+
+#: ../../user/faq.md:103 cff8851b777d453d96ef46463503500a
+msgid "Calculator (math operations)"
+msgstr ""
+
+#: ../../user/faq.md:104 7d2e3292ed0540b3aa96517236e8a249
+msgid "Code executor (run code)"
+msgstr ""
+
+#: ../../user/faq.md:105 5afa5bd75d6140eeb9dd632fedf37ea7
+msgid "Git (version control)"
+msgstr ""
+
+#: ../../user/faq.md:106 2e92c3277479487bb3c2b7714dec17b4
+msgid "Web search (internet access)"
+msgstr ""
+
+#: ../../user/faq.md:108 c25008955f9545f780f965200cf7aa10
+msgid "Circles"
+msgstr ""
+
+#: ../../user/faq.md:110 c135142e54a249d8ab55aed60a0387aa
+msgid "What's the difference between a circle and a conversation?"
+msgstr ""
+
+#: ../../user/faq.md:112 77da3c8bc319473b860f1e4961260cd9
+msgid "**Circle**: A persistent group of agents (like a team)"
+msgstr ""
+
+#: ../../user/faq.md:113 7baf2abb63a1478ba0345013dd0a4dea
+msgid "**Conversation**: A specific discussion within a circle (like a meeting)"
+msgstr ""
+
+#: ../../user/faq.md:115 29e54174a267475f96e0d7a169c5f3ca
+msgid "Can an agent be in multiple circles?"
+msgstr ""
+
+#: ../../user/faq.md:117 44ceaf46be934809b81c31e33e3d6356
+msgid "Yes, agents can belong to multiple circles simultaneously."
+msgstr ""
+
+#: ../../user/faq.md:119 d482e22850d24ac8b1c06984813c541f
+msgid "How do I archive a circle?"
+msgstr ""
+
+#: ../../user/faq.md:121 91ce95d8f232464f94f6ad365bb03575
+msgid "curl -X POST http://localhost:8000/circles/my-circle/archive\n"
+msgstr ""
+
+#: ../../user/faq.md:125 15d8034a0eb24651a7ede7363661a20b
+msgid "Archived circles are read-only but preserved for reference."
+msgstr ""
+
+#: ../../user/faq.md:127 799646a684f44308aa9122565cb42e19
+msgid "Workspace"
+msgstr ""
+
+#: ../../user/faq.md:129 07a934eb9d0f4eaaa5cfeedeb353af35
+msgid "Why isn't syntax highlighting working?"
+msgstr ""
+
+#: ../../user/faq.md:131 67420d3f1b674a01b54fef561eb3ae8b
+msgid "Check file extension matches the language"
+msgstr ""
+
+#: ../../user/faq.md:132 4bc8ca5613bc40a89d0975f4d035c1ae
+msgid "Ensure LSP server is running"
+msgstr ""
+
+#: ../../user/faq.md:133 620ddcbf2b344f708f6f62c3a56f8e84
+msgid "Try refreshing the page"
+msgstr ""
+
+#: ../../user/faq.md:135 423f4f8f4d9346739a0a832769307d8a
+msgid "How do I enable LSP for Python?"
+msgstr ""
+
+#: ../../user/faq.md:137 898e846f462644ff9212714164b89606
+msgid "LSP should work automatically. If not:"
+msgstr ""
+
+#: ../../user/faq.md:139 bcfac8bf25df4d38b81c3941069fd7e7
+msgid "pip install python-lsp-server pyright\n"
+msgstr ""
+
+#: ../../user/faq.md:143 04bce7bc290f4b66a8503b661cc56a28
+msgid "Can I use the workspace without the dashboard?"
+msgstr ""
+
+#: ../../user/faq.md:145 04cd95cd2c4441fd969fa9991d364744
+msgid "Yes, all workspace features are available via API:"
+msgstr ""
+
+#: ../../user/faq.md:147 edb4f1e40b554e1b80f5beead2515b3f
+msgid ""
+"# List files\n"
+"curl http://localhost:8000/workspace/1/files\n"
+"\n"
+"# Read file\n"
+"curl http://localhost:8000/workspace/1/files/src/main.py\n"
+msgstr ""
+
+#: ../../user/faq.md:155 6054a3ff8c20452490ae3274cbd4c6df
+msgid "How do I fix terminal issues?"
+msgstr ""
+
+#: ../../user/faq.md:157 21d87afca625409e82ed95d34025b3c8
+msgid "Clear terminal: type `clear` or `Ctrl+L`"
+msgstr ""
+
+#: ../../user/faq.md:158 4ee127bec3d1439bbeb8b2a44d0c4f42
+msgid "Reset terminal: close and reopen the panel"
+msgstr ""
+
+#: ../../user/faq.md:159 0032f343b77743fcbf1c8444626b1aa4
+msgid "Check for zombie processes: `ps aux | grep bash`"
+msgstr ""
+
+#: ../../user/faq.md:161 c7ee599d9940457b89ec39079c77ad08
+msgid "API"
+msgstr ""
+
+#: ../../user/faq.md:163 2e2b0d6f37cd470bb7dd6cc53919eb57
+msgid "How do I authenticate API requests?"
+msgstr ""
+
+#: ../../user/faq.md:165 c56329a3b5604b0a934ed83fd9e74a7b
+msgid ""
+"Currently, GatheRing uses API keys in the `.env` file for AI providers. "
+"The internal API doesn't require authentication by default (configure in "
+"production)."
+msgstr ""
+
+#: ../../user/faq.md:167 66611c6866964a66985141eb5546cd60
+msgid "What's the rate limit?"
+msgstr ""
+
+#: ../../user/faq.md:169 2f7b2ab91c4a4fa89a4e4937ed196482
+msgid "GatheRing doesn't impose its own rate limits, but AI providers do:"
+msgstr ""
+
+#: ../../user/faq.md:171 3963a3781e5147d6a14a26b5f579a1d9
+msgid "Anthropic: Varies by plan"
+msgstr ""
+
+#: ../../user/faq.md:172 916c91fff4cc47dca849d2dfac7fa4e1
+msgid "OpenAI: Varies by plan"
+msgstr ""
+
+#: ../../user/faq.md:174 83965e5b48aa43b0b1da97ba252119b5
+msgid "How do I stream responses?"
+msgstr ""
+
+#: ../../user/faq.md:176 68d96cccaf9c4fe89e49b0d0153509f7
+msgid "Use WebSocket connections:"
+msgstr ""
+
+#: ../../user/faq.md:178 e6456df5ded64a73b159cf861907652e
+#, python-brace-format
+msgid ""
+"const ws = new WebSocket('ws://localhost:8000/ws/circles/my-circle');\n"
+"ws.onmessage = (event) => {\n"
+"  const data = JSON.parse(event.data);\n"
+"  console.log(data);\n"
+"};\n"
+msgstr ""
+
+#: ../../user/faq.md:186 0109f6e99f4d4d749d09e0ccd298de71
+msgid "Performance"
+msgstr ""
+
+#: ../../user/faq.md:188 a4ec2a23b2f742c7b1f777c413602e1f
+msgid "How do I improve response times?"
+msgstr ""
+
+#: ../../user/faq.md:190 d03f2ad5ca9a4a63b4d22e2166e86a3d
+msgid "Use Haiku for simple tasks"
+msgstr ""
+
+#: ../../user/faq.md:191 067ddea9e1c94be5801b6bd8c228b40d
+msgid "Reduce conversation history length"
+msgstr ""
+
+#: ../../user/faq.md:192 287ad141a58d4ff08505d77c3dc1760d
+msgid "Enable Redis caching"
+msgstr ""
+
+#: ../../user/faq.md:193 631a79da39a049c49819bf1ae464c75d
+msgid "Use connection pooling for database"
+msgstr ""
+
+#: ../../user/faq.md:195 421051025feb40d7bb3056a75ce3dc99
+msgid "Why is memory usage high?"
+msgstr ""
+
+#: ../../user/faq.md:197 5c34b1570e294fd79b62f3407e5de2ad
+msgid "Clear old conversation histories"
+msgstr ""
+
+#: ../../user/faq.md:198 432d84e2b8b3452883def3064537519d
+msgid "Reduce the number of active agents"
+msgstr ""
+
+#: ../../user/faq.md:199 f5db5be26bdb417d90d4d12ea490f78f
+msgid "Use memory compaction"
+msgstr ""
+
+#: ../../user/faq.md:200 585ace183c964a0dbe80482b3f3c0a00
+msgid "Monitor with: `curl http://localhost:8000/health`"
+msgstr ""
+
+#: ../../user/faq.md:202 2f78ff939143499c8c4648229aedfdf0
+msgid "How do I scale GatheRing?"
+msgstr ""
+
+#: ../../user/faq.md:204 1a78ea918b824ca197e7e178f4f2ce1d
+msgid "Use Redis for distributed caching"
+msgstr ""
+
+#: ../../user/faq.md:205 10bb0e4e4a1f4dd18b2229d9d0fef861
+msgid "Deploy multiple API instances"
+msgstr ""
+
+#: ../../user/faq.md:206 78924d95380a46f194853c90113f16a6
+msgid "Use a load balancer"
+msgstr ""
+
+#: ../../user/faq.md:207 6962d149440a48b9a032a04a6d93f072
+msgid "Consider Kubernetes for orchestration"
+msgstr ""
+
+#: ../../user/faq.md:209 b7d5fc241d9e421894e4c059918ae025
+msgid "Troubleshooting"
+msgstr ""
+
+#: ../../user/faq.md:211 6d9e9464009645a09522273515dbeba5
+msgid "Agents aren't responding"
+msgstr ""
+
+#: ../../user/faq.md:213 6dfc436a7edf4c82a80c3f924dc2cd96
+msgid "Check API keys in `.env`"
+msgstr ""
+
+#: ../../user/faq.md:214 798c83e0599d4595afcb83c38617ce03
+msgid "Verify agent is active: `curl http://localhost:8000/agents/1`"
+msgstr ""
+
+#: ../../user/faq.md:215 1290791ad1ac44b5987633a5ed8c2ad8
+msgid "Check logs: `tail -f /tmp/gathering-api.log`"
+msgstr ""
+
+#: ../../user/faq.md:217 a4478d282fe34163abf1a81b29bd7b4f
+msgid "WebSocket connection fails"
+msgstr ""
+
+#: ../../user/faq.md:219 7beb97df2aec4fa5bbfaa1589bd29646
+msgid "Check API is running: `curl http://localhost:8000/health`"
+msgstr ""
+
+#: ../../user/faq.md:220 9809892d46dc46379bb4259afd531570
+msgid "Verify WebSocket URL format"
+msgstr ""
+
+#: ../../user/faq.md:221 480102c992a94aaf8147ddf09af40ea7
+msgid "Check browser console for errors"
+msgstr ""
+
+#: ../../user/faq.md:223 b461e506214d45c2b0d4f735c4acf7d3
+msgid "Database migrations fail"
+msgstr ""
+
+#: ../../user/faq.md:225 8f1430c6b5b94c9b8abfc082f6d3b9f3
+msgid "Ensure PostgreSQL is running"
+msgstr ""
+
+#: ../../user/faq.md:226 374006076c144fb58499fd856c85e811
+msgid "Check database permissions"
+msgstr ""
+
+#: ../../user/faq.md:227 866a65437f7648a39d89d7c0abadb9ce
+msgid "Try manual migration:"
+msgstr ""
+
+#: ../../user/faq.md:228 08797367ed7b4af8822fdd28ca8b54cd
+msgid "psql -d gathering -f gathering/db/migrations/001_initial.sql\n"
+msgstr ""
+
+#: ../../user/faq.md:232 09ba9d8297d64082acdded6e3818fb9e
+msgid "File uploads don't work"
+msgstr ""
+
+#: ../../user/faq.md:234 f91376f279614e849beff050a5615108
+msgid "Check file size limits"
+msgstr ""
+
+#: ../../user/faq.md:235 46d88b2da88643b8b3437f75e3177eb2
+msgid "Verify write permissions"
+msgstr ""
+
+#: ../../user/faq.md:236 869a914a7628415db5b52d4aabe63c1b
+msgid "Check disk space: `df -h`"
+msgstr ""
+
+#: ../../user/faq.md:238 627897e804c14cb5b6b3e28c50520356
+msgid "Getting Help"
+msgstr ""
+
+#: ../../user/faq.md:240 75634908d8bd4c12ada23dd176625c5f
+msgid "Where can I report bugs?"
+msgstr ""
+
+#: ../../user/faq.md:242 f09f7a90330a413098bb36366ff94d94
+msgid "Open an issue on GitHub: <https://github.com/alkimya/gathering/issues>"
+msgstr ""
+
+#: ../../user/faq.md:244 7fc42598701a488682f156d529a4dc40
+msgid "Is there a community?"
+msgstr ""
+
+#: ../../user/faq.md:246 a5c5d2f786ba4050abdcc7e8de658dcb
+msgid "GitHub Discussions"
+msgstr ""
+
+#: ../../user/faq.md:247 8c255ba525334670894c3b6c33ebdbd0
+msgid "Discord server (coming soon)"
+msgstr ""
+
+#: ../../user/faq.md:249 f881e018655746109e44f339a0aa454e
+msgid "How can I contribute?"
+msgstr ""
+
+#: ../../user/faq.md:251 d4c86a443e11417f9b5b787e11c70c93
+msgid "See the [Contributing Guide](../developer/contributing.md) for details on:"
+msgstr ""
+
+#: ../../user/faq.md:253 1d6c4295c1d0491f8fd32a6fddf617a6
+msgid "Code contributions"
+msgstr ""
+
+#: ../../user/faq.md:254 72f72e99811d41cea0230402a26789a3
+msgid "Documentation"
+msgstr ""
+
+#: ../../user/faq.md:255 7a939190e96e41e48f66aa05d61dc876
+msgid "Bug reports"
+msgstr ""
+
+#: ../../user/faq.md:256 a3c5d867f93c43298f20c1869bb26302
+msgid "Feature requests"
+msgstr ""
+

@@ -26,6 +26,7 @@ class ProjectContext:
     id: Optional[int] = None
     name: str = ""
     path: str = ""
+    description: str = ""  # Project description for agent context
 
     # Environment
     venv_path: Optional[str] = None
@@ -67,8 +68,13 @@ class ProjectContext:
         """
         lines = [
             f"Projet: {self.name}",
-            f"Chemin: {self.path}",
         ]
+
+        # Add description if available
+        if self.description:
+            lines.append(f"\n{self.description}")
+
+        lines.append(f"\nChemin: {self.path}")
 
         # Python environment
         if self.venv_path:
@@ -147,6 +153,7 @@ class ProjectContext:
             "id": self.id,
             "name": self.name,
             "path": self.path,
+            "description": self.description,
             "venv_path": self.venv_path,
             "python_version": self.python_version,
             "tools": self.tools,
@@ -167,6 +174,7 @@ class ProjectContext:
             id=data.get("id"),
             name=data.get("name", ""),
             path=data.get("path", ""),
+            description=data.get("description", ""),
             venv_path=data.get("venv_path"),
             python_version=data.get("python_version", "3.11"),
             tools=data.get("tools", {}),
@@ -370,6 +378,7 @@ def load_project_from_db(project_id: Optional[int] = None, project_name: Optiona
             id=row.get("id"),
             name=row.get("name", ""),
             path=row.get("local_path", ""),
+            description=row.get("description") or "",
             venv_path=venv_path,
             python_version=row.get("python_version", "3.11"),
             tools=row.get("tools") or {},

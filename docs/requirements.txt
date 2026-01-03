@@ -1,0 +1,10 @@
+# Documentation dependencies for ReadTheDocs
+sphinx>=7.0
+sphinx-rtd-theme>=2.0
+sphinx-copybutton>=0.5
+myst-parser>=2.0
+sphinx-design>=0.5
+
+# For API autodoc
+pydantic>=2.0
+pydantic-settings>=2.0

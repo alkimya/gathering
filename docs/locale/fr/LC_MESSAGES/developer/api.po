@@ -1,0 +1,524 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026, GatheRing Team
+# This file is distributed under the same license as the GatheRing package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: GatheRing 0.2.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-01-02 14:08+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.17.0\n"
+
+#: ../../developer/api.md:1 9cc5ce562d704cf3804fa8c7b3ccc97e
+msgid "API Development"
+msgstr ""
+
+#: ../../developer/api.md:3 9551ccb327f7442bbdca388e01cef8e4
+msgid "Guide for developing and extending the GatheRing API."
+msgstr ""
+
+#: ../../developer/api.md:5 b48d5e572ae045448236e054a251732e
+msgid "Architecture"
+msgstr ""
+
+#: ../../developer/api.md:7 8d796c6d522f4496bcc617e2f156ac46
+msgid "The API is built with FastAPI and organized into routers:"
+msgstr ""
+
+#: ../../developer/api.md:9 d534312e135d4f2bb8ae2ec91ac18a37
+msgid ""
+"gathering/api/\n"
+"├── __init__.py\n"
+"├── app.py              # Main FastAPI app\n"
+"├── routers/\n"
+"│   ├── agents.py       # /agents endpoints\n"
+"│   ├── circles.py      # /circles endpoints\n"
+"│   ├── conversations.py # /conversations endpoints\n"
+"│   ├── workspace.py    # /workspace endpoints\n"
+"│   └── memory.py       # /memory endpoints\n"
+"├── schemas/            # Pydantic models\n"
+"├── dependencies.py     # Dependency injection\n"
+"└── middleware.py       # Custom middleware\n"
+msgstr ""
+
+#: ../../developer/api.md:24 89df0b9b197a489e9115839ea420d500
+msgid "Creating a New Router"
+msgstr ""
+
+#: ../../developer/api.md:26 9f073020d563453c87db872c2d555cc1
+msgid "1. Create the Router File"
+msgstr ""
+
+#: ../../developer/api.md:28 126f81e9784b48c4970771fc2d8b94c8
+#, python-brace-format
+msgid ""
+"# gathering/api/routers/my_feature.py\n"
+"from fastapi import APIRouter, Depends, HTTPException\n"
+"from typing import List\n"
+"\n"
+"from gathering.api.schemas.my_feature import (\n"
+"    MyFeatureCreate,\n"
+"    MyFeatureResponse,\n"
+")\n"
+"from gathering.api.dependencies import get_db\n"
+"\n"
+"router = APIRouter(\n"
+"    prefix=\"/my-feature\",\n"
+"    tags=[\"my-feature\"],\n"
+")\n"
+"\n"
+"\n"
+"@router.get(\"/\", response_model=List[MyFeatureResponse])\n"
+"async def list_features(db=Depends(get_db)):\n"
+"    \"\"\"List all features.\"\"\"\n"
+"    features = await db.fetch_all(\"SELECT * FROM my_features\")\n"
+"    return features\n"
+"\n"
+"\n"
+"@router.post(\"/\", response_model=MyFeatureResponse, status_code=201)\n"
+"async def create_feature(\n"
+"    data: MyFeatureCreate,\n"
+"    db=Depends(get_db),\n"
+"):\n"
+"    \"\"\"Create a new feature.\"\"\"\n"
+"    result = await db.execute(\n"
+"        \"INSERT INTO my_features (name) VALUES ($1) RETURNING *\",\n"
+"        data.name,\n"
+"    )\n"
+"    return result\n"
+"\n"
+"\n"
+"@router.get(\"/{feature_id}\", response_model=MyFeatureResponse)\n"
+"async def get_feature(feature_id: int, db=Depends(get_db)):\n"
+"    \"\"\"Get a feature by ID.\"\"\"\n"
+"    feature = await db.fetch_one(\n"
+"        \"SELECT * FROM my_features WHERE id = $1\",\n"
+"        feature_id,\n"
+"    )\n"
+"    if not feature:\n"
+"        raise HTTPException(status_code=404, detail=\"Feature not "
+"found\")\n"
+"    return feature\n"
+msgstr ""
+
+#: ../../developer/api.md:77 d68c00c88df04c10a6379556a3f54d07
+msgid "2. Create Schemas"
+msgstr ""
+
+#: ../../developer/api.md:79 47f99ef8c33d4cadb70d87982515a036
+msgid ""
+"# gathering/api/schemas/my_feature.py\n"
+"from pydantic import BaseModel\n"
+"from datetime import datetime\n"
+"from typing import Optional\n"
+"\n"
+"\n"
+"class MyFeatureBase(BaseModel):\n"
+"    name: str\n"
+"    description: Optional[str] = None\n"
+"\n"
+"\n"
+"class MyFeatureCreate(MyFeatureBase):\n"
+"    pass\n"
+"\n"
+"\n"
+"class MyFeatureUpdate(BaseModel):\n"
+"    name: Optional[str] = None\n"
+"    description: Optional[str] = None\n"
+"\n"
+"\n"
+"class MyFeatureResponse(MyFeatureBase):\n"
+"    id: int\n"
+"    created_at: datetime\n"
+"    updated_at: datetime\n"
+"\n"
+"    class Config:\n"
+"        from_attributes = True\n"
+msgstr ""
+
+#: ../../developer/api.md:109 ef9179521bc64502b49b2fc10b3ba98d
+msgid "3. Register the Router"
+msgstr ""
+
+#: ../../developer/api.md:111 c585a20fa8bc46c89a5f7040cc78a0a3
+msgid ""
+"# gathering/api/app.py\n"
+"from gathering.api.routers import my_feature\n"
+"\n"
+"app.include_router(my_feature.router)\n"
+msgstr ""
+
+#: ../../developer/api.md:118 7569f9a769cf4a5fa9a15c22657a1f82
+msgid "Dependency Injection"
+msgstr ""
+
+#: ../../developer/api.md:120 0f5023e52f2149c987b95e213c1aae48
+msgid "Database Connection"
+msgstr ""
+
+#: ../../developer/api.md:122 7bc0d672499e4076b134470d6889224d
+msgid ""
+"from gathering.api.dependencies import get_db\n"
+"\n"
+"@router.get(\"/\")\n"
+"async def my_endpoint(db=Depends(get_db)):\n"
+"    result = await db.fetch_all(\"SELECT 1\")\n"
+"    return result\n"
+msgstr ""
+
+#: ../../developer/api.md:131 d1fdaf9f02de4c26956638662012b229
+msgid "Current User (Future)"
+msgstr ""
+
+#: ../../developer/api.md:133 026d8b16714745ed840e195c32b956b1
+msgid ""
+"from gathering.api.dependencies import get_current_user\n"
+"\n"
+"@router.get(\"/me\")\n"
+"async def my_profile(user=Depends(get_current_user)):\n"
+"    return user\n"
+msgstr ""
+
+#: ../../developer/api.md:141 25b8be3f3d014c4782e0e6a0de3ca332
+msgid "Custom Dependencies"
+msgstr ""
+
+#: ../../developer/api.md:143 bf3c7e9498d945b281c9703390f71e90
+#, python-brace-format
+msgid ""
+"# gathering/api/dependencies.py\n"
+"from fastapi import Depends, HTTPException\n"
+"\n"
+"async def get_agent_or_404(\n"
+"    agent_id: int,\n"
+"    db=Depends(get_db),\n"
+"):\n"
+"    agent = await db.fetch_one(\n"
+"        \"SELECT * FROM agent.agents WHERE id = $1\",\n"
+"        agent_id,\n"
+"    )\n"
+"    if not agent:\n"
+"        raise HTTPException(404, \"Agent not found\")\n"
+"    return agent\n"
+"\n"
+"\n"
+"# Usage\n"
+"@router.get(\"/agents/{agent_id}/details\")\n"
+"async def agent_details(agent=Depends(get_agent_or_404)):\n"
+"    return {\"agent\": agent}\n"
+msgstr ""
+
+#: ../../developer/api.md:166 488b26bfbd4c4a21a4c5fe6159b597d9
+msgid "Error Handling"
+msgstr ""
+
+#: ../../developer/api.md:168 82b00735befe4e19b75ba74eef9a02ff
+msgid "HTTP Exceptions"
+msgstr ""
+
+#: ../../developer/api.md:170 b729e9fe9f41482c83b3536ad9275c8c
+#, python-brace-format
+msgid ""
+"from fastapi import HTTPException\n"
+"\n"
+"@router.get(\"/{id}\")\n"
+"async def get_item(id: int):\n"
+"    item = await find_item(id)\n"
+"    if not item:\n"
+"        raise HTTPException(\n"
+"            status_code=404,\n"
+"            detail=\"Item not found\",\n"
+"        )\n"
+"    return item\n"
+msgstr ""
+
+#: ../../developer/api.md:184 052566cb22f84441aa2972d917749da9
+msgid "Custom Exception Handlers"
+msgstr ""
+
+#: ../../developer/api.md:186 fb4127e217ce47648c818e4248235bf5
+#, python-brace-format
+msgid ""
+"# gathering/api/middleware.py\n"
+"from fastapi import Request\n"
+"from fastapi.responses import JSONResponse\n"
+"\n"
+"class ValidationError(Exception):\n"
+"    def __init__(self, message: str):\n"
+"        self.message = message\n"
+"\n"
+"\n"
+"@app.exception_handler(ValidationError)\n"
+"async def validation_error_handler(request: Request, exc: "
+"ValidationError):\n"
+"    return JSONResponse(\n"
+"        status_code=422,\n"
+"        content={\"error\": exc.message},\n"
+"    )\n"
+msgstr ""
+
+#: ../../developer/api.md:204 e5310fe1a76c40e0a1d4968fde62e993
+msgid "Request Validation"
+msgstr ""
+
+#: ../../developer/api.md:206 c4e3ca93577241478626dc5932fb2ca4
+msgid "Path Parameters"
+msgstr ""
+
+#: ../../developer/api.md:208 4ae2918336dc420baa6d9926f702f025
+#, python-brace-format
+msgid ""
+"@router.get(\"/agents/{agent_id}\")\n"
+"async def get_agent(agent_id: int):  # Automatically validated as int\n"
+"    pass\n"
+msgstr ""
+
+#: ../../developer/api.md:214 4e01960b33f344c5b6cea1c40b9b8bba
+msgid "Query Parameters"
+msgstr ""
+
+#: ../../developer/api.md:216 99e3829141614686afbf1a4081d9584e
+msgid ""
+"from typing import Optional\n"
+"\n"
+"@router.get(\"/agents\")\n"
+"async def list_agents(\n"
+"    status: Optional[str] = None,\n"
+"    limit: int = 10,\n"
+"    offset: int = 0,\n"
+"):\n"
+"    pass\n"
+msgstr ""
+
+#: ../../developer/api.md:228 4827cf8d58614c258e475abea8c2f12b
+msgid "Request Body"
+msgstr ""
+
+#: ../../developer/api.md:230 415924e18f5c48599e2f8d1b33f15487
+msgid ""
+"from pydantic import BaseModel, Field\n"
+"\n"
+"class CreateAgent(BaseModel):\n"
+"    name: str = Field(..., min_length=1, max_length=100)\n"
+"    role: Optional[str] = Field(None, max_length=100)\n"
+"    provider: str = Field(default=\"anthropic\")  # openai, anthropic, "
+"ollama\n"
+"    model: str = Field(default=\"claude-sonnet-4-20250514\")\n"
+"\n"
+"@router.post(\"/agents\")\n"
+"async def create_agent(data: CreateAgent):\n"
+"    pass\n"
+msgstr ""
+
+#: ../../developer/api.md:244 c07c49ef7b3e4c08994c67dcfa6a0b2c
+msgid "Response Models"
+msgstr ""
+
+#: ../../developer/api.md:246 b62f633929134bee9d5e878aea675431
+msgid "Single Item"
+msgstr ""
+
+#: ../../developer/api.md:248 0f14f1f13c474d88a83f9db9250eefc5
+#, python-brace-format
+msgid ""
+"@router.get(\"/{id}\", response_model=AgentResponse)\n"
+"async def get_agent(id: int):\n"
+"    return await fetch_agent(id)\n"
+msgstr ""
+
+#: ../../developer/api.md:254 5ac0f83e30494f3a915e5805192d5a3c
+msgid "List with Pagination"
+msgstr ""
+
+#: ../../developer/api.md:256 53b474d9a6f54b3fb92452491c9a743f
+#, python-brace-format
+msgid ""
+"from pydantic import BaseModel\n"
+"from typing import List, Generic, TypeVar\n"
+"\n"
+"T = TypeVar(\"T\")\n"
+"\n"
+"class PaginatedResponse(BaseModel, Generic[T]):\n"
+"    items: List[T]\n"
+"    total: int\n"
+"    page: int\n"
+"    page_size: int\n"
+"\n"
+"\n"
+"@router.get(\"/\", response_model=PaginatedResponse[AgentResponse])\n"
+"async def list_agents(page: int = 1, page_size: int = 10):\n"
+"    items = await fetch_agents(page, page_size)\n"
+"    total = await count_agents()\n"
+"    return {\n"
+"        \"items\": items,\n"
+"        \"total\": total,\n"
+"        \"page\": page,\n"
+"        \"page_size\": page_size,\n"
+"    }\n"
+msgstr ""
+
+#: ../../developer/api.md:281 67295afb40a24519ae996540d7a2b47a
+msgid "WebSocket Endpoints"
+msgstr ""
+
+#: ../../developer/api.md:283 0d528e7af6b84944ab1d741ff5111a44
+#, python-brace-format
+msgid ""
+"from fastapi import WebSocket, WebSocketDisconnect\n"
+"\n"
+"@router.websocket(\"/ws/{channel}\")\n"
+"async def websocket_endpoint(websocket: WebSocket, channel: str):\n"
+"    await websocket.accept()\n"
+"\n"
+"    try:\n"
+"        while True:\n"
+"            data = await websocket.receive_text()\n"
+"            await websocket.send_text(f\"Echo: {data}\")\n"
+"    except WebSocketDisconnect:\n"
+"        pass\n"
+msgstr ""
+
+#: ../../developer/api.md:298 9c9b2b22ff804bfea453bf4937ce146b
+msgid "Background Tasks"
+msgstr ""
+
+#: ../../developer/api.md:300 31ac92ace2a34ae29bdbe1670e66582c
+#, python-brace-format
+msgid ""
+"from fastapi import BackgroundTasks\n"
+"\n"
+"async def process_in_background(data: dict):\n"
+"    # Long-running task\n"
+"    await asyncio.sleep(10)\n"
+"    print(f\"Processed: {data}\")\n"
+"\n"
+"\n"
+"@router.post(\"/process\")\n"
+"async def start_processing(\n"
+"    data: dict,\n"
+"    background_tasks: BackgroundTasks,\n"
+"):\n"
+"    background_tasks.add_task(process_in_background, data)\n"
+"    return {\"status\": \"processing\"}\n"
+msgstr ""
+
+#: ../../developer/api.md:318 ab982b472b8048c29cefb57c9f2d2e04
+msgid "Testing API Endpoints"
+msgstr ""
+
+#: ../../developer/api.md:320 9e55a0dc04d14103a389ff5695ab2737
+#, python-brace-format
+msgid ""
+"# tests/api/test_agents.py\n"
+"import pytest\n"
+"from httpx import AsyncClient\n"
+"from gathering.api.app import app\n"
+"\n"
+"\n"
+"@pytest.fixture\n"
+"async def client():\n"
+"    async with AsyncClient(app=app, base_url=\"http://test\") as ac:\n"
+"        yield ac\n"
+"\n"
+"\n"
+"@pytest.mark.asyncio\n"
+"async def test_list_agents(client):\n"
+"    response = await client.get(\"/agents\")\n"
+"    assert response.status_code == 200\n"
+"    assert isinstance(response.json(), list)\n"
+"\n"
+"\n"
+"@pytest.mark.asyncio\n"
+"async def test_create_agent(client):\n"
+"    response = await client.post(\n"
+"        \"/agents\",\n"
+"        json={\n"
+"            \"name\": \"Test Agent\",\n"
+"            \"provider\": \"openai\",\n"
+"            \"model\": \"gpt-4o\"\n"
+"        },\n"
+"    )\n"
+"    assert response.status_code == 201\n"
+"    assert response.json()[\"name\"] == \"Test Agent\"\n"
+msgstr ""
+
+#: ../../developer/api.md:354 37e05902ef874951b37f28a4899d2fe4
+msgid "API Documentation"
+msgstr ""
+
+#: ../../developer/api.md:356 6e2374d681b24fbd8b0173eb86b64f7f
+msgid "FastAPI automatically generates OpenAPI documentation:"
+msgstr ""
+
+#: ../../developer/api.md:358 e04f34ef35864a48b4990897973afd42
+msgid "Swagger UI: `http://localhost:8000/docs`"
+msgstr ""
+
+#: ../../developer/api.md:359 226b40fd8717445bbbfdd4872f238b7f
+msgid "ReDoc: `http://localhost:8000/redoc`"
+msgstr ""
+
+#: ../../developer/api.md:360 f066895523cf41b4a5dbf8f5f96ec977
+msgid "OpenAPI JSON: `http://localhost:8000/openapi.json`"
+msgstr ""
+
+#: ../../developer/api.md:362 00842231bf714ac7ada064775006c5db
+msgid "Adding Documentation"
+msgstr ""
+
+#: ../../developer/api.md:364 d44925a5327d4e26a02f74d065e9be41
+#, python-brace-format
+msgid ""
+"@router.post(\n"
+"    \"/\",\n"
+"    response_model=AgentResponse,\n"
+"    summary=\"Create a new agent\",\n"
+"    description=\"Creates a new AI agent with the specified "
+"configuration.\",\n"
+"    responses={\n"
+"        201: {\"description\": \"Agent created successfully\"},\n"
+"        422: {\"description\": \"Validation error\"},\n"
+"    },\n"
+")\n"
+"async def create_agent(data: AgentCreate):\n"
+"    \"\"\"\n"
+"    Create a new agent with:\n"
+"\n"
+"    - **name**: Agent's display name\n"
+"    - **role**: Agent's role (optional)\n"
+"    - **provider**: LLM provider (openai, anthropic, ollama)\n"
+"    - **model**: Model identifier (provider-specific)\n"
+"    \"\"\"\n"
+"    pass\n"
+msgstr ""
+
+#: ../../developer/api.md:387 fa3f3e7ff8ec42fd818d0c32d2b4b427
+msgid "Related Topics"
+msgstr ""
+
+#: ../../developer/api.md:389 247ae80ebfc44c1a9e227b295208ebfc
+msgid "[Architecture](architecture.md) - System architecture"
+msgstr ""
+
+#: ../../developer/api.md:390 d3dbe9a6f04f437e82ff2d10179522b1
+msgid "[Database](database.md) - Database layer"
+msgstr ""
+
+#: ../../developer/api.md:391 02fbc98a3496484ba77f1b788759ad8e
+msgid "[WebSocket](websocket.md) - Real-time communication"
+msgstr ""
+
+#: ../../developer/api.md:392 2dd538105f094a6aa70fc13fc36fd196
+msgid "[Testing](testing.md) - API testing"
+msgstr ""
+

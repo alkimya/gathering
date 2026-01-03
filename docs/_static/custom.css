@@ -41,3 +41,105 @@
 .important .admonition-title:before {
     content: "❗";
 }
+
+/* ============================
+   Dashboard Image Lightbox
+   ============================ */
+
+/* Make images clickable with visual feedback */
+.rst-content img {
+    cursor: zoom-in;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border-radius: 8px;
+    border: 1px solid #e1e4e8;
+    max-width: 100%;
+}
+
+.rst-content img:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Lightbox overlay */
+.lightbox-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    cursor: zoom-out;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.lightbox-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.lightbox-overlay img {
+    max-width: 95%;
+    max-height: 95%;
+    border-radius: 8px;
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+}
+
+.lightbox-overlay.active img {
+    transform: scale(1);
+}
+
+/* Close button */
+.lightbox-close {
+    position: fixed;
+    top: 20px;
+    right: 30px;
+    color: white;
+    font-size: 40px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 10000;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.lightbox-close:hover {
+    opacity: 1;
+}
+
+/* Navigation hint */
+.lightbox-hint {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 14px;
+    z-index: 10000;
+}
+
+/* Dashboard screenshot specific styling */
+.rst-content .section img[alt*="Screenshot"],
+.rst-content .section img[alt*="screenshot"] {
+    display: block;
+    margin: 1.5em auto;
+    max-width: 90%;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Image captions */
+.rst-content p > em:only-child {
+    display: block;
+    text-align: center;
+    color: #6c757d;
+    font-size: 0.9em;
+    margin-top: -1em;
+    margin-bottom: 1.5em;
+}

@@ -33,7 +33,11 @@ from gathering.orchestration import GatheringCircle, AgentHandle, CircleTask
 router = APIRouter(prefix="/circles", tags=["circles"])
 
 
-def _circle_to_response(circle: GatheringCircle) -> CircleResponse:
+def _circle_to_response(
+    circle: GatheringCircle,
+    project_id: Optional[int] = None,
+    project_name: Optional[str] = None,
+) -> CircleResponse:
     """Convert GatheringCircle to CircleResponse."""
     status_map = {
         "initializing": CircleStatus.STOPPED,
@@ -67,6 +71,8 @@ def _circle_to_response(circle: GatheringCircle) -> CircleResponse:
         auto_route=circle.auto_route,
         created_at=datetime.now(timezone.utc),
         started_at=started_at,
+        project_id=project_id,
+        project_name=project_name,
     )
 
 
@@ -159,8 +165,17 @@ async def list_circles(
 ) -> CircleListResponse:
     """List all circles."""
     circles = registry.list_all()
+    responses = []
+    for c in circles:
+        metadata = registry.get_metadata(c.name)
+        project_name = registry.get_project_name(c.name)
+        responses.append(_circle_to_response(
+            c,
+            project_id=metadata.get('project_id'),
+            project_name=project_name,
+        ))
     return CircleListResponse(
-        circles=[_circle_to_response(c) for c in circles],
+        circles=responses,
         total=len(circles),
     )
 

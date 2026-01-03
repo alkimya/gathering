@@ -1,0 +1,631 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026, GatheRing Team
+# This file is distributed under the same license as the GatheRing package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: GatheRing 0.2.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-01-02 14:08+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.17.0\n"
+
+#: ../../user/agents.md:1 b22d2eb8cb6947d58cfcd0112a199ee0
+msgid "Agents"
+msgstr ""
+
+#: ../../user/agents.md:3 8c338ac5977a4c93abab96fa2aa3e6e0
+msgid ""
+"Agents are AI personalities that can think, communicate, and collaborate."
+" Each agent has unique traits, skills, and behaviors."
+msgstr ""
+
+#: ../../user/agents.md:5 7b8ee2730e0f4d9290c8dc1e3e39b374
+msgid "Agent Anatomy"
+msgstr ""
+
+#: ../../user/agents.md:7 4c98353bb09d4f08a36eb60c41aa098a
+msgid "An agent consists of:"
+msgstr ""
+
+#: ../../user/agents.md:9 041f3f9bb06547f18cabdf57828d4b2f
+msgid ""
+"┌─────────────────────────────────────────┐\n"
+"│                 Agent                    │\n"
+"├─────────────────────────────────────────┤\n"
+"│  Identity                               │\n"
+"│  ├── Name, Role, Background             │\n"
+"│  └── Model & Provider                   │\n"
+"├─────────────────────────────────────────┤\n"
+"│  Personality                            │\n"
+"│  ├── Traits (curious, analytical, etc.) │\n"
+"│  └── Communication style                │\n"
+"├─────────────────────────────────────────┤\n"
+"│  Capabilities                           │\n"
+"│  ├── Skills & Competencies              │\n"
+"│  └── Tools (filesystem, calculator)     │\n"
+"├─────────────────────────────────────────┤\n"
+"│  Memory                                 │\n"
+"│  ├── Short-term (conversation)          │\n"
+"│  └── Long-term (persistent)             │\n"
+"└─────────────────────────────────────────┘\n"
+msgstr ""
+
+#: ../../user/agents.md:31 5b226eee3a534919b105cc9f78e6987f
+msgid "Creating Agents"
+msgstr ""
+
+#: ../../user/agents.md:33 5b939fa164c142869cacabbe3501c1d1
+msgid "Basic Agent"
+msgstr ""
+
+#: ../../user/agents.md:35 dad1570a1a924510947194b810f24122
+#, python-brace-format
+msgid ""
+"curl -X POST http://localhost:8000/agents \\\n"
+"  -H \"Content-Type: application/json\" \\\n"
+"  -d '{\n"
+"    \"name\": \"Sophie\",\n"
+"    \"role\": \"Software Architect\",\n"
+"    \"provider\": \"openai\",\n"
+"    \"model\": \"gpt-4\"\n"
+"  }'\n"
+msgstr ""
+
+#: ../../user/agents.md:46 703d9c1cd53c4e8e9a201beacd8b02cd
+msgid "Full Agent Configuration"
+msgstr ""
+
+#: ../../user/agents.md:48 80f8d917528a4acab402130b42bf2252
+#, python-brace-format
+msgid ""
+"curl -X POST http://localhost:8000/agents \\\n"
+"  -H \"Content-Type: application/json\" \\\n"
+"  -d '{\n"
+"    \"name\": \"Sophie Chen\",\n"
+"    \"role\": \"Lead Technical Architect\",\n"
+"    \"provider\": \"anthropic\",\n"
+"    \"model\": \"claude-sonnet-4-20250514\",\n"
+"    \"personality\": {\n"
+"      \"traits\": [\"analytical\", \"creative\", \"detail-oriented\"],\n"
+"      \"communication_style\": \"professional\",\n"
+"      \"languages\": [\"English\", \"French\", \"Mandarin\"]\n"
+"    },\n"
+"    \"background\": {\n"
+"      \"history\": \"15 years in software architecture, PhD from MIT\",\n"
+"      \"expertise\": [\"distributed systems\", \"API design\", \"cloud "
+"architecture\"]\n"
+"    },\n"
+"    \"config\": {\n"
+"      \"temperature\": 0.7,\n"
+"      \"max_tokens\": 4096\n"
+"    }\n"
+"  }'\n"
+msgstr ""
+
+#: ../../user/agents.md:72 251677936a374ffcb963c46580c3bb1a
+msgid "Supported Providers"
+msgstr ""
+
+#: ../../user/agents.md:74 52ec21d4b4534bb9a695e91026418804
+msgid "GatheRing supports multiple LLM providers:"
+msgstr ""
+
+#: ../../user/agents.md ../../user/agents.md:76
+#: 083217088b8a44069e4f11291bf8e70b 875cde9506264c7cb9668575141f5327
+msgid "OpenAI"
+msgstr ""
+
+#: ../../user/agents.md:78 7f66fca3143e4e8592b6be1d4d0214c7
+#, python-brace-format
+msgid ""
+"{\n"
+"  \"provider\": \"openai\",\n"
+"  \"model\": \"gpt-4o\"\n"
+"}\n"
+msgstr ""
+
+#: ../../user/agents.md:85 ada73f48fcd545a6a1bb31815f04969f
+msgid "Available models: `gpt-4o`, `gpt-4o-mini`, `gpt-4-turbo`, `gpt-3.5-turbo`"
+msgstr ""
+
+#: ../../user/agents.md ../../user/agents.md:87
+#: 1d7a162df8a64d499d6c714f1b1c0e87 36a8e5e8eef741c79b9fd40f79c7a07a
+msgid "Anthropic"
+msgstr ""
+
+#: ../../user/agents.md:89 08795fae4a04435d9b45e2d6dedc4ecf
+#, python-brace-format
+msgid ""
+"{\n"
+"  \"provider\": \"anthropic\",\n"
+"  \"model\": \"claude-sonnet-4-20250514\"\n"
+"}\n"
+msgstr ""
+
+#: ../../user/agents.md:96 e50715cd4ee24fd5b24e3bc487de1388
+msgid ""
+"Available models: `claude-sonnet-4-20250514`, `claude-opus-4-20250514`, "
+"`claude-3-5-sonnet-20241022`, `claude-3-5-haiku-20241022`"
+msgstr ""
+
+#: ../../user/agents.md:98 004df1d391e847e297d095f405e2c7d9
+msgid "Ollama (Local)"
+msgstr ""
+
+#: ../../user/agents.md:100 2e8f71975da84c5b8503bc0a47836268
+#, python-brace-format
+msgid ""
+"{\n"
+"  \"provider\": \"ollama\",\n"
+"  \"model\": \"llama3.2\"\n"
+"}\n"
+msgstr ""
+
+#: ../../user/agents.md:107 9ce5b8a404aa4b42a04d3ab86f62f129
+msgid "Available models: Any model installed in your local Ollama instance"
+msgstr ""
+
+#: ../../user/agents.md:109 070f26aa72bc48febb663ad18a94cf42
+msgid "Choosing the Right Provider"
+msgstr ""
+
+#: ../../user/agents.md f9178c18b95f4212a9eb613f553c7074
+msgid "Provider"
+msgstr ""
+
+#: ../../user/agents.md 3b17dbb372ff4a0a81c491e5f82fce6b
+msgid "Use Case"
+msgstr ""
+
+#: ../../user/agents.md 1bff611f583b4aec908659dfe332b972
+msgid "Considerations"
+msgstr ""
+
+#: ../../user/agents.md e6674400432348fcb4d5cccd3a795816
+msgid "General purpose, wide compatibility"
+msgstr ""
+
+#: ../../user/agents.md 7e768e3c3d6e4fb2b86c1cd818299166
+#: 9952890db519496e82f1dc46d49f6362
+msgid "API costs, rate limits"
+msgstr ""
+
+#: ../../user/agents.md dea973baaa7e43498c08d85acd74d1f0
+msgid "Long context, complex reasoning"
+msgstr ""
+
+#: ../../user/agents.md 742da811b2f44d1dac7fff443ba684b8
+msgid "Ollama"
+msgstr ""
+
+#: ../../user/agents.md 3655366bd2964a8b83c5528b99889cb8
+msgid "Privacy, offline use, cost control"
+msgstr ""
+
+#: ../../user/agents.md b43bbc39ba9846c491a1c23ff41f8191
+msgid "Requires local setup, hardware dependent"
+msgstr ""
+
+#: ../../user/agents.md:117 8307a263a29e450ca0b9851ea863cf95
+msgid "Personality System"
+msgstr ""
+
+#: ../../user/agents.md:119 a607c08e80ac4a098300c6473b5a2651
+msgid "Available Traits"
+msgstr ""
+
+#: ../../user/agents.md f44dfceb8c05409f976221b44bdfd187
+msgid "Category"
+msgstr ""
+
+#: ../../user/agents.md 32151927ed2745ba8c46fcd1bba09dbc
+msgid "Traits"
+msgstr ""
+
+#: ../../user/agents.md a1327ed9674c4335a22aaa3db84f9535
+msgid "Cognitive"
+msgstr ""
+
+#: ../../user/agents.md 797657c5017140b3bc66b14af0758ca3
+msgid "`analytical`, `creative`, `logical`, `intuitive`"
+msgstr ""
+
+#: ../../user/agents.md d314efc830e14f938285ffaf093577b4
+msgid "Social"
+msgstr ""
+
+#: ../../user/agents.md 89e8c5fa0e78458caf621466e6158672
+msgid "`empathetic`, `collaborative`, `diplomatic`, `direct`"
+msgstr ""
+
+#: ../../user/agents.md 2b97d1ac33764a36900f4509a691773d
+msgid "Work Style"
+msgstr ""
+
+#: ../../user/agents.md 2e635dd490e44cc08c33fd33b7db5230
+msgid "`detail-oriented`, `big-picture`, `methodical`, `agile`"
+msgstr ""
+
+#: ../../user/agents.md 4ce43f131e654550a38e498890167de6
+msgid "Communication"
+msgstr ""
+
+#: ../../user/agents.md 00b56aeab82841b98ee08d30d0b5b7e3
+msgid "`formal`, `casual`, `technical`, `accessible`"
+msgstr ""
+
+#: ../../user/agents.md:128 90effc9cbf8e4b56a36dabef32c209e3
+msgid "Trait Intensity"
+msgstr ""
+
+#: ../../user/agents.md:130 bbeb2e761e104b4a861a12508857ada2
+msgid "Traits can have varying intensities (0.0 to 1.0):"
+msgstr ""
+
+#: ../../user/agents.md:132 7f21c6ee01af45db9402a82c26709f77
+#, python-brace-format
+msgid ""
+"{\n"
+"  \"personality\": {\n"
+"    \"traits\": {\n"
+"      \"curious\": 0.9,\n"
+"      \"analytical\": 0.8,\n"
+"      \"creative\": 0.6\n"
+"    }\n"
+"  }\n"
+"}\n"
+msgstr ""
+
+#: ../../user/agents.md:144 9a536ed49de1473ea8b1cfe78a51c3a2
+msgid "Communication Styles"
+msgstr ""
+
+#: ../../user/agents.md:146 34143fb90dbe44538e0ded6be0f99438
+msgid "`professional`: Formal, structured responses"
+msgstr ""
+
+#: ../../user/agents.md:147 3bf58e3ac0154259af4006ccdb63027f
+msgid "`casual`: Friendly, conversational tone"
+msgstr ""
+
+#: ../../user/agents.md:148 afecceddc0ca4c6a9719552881c71779
+msgid "`technical`: Precise, jargon-appropriate"
+msgstr ""
+
+#: ../../user/agents.md:149 0047f04b8afa4459a26c71082f15599e
+msgid "`accessible`: Simple, clear explanations"
+msgstr ""
+
+#: ../../user/agents.md:151 c137e97d91ae49c4910f99597068f241
+msgid "Agent Skills"
+msgstr ""
+
+#: ../../user/agents.md:153 f18a534f33a54b3eb115a18b513296cd
+msgid "Built-in Skills"
+msgstr ""
+
+#: ../../user/agents.md:155 f53d0b62cb11459389a5c03079ae4d12
+#, python-brace-format
+msgid ""
+"{\n"
+"  \"skills\": [\n"
+"    \"code_review\",\n"
+"    \"documentation\",\n"
+"    \"testing\",\n"
+"    \"debugging\",\n"
+"    \"architecture\"\n"
+"  ]\n"
+"}\n"
+msgstr ""
+
+#: ../../user/agents.md:167 c2bb402497364f309b3dcf9bfd09d10d
+msgid "Custom Competencies"
+msgstr ""
+
+#: ../../user/agents.md:169 2f5e748d0a2a433e905a62e48277907a
+#, python-brace-format
+msgid ""
+"{\n"
+"  \"competencies\": {\n"
+"    \"python\": \"expert\",\n"
+"    \"react\": \"advanced\",\n"
+"    \"kubernetes\": \"intermediate\",\n"
+"    \"machine_learning\": \"basic\"\n"
+"  }\n"
+"}\n"
+msgstr ""
+
+#: ../../user/agents.md:180 2930da08d9244145a1c44bc98fc219a7
+msgid "Agent Tools"
+msgstr ""
+
+#: ../../user/agents.md:182 2d57778f161e41b9a30da3eef2cd683a
+msgid "Agents can use tools to interact with the world:"
+msgstr ""
+
+#: ../../user/agents.md:184 974463998c8a410da9d36ae5036a5fd9
+msgid "Available Tools"
+msgstr ""
+
+#: ../../user/agents.md 9c961498f53e4251814a164355f7efa4
+msgid "Tool"
+msgstr ""
+
+#: ../../user/agents.md 9a007f90fecd429b936f3c6ec5c7206b
+msgid "Description"
+msgstr ""
+
+#: ../../user/agents.md 3cda41e67edd46e9a80e344282588c01
+msgid "`filesystem`"
+msgstr ""
+
+#: ../../user/agents.md 364a9ff9a6af4843ae42d9437e8936a8
+msgid "Read/write files"
+msgstr ""
+
+#: ../../user/agents.md 28a673c3f6ed4f249ab53c109a41656e
+msgid "`calculator`"
+msgstr ""
+
+#: ../../user/agents.md 2910f8dadd2446e3b67c00d0214128a7
+msgid "Mathematical operations"
+msgstr ""
+
+#: ../../user/agents.md 3d2fa4535e194b0bba355e5ebc1b86ac
+msgid "`web_search`"
+msgstr ""
+
+#: ../../user/agents.md c5268091ecb94a259c01a276fcaa4ba3
+msgid "Search the web"
+msgstr ""
+
+#: ../../user/agents.md f80efea9784848e882c06473116cbd94
+msgid "`code_executor`"
+msgstr ""
+
+#: ../../user/agents.md 51a5cedd7512495d94f8037ee9fae2fe
+msgid "Run code snippets"
+msgstr ""
+
+#: ../../user/agents.md d93113505bbc4c0ead27510f053bb898
+msgid "`git`"
+msgstr ""
+
+#: ../../user/agents.md 15bf1235dd1a44b3867790253f6d97d0
+msgid "Git operations"
+msgstr ""
+
+#: ../../user/agents.md:194 0616f09628c647558730229d5adc6ac6
+msgid "Configuring Tools"
+msgstr ""
+
+#: ../../user/agents.md:196 c5ed81d6f0e04ff68ecd7f3f6d5bc57d
+#, python-brace-format
+msgid ""
+"{\n"
+"  \"tools\": {\n"
+"    \"filesystem\": {\n"
+"      \"enabled\": true,\n"
+"      \"permissions\": [\"read\", \"write\"],\n"
+"      \"base_path\": \"/workspace\"\n"
+"    },\n"
+"    \"calculator\": {\n"
+"      \"enabled\": true\n"
+"    }\n"
+"  }\n"
+"}\n"
+msgstr ""
+
+#: ../../user/agents.md:211 d4de7afe83a94e1294a4a4c36ff7ed95
+msgid "Agent Memory"
+msgstr ""
+
+#: ../../user/agents.md:213 ebb4530445d54e86a8f2eb2d54f06658
+msgid "Memory Scopes"
+msgstr ""
+
+#: ../../user/agents.md:215 4c03663a2c324bec97ecafcadaab993a
+msgid "**Conversation**: Current conversation context"
+msgstr ""
+
+#: ../../user/agents.md:216 cea03574438a4a18ba87d080be809665
+msgid "**Session**: Current session across conversations"
+msgstr ""
+
+#: ../../user/agents.md:217 97ebf64c86cc4d0a8db329c3783dc437
+msgid "**Agent**: Persistent agent-specific memories"
+msgstr ""
+
+#: ../../user/agents.md:218 d41e8bf387c24819a6455f9e05d5693a
+msgid "**Circle**: Shared with circle members"
+msgstr ""
+
+#: ../../user/agents.md:219 eed763ba46574ed096c716bd791ce4eb
+msgid "**Global**: Shared across all agents"
+msgstr ""
+
+#: ../../user/agents.md:221 d57523f88b114f20ad10a8295dd8cf1f
+msgid "Memory Operations"
+msgstr ""
+
+#: ../../user/agents.md:223 86c3b4f7a4594cfcb7c7b8ca2d3d2d91
+#, python-brace-format
+msgid ""
+"# Get agent memories\n"
+"curl http://localhost:8000/agents/1/memories\n"
+"\n"
+"# Add a memory\n"
+"curl -X POST http://localhost:8000/agents/1/memories \\\n"
+"  -H \"Content-Type: application/json\" \\\n"
+"  -d '{\n"
+"    \"key\": \"user_preference\",\n"
+"    \"value\": \"Prefers detailed explanations\",\n"
+"    \"scope\": \"agent\"\n"
+"  }'\n"
+msgstr ""
+
+#: ../../user/agents.md:237 3fe899d6e7be49b0b7da3c3a6cfcfbc1
+msgid "Agent States"
+msgstr ""
+
+#: ../../user/agents.md:239 1e2d5a94b8024d8aabeac11b78074120
+msgid ""
+"┌──────────┐     ┌──────────┐     ┌──────────┐\n"
+"│  Idle    │────▶│  Active  │────▶│  Busy    │\n"
+"└──────────┘     └──────────┘     └──────────┘\n"
+"     ▲                                  │\n"
+"     └──────────────────────────────────┘\n"
+msgstr ""
+
+#: ../../user/agents.md:247 8a5659f9c0d84ad895becff6b0698923
+msgid "States"
+msgstr ""
+
+#: ../../user/agents.md:249 34f9dfe876b44261aa0a3ce91ce5c15e
+msgid "**Idle**: Ready to receive tasks"
+msgstr ""
+
+#: ../../user/agents.md:250 9e6fc6e3c2754ca08566af2d3d905025
+msgid "**Active**: Engaged in conversation"
+msgstr ""
+
+#: ../../user/agents.md:251 875105317ccc458692433062d3e25957
+msgid "**Busy**: Processing a complex task"
+msgstr ""
+
+#: ../../user/agents.md:252 8d7602be45b344968ac22f3e784e4588
+msgid "**Offline**: Not available"
+msgstr ""
+
+#: ../../user/agents.md:254 cac0326385ba4d109391c79d9a2f3053
+msgid "Agent Sessions"
+msgstr ""
+
+#: ../../user/agents.md:256 0c794e198bbb48cfad89afd199b9e539
+msgid "Sessions track agent activity:"
+msgstr ""
+
+#: ../../user/agents.md:258 abcea6190eeb4e068ca88df1cc159391
+msgid ""
+"# Start a session\n"
+"curl -X POST http://localhost:8000/agents/1/sessions\n"
+"\n"
+"# Get current session\n"
+"curl http://localhost:8000/agents/1/sessions/current\n"
+"\n"
+"# End session\n"
+"curl -X POST http://localhost:8000/agents/1/sessions/current/end\n"
+msgstr ""
+
+#: ../../user/agents.md:269 84bc382923024a33a9977c874c2756af
+msgid "Using Personas"
+msgstr ""
+
+#: ../../user/agents.md:271 2b74259a190a4e65be89e30ef5e2f590
+msgid ""
+"GatheRing includes pre-built personas for common roles. See the "
+"`personas/` directory for examples:"
+msgstr ""
+
+#: ../../user/agents.md:273 bb549a959ed7456db82b7366cc383f33
+msgid "`sophie_chen.md` - Lead Technical Architect"
+msgstr ""
+
+#: ../../user/agents.md:274 bd4a4f8819ca45e38740e96ca2071e15
+msgid "`olivia_nakamoto.md` - Senior Systems Engineer"
+msgstr ""
+
+#: ../../user/agents.md:275 e00b90ee6517491283184411b51cecfe
+msgid "`marcus_johnson.md` - DevOps Engineer"
+msgstr ""
+
+#: ../../user/agents.md:276 2f976d4732c44ac1aa4bd941f98742b5
+msgid "And many more..."
+msgstr ""
+
+#: ../../user/agents.md:278 5cac5d14eb5b4d19bcb670091a0a5020
+msgid "Loading a Persona"
+msgstr ""
+
+#: ../../user/agents.md:280 5654608ba4164e6ab1ac043257b8d86b
+msgid ""
+"from gathering import Agent\n"
+"\n"
+"# Load from persona file\n"
+"agent = Agent.from_persona(\"personas/sophie_chen.md\")\n"
+msgstr ""
+
+#: ../../user/agents.md:287 e4d2ab14c78d48f48759d30ebb78ea20
+msgid "Best Practices"
+msgstr ""
+
+#: ../../user/agents.md:289 94958e07c80f4ee8b7271afbccd7f323
+msgid "1. Match Model to Task"
+msgstr ""
+
+#: ../../user/agents.md:291 2fc9080f3f944d9591b5ab80dfa1f676
+msgid ""
+"Use faster/cheaper models for simple tasks, more capable models for "
+"complex reasoning."
+msgstr ""
+
+#: ../../user/agents.md:293 00c2c5e4d5c94f4f81b29c6833a4c2c7
+msgid "2. Define Clear Roles"
+msgstr ""
+
+#: ../../user/agents.md:295 830dbdb004b243da81f1be70355366ae
+msgid "Each agent should have a specific, well-defined role."
+msgstr ""
+
+#: ../../user/agents.md:297 1624a2a45e5144eab069e183feea4a30
+msgid "3. Balanced Personalities"
+msgstr ""
+
+#: ../../user/agents.md:299 799c5e9fcd2f44058c04f4f58608abb9
+msgid ""
+"Avoid extreme trait intensities; balance creates more natural "
+"interactions."
+msgstr ""
+
+#: ../../user/agents.md:301 26c7e6e843174e15bc3614aa8325bc93
+msgid "4. Appropriate Memory Scope"
+msgstr ""
+
+#: ../../user/agents.md:303 c2f4f38e5bb3468eb70f965cf95d192a
+msgid "Use the narrowest scope that works for your use case."
+msgstr ""
+
+#: ../../user/agents.md:305 dd1ebf4dd5bc42c9abe2449e9a522f6d
+msgid "5. Tool Permissions"
+msgstr ""
+
+#: ../../user/agents.md:307 70ea0bc588da4aa3a3eef364880f3663
+msgid "Only grant tools that the agent actually needs."
+msgstr ""
+
+#: ../../user/agents.md:309 b6ca781b73494d2bafd03dc7babfb99f
+msgid "Related Topics"
+msgstr ""
+
+#: ../../user/agents.md:311 3a320109fba0406e8ce0c4bbf51a4d72
+msgid "[Circles](circles.md) - Organizing agents into teams"
+msgstr ""
+
+#: ../../user/agents.md:312 41502b1856f34e129cff7201ca322c92
+msgid "[Workspace](workspace.md) - Agent development environment"
+msgstr ""
+
+#: ../../user/agents.md:313 cf660c970d454b8baccb013bb7c90c9d
+msgid "[API Reference](../api/reference.md) - Complete API documentation"
+msgstr ""
+

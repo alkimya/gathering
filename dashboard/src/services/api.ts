@@ -11,6 +11,8 @@ import type {
   ChatRequest,
   ChatResponse,
   HealthResponse,
+  SystemMetricsResponse,
+  HealthChecksResponse,
   ChatMessage,
   CircleMetrics,
   TaskPriority,
@@ -20,6 +22,9 @@ import type {
   Knowledge,
   KnowledgeCreate,
   KnowledgeSearchResponse,
+  KnowledgeListResponse,
+  KnowledgeStatsResponse,
+  DocumentUploadResponse,
   MemoryStats,
   MemoryType,
   KnowledgeCategory,
@@ -43,6 +48,7 @@ import type {
   AllSettings,
   ProviderSettings,
   ApplicationSettings,
+  DatabaseSettings,
   ProviderTestResult,
   Project,
   ProjectCreate,
@@ -56,9 +62,29 @@ import type {
   PipelineStatus,
   PipelineRun,
   PipelineRunStatus,
+  SkillInfo,
+  AgentToolsResponse,
+  AgentSkillsResponse,
 } from '../types';
 
 const API_BASE = '/api';
+
+// HTTP status code messages for better error feedback
+const HTTP_STATUS_MESSAGES: Record<number, string> = {
+  400: 'Invalid request data',
+  401: 'Authentication required',
+  403: 'Access denied',
+  404: 'Resource not found',
+  405: 'Method not allowed',
+  408: 'Request timeout',
+  409: 'Conflict with existing resource',
+  422: 'Validation failed',
+  429: 'Too many requests',
+  500: 'Server error',
+  502: 'Bad gateway',
+  503: 'Service unavailable',
+  504: 'Gateway timeout',
+};
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const response = await fetch(`${API_BASE}${path}`, {
@@ -70,13 +96,26 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
   });
 
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ detail: 'Unknown error' }));
+    const error = await response.json().catch(() => ({ detail: null }));
+
     // Handle Pydantic validation errors (422)
     if (response.status === 422 && error.detail && Array.isArray(error.detail)) {
-      const messages = error.detail.map((e: any) => `${e.loc?.join('.')}: ${e.msg}`).join('; ');
+      const messages = error.detail.map((e: any) => {
+        const field = e.loc?.slice(1).join('.') || 'field';
+        return `${field}: ${e.msg}`;
+      }).join('; ');
       throw new Error(`Validation error: ${messages}`);
     }
-    throw new Error(error.detail || `HTTP ${response.status}`);
+
+    // Use detail from API if available
+    if (error.detail && typeof error.detail === 'string') {
+      throw new Error(error.detail);
+    }
+
+    // Fallback to descriptive HTTP status message
+    const statusMessage = HTTP_STATUS_MESSAGES[response.status] || 'Request failed';
+    const pathHint = path.split('/').slice(0, 3).join('/');
+    throw new Error(`${statusMessage} (${response.status}) - ${pathHint}`);
   }
 
   if (response.status === 204) {
@@ -89,6 +128,8 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 // Health
 export const health = {
   check: () => request<HealthResponse>('/health'),
+  system: () => request<SystemMetricsResponse>('/health/system'),
+  checks: () => request<HealthChecksResponse>('/health/checks'),
 };
 
 // Agents (using database endpoints)
@@ -134,6 +175,26 @@ export const agents = {
     request<{ memories: string[]; query: string }>(`/agents/${id}/memories/recall`, {
       method: 'POST',
       body: JSON.stringify({ query, limit }),
+    }),
+
+  // Skills management
+  getSkills: (id: number) =>
+    request<AgentSkillsResponse>(`/agents/${id}/skills`),
+
+  updateSkills: (id: number, skills: string[]) =>
+    request<AgentSkillsResponse>(`/agents/${id}/skills?${new URLSearchParams({ skills: skills.join(',') })}`, {
+      method: 'PUT',
+      body: JSON.stringify(skills),
+    }),
+
+  addSkill: (id: number, skillName: string) =>
+    request<{ status: string; skills: string[] }>(`/agents/${id}/skills/${skillName}`, {
+      method: 'POST',
+    }),
+
+  removeSkill: (id: number, skillName: string) =>
+    request<{ status: string; skills: string[] }>(`/agents/${id}/skills/${skillName}`, {
+      method: 'DELETE',
     }),
 };
 
@@ -338,6 +399,56 @@ export const memories = {
       method: 'POST',
       body: JSON.stringify({ query, ...options }),
     }),
+
+  listKnowledge: (options?: {
+    category?: KnowledgeCategory;
+    page?: number;
+    page_size?: number;
+  }) => {
+    const params = new URLSearchParams();
+    if (options?.category) params.append('category', options.category);
+    if (options?.page) params.append('page', options.page.toString());
+    if (options?.page_size) params.append('page_size', options.page_size.toString());
+    const queryString = params.toString();
+    return request<KnowledgeListResponse>(`/memories/knowledge${queryString ? `?${queryString}` : ''}`);
+  },
+
+  knowledgeStats: () =>
+    request<KnowledgeStatsResponse>('/memories/knowledge/stats'),
+
+  // Document upload
+  uploadDocument: async (
+    file: File,
+    options?: {
+      title?: string;
+      category?: KnowledgeCategory;
+      tags?: string[];
+      is_global?: boolean;
+      author_agent_id?: number;
+      chunk_large_docs?: boolean;
+    }
+  ): Promise<DocumentUploadResponse> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    if (options?.title) formData.append('title', options.title);
+    if (options?.category) formData.append('category', options.category);
+    if (options?.tags) formData.append('tags', options.tags.join(','));
+    if (options?.is_global !== undefined) formData.append('is_global', String(options.is_global));
+    if (options?.author_agent_id) formData.append('author_agent_id', String(options.author_agent_id));
+    if (options?.chunk_large_docs !== undefined) formData.append('chunk_large_docs', String(options.chunk_large_docs));
+
+    const response = await fetch(`${API_BASE}/memories/knowledge/upload`, {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ detail: 'Upload failed' }));
+      throw new Error(error.detail || 'Upload failed');
+    }
+
+    return response.json();
+  },
 };
 
 // Providers
@@ -616,6 +727,12 @@ export const settings = {
       body: JSON.stringify(data),
     }),
 
+  updateDatabase: (data: { pool_size?: number; max_overflow?: number }) =>
+    request<DatabaseSettings>('/settings/database', {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
+
   testProvider: (provider: string) =>
     request<ProviderTestResult>(`/settings/providers/${provider}/test`, {
       method: 'POST',
@@ -675,9 +792,68 @@ export const projects = {
     request<{
       project_id: number;
       project_name: string;
-      circles: { circle_id: number; is_primary: boolean; linked_at: string }[];
+      circles: { circle_id: number; circle_name: string; is_primary: boolean; linked_at: string }[];
       total: number;
     }>(`/projects/${projectId}/circles`),
+};
+
+// Tools (Agent Skills/Capabilities)
+export const tools = {
+  // List all available skills
+  listSkills: (category?: string) => {
+    const params = category ? `?category=${category}` : '';
+    return request<SkillInfo[]>(`/tools/skills${params}`);
+  },
+
+  // Get skill categories with counts
+  getCategories: () =>
+    request<Record<string, number>>('/tools/skills/categories'),
+
+  // Get all tools for an agent with enabled status
+  getAgentTools: (agentId: number) =>
+    request<AgentToolsResponse>(`/tools/agents/${agentId}`),
+
+  // Toggle a single tool for an agent
+  toggleTool: (agentId: number, skillName: string, isEnabled: boolean) =>
+    request<{ agent_id: number; skill_name: string; is_enabled: boolean; message: string }>(
+      `/tools/agents/${agentId}/skills/${skillName}`,
+      {
+        method: 'PATCH',
+        body: JSON.stringify({ is_enabled: isEnabled }),
+      }
+    ),
+
+  // Bulk toggle multiple tools
+  bulkToggle: (agentId: number, skillNames: string[], isEnabled: boolean) =>
+    request<{ agent_id: number; updated_count: number; is_enabled: boolean; message: string }>(
+      `/tools/agents/${agentId}/skills/bulk`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ skill_names: skillNames, is_enabled: isEnabled }),
+      }
+    ),
+
+  // Enable all tools (optionally by category)
+  enableAll: (agentId: number, category?: string) => {
+    const params = category ? `?category=${category}` : '';
+    return request<{ agent_id: number; enabled_count: number; category?: string; message: string }>(
+      `/tools/agents/${agentId}/skills/enable-all${params}`,
+      { method: 'POST' }
+    );
+  },
+
+  // Disable all tools (optionally by category)
+  disableAll: (agentId: number, category?: string) => {
+    const params = category ? `?category=${category}` : '';
+    return request<{ agent_id: number; category?: string; message: string }>(
+      `/tools/agents/${agentId}/skills/disable-all${params}`,
+      { method: 'POST' }
+    );
+  },
+
+  // Get list of enabled skill names for an agent
+  getEnabledSkills: (agentId: number) =>
+    request<{ agent_id: number; enabled_skills: string[] }>(`/tools/agents/${agentId}/enabled`),
 };
 
 // Pipelines
@@ -807,4 +983,4 @@ export const del = (path: string, options?: { params?: Record<string, any> }) =>
   return request(fullPath, { method: 'DELETE' }).then(data => ({ data }));
 };
 
-export default { get, post, put, delete: del, health, agents, circles, conversations, memories, providers, models, personas, backgroundTasks, scheduledActions, goals, settings, projects, pipelines };
+export default { get, post, put, delete: del, health, agents, circles, conversations, memories, providers, models, personas, backgroundTasks, scheduledActions, goals, settings, projects, pipelines, tools };

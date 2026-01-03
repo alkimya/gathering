@@ -21,6 +21,33 @@ class GitManager:
     """
 
     @classmethod
+    def _validate_file_path(cls, project_path: str, file_path: str) -> bool:
+        """
+        Validate that a file path is within the project directory.
+
+        Prevents path traversal attacks via git operations.
+
+        Args:
+            project_path: The project root path.
+            file_path: The file path to validate.
+
+        Returns:
+            True if path is safe, False otherwise.
+        """
+        if not file_path:
+            return True  # No path is safe
+
+        try:
+            project = Path(project_path).resolve()
+            target = (project / file_path).resolve()
+            # Check that target is within project
+            target.relative_to(project)
+            return True
+        except ValueError:
+            logger.warning(f"Path traversal attempt blocked: {file_path}")
+            return False
+
+    @classmethod
     def is_git_repo(cls, project_path: str) -> bool:
         """
         Check if project is a git repository.
@@ -219,6 +246,10 @@ class GitManager:
         if not cls.is_git_repo(project_path):
             return {"error": "Not a git repository"}
 
+        # Validate file_path to prevent path traversal
+        if file_path and not cls._validate_file_path(project_path, file_path):
+            return {"error": "Invalid file path"}
+
         cmd = ["git", "diff"]
 
         if commit_hash:
@@ -340,6 +371,11 @@ class GitManager:
             List of commits that modified the file.
         """
         if not cls.is_git_repo(project_path):
+            return []
+
+        # Validate file_path to prevent path traversal
+        if not cls._validate_file_path(project_path, file_path):
+            logger.warning(f"Path traversal blocked in get_file_history: {file_path}")
             return []
 
         cmd = [
@@ -617,6 +653,11 @@ class GitManager:
         if not cls.is_git_repo(project_path):
             return {"error": "Not a git repository"}
 
+        # Validate all file paths to prevent path traversal
+        for file_path in files:
+            if not cls._validate_file_path(project_path, file_path):
+                return {"error": f"Invalid file path: {file_path}"}
+
         try:
             # Stage each file
             for file_path in files:
@@ -652,6 +693,11 @@ class GitManager:
         """
         if not cls.is_git_repo(project_path):
             return {"error": "Not a git repository"}
+
+        # Validate all file paths to prevent path traversal
+        for file_path in files:
+            if not cls._validate_file_path(project_path, file_path):
+                return {"error": f"Invalid file path: {file_path}"}
 
         try:
             # Unstage each file

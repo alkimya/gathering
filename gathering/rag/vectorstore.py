@@ -438,6 +438,133 @@ class VectorStore:
             for r in results
         ]
 
+    def list_knowledge(
+        self,
+        category: Optional[str] = None,
+        limit: int = 20,
+        offset: int = 0,
+    ) -> List[KnowledgeResult]:
+        """
+        List knowledge base entries with pagination.
+
+        Args:
+            category: Filter by category.
+            limit: Maximum results.
+            offset: Pagination offset.
+
+        Returns:
+            List of knowledge entries.
+        """
+        params: List[Any] = []
+        category_clause = ""
+        if category:
+            category_clause = "AND category = %s"
+            params.append(category)
+
+        params.extend([limit, offset])
+
+        results = self.db.execute(f"""
+            SELECT
+                id,
+                title,
+                content,
+                category,
+                tags,
+                created_at
+            FROM memory.knowledge_base
+            WHERE is_active = true
+            {category_clause}
+            ORDER BY created_at DESC
+            LIMIT %s OFFSET %s
+        """, params)
+
+        return [
+            KnowledgeResult(
+                id=r["id"],
+                title=r["title"],
+                content=r["content"],
+                category=r["category"],
+                similarity=0.0,
+                tags=r["tags"],
+            )
+            for r in results
+        ]
+
+    def count_knowledge(self, category: Optional[str] = None) -> int:
+        """
+        Count knowledge base entries.
+
+        Args:
+            category: Filter by category.
+
+        Returns:
+            Total count.
+        """
+        params: List[Any] = []
+        category_clause = ""
+        if category:
+            category_clause = "AND category = %s"
+            params.append(category)
+
+        result = self.db.execute(f"""
+            SELECT COUNT(*) AS count
+            FROM memory.knowledge_base
+            WHERE is_active = true
+            {category_clause}
+        """, params)
+
+        return result[0]["count"] if result else 0
+
+    def get_knowledge_stats(self) -> Dict[str, Any]:
+        """
+        Get knowledge base statistics.
+
+        Returns:
+            Stats dict with total, by_category, and recent entries.
+        """
+        # Total count
+        total_result = self.db.execute("""
+            SELECT COUNT(*) AS count
+            FROM memory.knowledge_base
+            WHERE is_active = true
+        """)
+        total = total_result[0]["count"] if total_result else 0
+
+        # By category
+        category_result = self.db.execute("""
+            SELECT category, COUNT(*) AS count
+            FROM memory.knowledge_base
+            WHERE is_active = true
+            GROUP BY category
+        """)
+        by_category = {r["category"] or "uncategorized": r["count"] for r in category_result}
+
+        # Recent entries
+        recent_result = self.db.execute("""
+            SELECT id, title, content, category, tags
+            FROM memory.knowledge_base
+            WHERE is_active = true
+            ORDER BY created_at DESC
+            LIMIT 5
+        """)
+        recent = [
+            KnowledgeResult(
+                id=r["id"],
+                title=r["title"],
+                content=r["content"],
+                category=r["category"],
+                similarity=0.0,
+                tags=r["tags"],
+            )
+            for r in recent_result
+        ]
+
+        return {
+            "total": total,
+            "by_category": by_category,
+            "recent": recent,
+        }
+
     # =========================================================================
     # EMBEDDING CACHE
     # =========================================================================

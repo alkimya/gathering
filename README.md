@@ -16,10 +16,11 @@ GatheRing is a highly customizable and modular framework for creating and managi
 - **React Dashboard**: Modern Web3 dark theme UI for agents, circles, tasks, and conversations
 - **RAG Support**: PostgreSQL + pgvector for semantic memory search
 - **Knowledge Base**: Semantic search across documentation and best practices
-- **Skills System**: Git, Test, and extensible tool framework
+- **Skills System**: 18+ skills (filesystem, git, code, shell, database, http, etc.) with per-agent configuration
 - **Agent Autonomy**: Background tasks, scheduled actions, goal management
 - **Settings UI**: Configure API keys and application parameters via dashboard
-- **Fully Tested**: 205+ tests with TDD approach
+- **Authentication**: JWT-based auth with token revocation and OWASP security headers
+- **Fully Tested**: 1071 tests with TDD approach
 
 ## Quick Start
 
@@ -76,8 +77,11 @@ dashboard/          # React + TypeScript + Tailwind (Web3 Dark Theme)
 
 ## Documentation
 
-- [Architecture](docs/ARCHITECTURE.md) - Full technical documentation
-- [Security Audit](docs/SECURITY_AUDIT.md) - Security analysis
+- [User Guide](docs/user/guide.md) - Getting started guide
+- [Dashboard Guide](docs/user/dashboard.md) - Web dashboard documentation
+- [Architecture](docs/developer/architecture.md) - Technical documentation
+- [API Reference](docs/api/endpoints.md) - REST API documentation
+- [Contributing](docs/developer/contributing.md) - Developer guide
 
 ## Stack
 
@@ -86,39 +90,9 @@ dashboard/          # React + TypeScript + Tailwind (Web3 Dark Theme)
 | Backend | Python 3.11+, FastAPI, Pydantic |
 | Frontend | React 19, TypeScript, Tailwind CSS, Vite |
 | Database | PostgreSQL 16 + pgvector |
-| LLM | Anthropic, OpenAI, DeepSeek, Ollama |
+| DB Layer | [pycopg](https://pypi.org/project/pycopg/) - High-level PostgreSQL API (asyncpg + psycopg) |
+| LLM | Anthropic, OpenAI, DeepSeek, Mistral, Google, Ollama |
 | Embeddings | OpenAI text-embedding-3-small (1536 dims) |
-
-## Roadmap
-
-### Completed
-
-- [x] **Phase 1-3**: Core, Security, LLM Providers
-- [x] **Phase 4**: Skills (Git, Test), DeepSeek Provider
-- [x] **Phase 5**: Orchestration, Persistence, Conversations
-- [x] **Phase 6**: FastAPI REST API
-- [x] **Phase 7**: React Dashboard
-- [x] **Phase 8**: RAG with pgvector (multi-schema database, migrations)
-- [x] **Phase 9**: RAG Services (Embedding, VectorStore, Memory Manager, Knowledge Base UI)
-- [x] **Phase 10**: Agent Autonomy
-  - Background task execution with progress tracking
-  - Scheduled actions (cron, interval, one-time, event-triggered)
-  - Agent goals with hierarchical decomposition
-  - Settings page for API keys and configuration
-
-### Next Steps
-
-- [ ] **Phase 11**: Advanced Skills
-  - Web browsing skill
-  - File system skill
-  - Code execution sandbox
-  - API integration skill
-
-- [ ] **Phase 12**: Production Readiness
-  - Authentication & authorization
-  - Rate limiting
-  - Monitoring & observability
-  - Docker deployment
 
 ## Environment Variables
 
@@ -134,6 +108,11 @@ OLLAMA_HOST=http://localhost:11434  # For local models
 
 # Dashboard
 VITE_API_URL=http://localhost:8000  # API URL for frontend
+
+# Authentication (production)
+SECRET_KEY=your-secret-key-min-32-chars  # JWT signing key
+ADMIN_EMAIL=admin@example.com            # Admin email
+ADMIN_PASSWORD_HASH=$2b$12$...           # Bcrypt hash of admin password
 ```
 
 ## API Overview
@@ -156,7 +135,9 @@ GET  /goals                        # List agent goals
 POST /goals                        # Create goal
 GET  /settings                     # Get configuration
 PATCH /settings/providers/{name}   # Update provider settings
-WS   /ws                           # Real-time updates
+POST /auth/login                   # Authenticate user
+POST /auth/logout                  # Revoke token
+WS   /ws?token=<jwt>               # Real-time updates (authenticated)
 ```
 
 Full API docs at `/docs` (Swagger) or `/redoc` when server is running.
@@ -168,4 +149,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Contact
 
 - GitHub: [alkimya/gathering](https://github.com/alkimya/gathering)
-- Email: [gathering.ai@pm.me](mailto:gathering.ai@pm.me)
+- Email: [loc.cosnier@pm.me](mailto:loc.cosnier@pm.me)

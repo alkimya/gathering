@@ -1,0 +1,523 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026, GatheRing Team
+# This file is distributed under the same license as the GatheRing package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: GatheRing 0.2.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-01-02 14:08+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.17.0\n"
+
+#: ../../api/models.md:1 e0b62ef4eb57464aa85feff138d533ae
+msgid "API Models"
+msgstr ""
+
+#: ../../api/models.md:3 6075e5624fce4440a93591cde83e1d78
+msgid "Pydantic models used in the GatheRing API."
+msgstr ""
+
+#: ../../api/models.md:5 e28b6ae024824e2fb1f8a0eb170f7e0e
+msgid "Agent Models"
+msgstr ""
+
+#: ../../api/models.md:7 9795fab005f547e78c3f1cb0ebc8ab57
+msgid "AgentCreate"
+msgstr ""
+
+#: ../../api/models.md:9 7d531da5fdd3462a86cfebb18adc4745
+msgid ""
+"class AgentCreate(BaseModel):\n"
+"    name: str = Field(..., min_length=1, max_length=100)\n"
+"    role: Optional[str] = Field(None, max_length=100)\n"
+"    provider: str = Field(default=\"anthropic\")  # openai, anthropic, "
+"ollama\n"
+"    model: str = Field(default=\"claude-sonnet-4-20250514\")\n"
+"    personality: Optional[PersonalityConfig] = None\n"
+"    background: Optional[BackgroundConfig] = None\n"
+"    config: Optional[AgentConfig] = None\n"
+msgstr ""
+
+#: ../../api/models.md:20 c1afe89865a64f0e9683162e01d0c3e9
+msgid "AgentUpdate"
+msgstr ""
+
+#: ../../api/models.md:22 0515c25e219943bda2093570becc5a2d
+msgid ""
+"class AgentUpdate(BaseModel):\n"
+"    name: Optional[str] = Field(None, min_length=1, max_length=100)\n"
+"    role: Optional[str] = None\n"
+"    model: Optional[str] = None\n"
+"    personality: Optional[PersonalityConfig] = None\n"
+"    config: Optional[AgentConfig] = None\n"
+msgstr ""
+
+#: ../../api/models.md:31 dc8c320353f84d518e1d7678c2e9da23
+msgid "AgentResponse"
+msgstr ""
+
+#: ../../api/models.md:33 bc6dce67f19048209ac018ba7b412f6d
+msgid ""
+"class AgentResponse(BaseModel):\n"
+"    id: int\n"
+"    name: str\n"
+"    role: Optional[str]\n"
+"    model: str\n"
+"    personality: Optional[PersonalityConfig]\n"
+"    config: Optional[AgentConfig]\n"
+"    status: AgentStatus\n"
+"    created_at: datetime\n"
+"    updated_at: datetime\n"
+"\n"
+"    class Config:\n"
+"        from_attributes = True\n"
+msgstr ""
+
+#: ../../api/models.md:49 ab414f74d3484932b272d635af0cbfc0
+msgid "PersonalityConfig"
+msgstr ""
+
+#: ../../api/models.md:51 647f6bdc4ff2467a8e44037fe8d84c22
+msgid ""
+"class PersonalityConfig(BaseModel):\n"
+"    traits: list[str] = Field(default_factory=list)\n"
+"    communication_style: Optional[str] = \"professional\"\n"
+"    languages: list[str] = Field(default_factory=lambda: [\"English\"])\n"
+msgstr ""
+
+#: ../../api/models.md:58 28be7001ad2949a2be154694aa65e541
+msgid "AgentConfig"
+msgstr ""
+
+#: ../../api/models.md:60 a6f029b0f3a94242964bc343fe3389dc
+msgid ""
+"class AgentConfig(BaseModel):\n"
+"    temperature: float = Field(default=0.7, ge=0, le=2)\n"
+"    max_tokens: int = Field(default=4096, ge=1)\n"
+"    tools: list[str] = Field(default_factory=list)\n"
+msgstr ""
+
+#: ../../api/models.md:67 94af4be9800542e494f7320cf9103c5e
+msgid "AgentStatus"
+msgstr ""
+
+#: ../../api/models.md:69 c449ee607aec46bc8d2d1cb7b502c2f1
+msgid ""
+"class AgentStatus(str, Enum):\n"
+"    IDLE = \"idle\"\n"
+"    ACTIVE = \"active\"\n"
+"    BUSY = \"busy\"\n"
+"    OFFLINE = \"offline\"\n"
+msgstr ""
+
+#: ../../api/models.md:77 3b7dc588163c4df8815121004a83d1c9
+msgid "Circle Models"
+msgstr ""
+
+#: ../../api/models.md:79 939cc1f46e01470fbb8cf0886fe0329f
+msgid "CircleCreate"
+msgstr ""
+
+#: ../../api/models.md:81 cfe114bd4a61417385546be3b07e2889
+msgid ""
+"class CircleCreate(BaseModel):\n"
+"    name: str = Field(..., pattern=\"^[a-z0-9-]+$\", max_length=50)\n"
+"    display_name: Optional[str] = Field(None, max_length=200)\n"
+"    description: Optional[str] = None\n"
+"    config: Optional[CircleConfig] = None\n"
+msgstr ""
+
+#: ../../api/models.md:89 edde25fd14c5406993285052204a9926
+msgid "CircleResponse"
+msgstr ""
+
+#: ../../api/models.md:91 41f362a19d404c6ca16d2dde268ee919
+msgid ""
+"class CircleResponse(BaseModel):\n"
+"    id: int\n"
+"    name: str\n"
+"    display_name: Optional[str]\n"
+"    description: Optional[str]\n"
+"    config: Optional[CircleConfig]\n"
+"    status: CircleStatus\n"
+"    agent_count: int\n"
+"    created_at: datetime\n"
+"\n"
+"    class Config:\n"
+"        from_attributes = True\n"
+msgstr ""
+
+#: ../../api/models.md:106 c7f0fc5ea1ab432ca014ef55dbccaead
+msgid "CircleConfig"
+msgstr ""
+
+#: ../../api/models.md:108 7460437bfd9a4a24bd7cb429cfd3e39d
+msgid ""
+"class CircleConfig(BaseModel):\n"
+"    max_agents: int = Field(default=10, ge=1, le=50)\n"
+"    conversation_mode: str = Field(default=\"round_robin\")\n"
+"    turn_timeout: int = Field(default=30, ge=1)\n"
+"    max_turns_per_conversation: int = Field(default=50, ge=1)\n"
+"    memory_scope: str = Field(default=\"circle\")\n"
+"    allow_tools: bool = True\n"
+msgstr ""
+
+#: ../../api/models.md:118 286136735e1d4077b86930cc01251c97
+msgid "CircleStatus"
+msgstr ""
+
+#: ../../api/models.md:120 507645f1e6a34192aa53e3b307f590f3
+msgid ""
+"class CircleStatus(str, Enum):\n"
+"    CREATED = \"created\"\n"
+"    ACTIVE = \"active\"\n"
+"    PAUSED = \"paused\"\n"
+"    ARCHIVED = \"archived\"\n"
+msgstr ""
+
+#: ../../api/models.md:128 81f234b35bfc4901a65787b261b44229
+msgid "Conversation Models"
+msgstr ""
+
+#: ../../api/models.md:130 ed556df9cc934b5dba8400577f30f976
+msgid "ConversationCreate"
+msgstr ""
+
+#: ../../api/models.md:132 348c508c238d4681912dd31faab1c641
+msgid ""
+"class ConversationCreate(BaseModel):\n"
+"    circle_name: str\n"
+"    topic: str = Field(..., min_length=1, max_length=500)\n"
+"    agent_ids: list[int] = Field(..., min_items=1)\n"
+"    initial_prompt: Optional[str] = None\n"
+"    max_turns: int = Field(default=50, ge=1)\n"
+msgstr ""
+
+#: ../../api/models.md:141 d4cd555142e745c9969457a45c9b9f49
+msgid "ConversationResponse"
+msgstr ""
+
+#: ../../api/models.md:143 c5488a133c5041c8811416798c5c79f5
+msgid ""
+"class ConversationResponse(BaseModel):\n"
+"    id: int\n"
+"    circle_id: int\n"
+"    topic: str\n"
+"    status: ConversationStatus\n"
+"    turn_count: int\n"
+"    created_at: datetime\n"
+"    ended_at: Optional[datetime]\n"
+"\n"
+"    class Config:\n"
+"        from_attributes = True\n"
+msgstr ""
+
+#: ../../api/models.md:157 c908c72642214bd18ed70f7ee6be4e26
+msgid "ConversationAdvance"
+msgstr ""
+
+#: ../../api/models.md:159 8b5268c5fc50481cb191818082656179
+msgid ""
+"class ConversationAdvance(BaseModel):\n"
+"    prompt: Optional[str] = None\n"
+"    agent_id: Optional[int] = None\n"
+msgstr ""
+
+#: ../../api/models.md:165 a0ee196fe2824b8a9fad950c4dc93df8
+msgid "MessageResponse"
+msgstr ""
+
+#: ../../api/models.md:167 9de0a3acce7147a5a3fe37e8013c471a
+msgid ""
+"class MessageResponse(BaseModel):\n"
+"    id: int\n"
+"    conversation_id: int\n"
+"    agent_id: int\n"
+"    agent_name: str\n"
+"    content: str\n"
+"    role: str\n"
+"    created_at: datetime\n"
+"\n"
+"    class Config:\n"
+"        from_attributes = True\n"
+msgstr ""
+
+#: ../../api/models.md:181 ac9af3ff76ff4a61b8d4250d5273f5a6
+msgid "Workspace Models"
+msgstr ""
+
+#: ../../api/models.md:183 4dcdcf6f755d4473827107c99086abb7
+msgid "WorkspaceInfo"
+msgstr ""
+
+#: ../../api/models.md:185 35465e8f4dbe4d51819d8fabaf68952a
+msgid ""
+"class WorkspaceInfo(BaseModel):\n"
+"    id: int\n"
+"    path: str\n"
+"    name: str\n"
+"    git_enabled: bool\n"
+"    current_branch: Optional[str]\n"
+msgstr ""
+
+#: ../../api/models.md:194 4271e3467bf0488d9953c8b78ce083d1
+msgid "FileInfo"
+msgstr ""
+
+#: ../../api/models.md:196 6bbb8c131ef84d8c967bc547c5c4d8c5
+msgid ""
+"class FileInfo(BaseModel):\n"
+"    path: str\n"
+"    name: str\n"
+"    type: str  # \"file\" or \"directory\"\n"
+"    size: Optional[int]\n"
+"    modified_at: Optional[datetime]\n"
+msgstr ""
+
+#: ../../api/models.md:205 2c10b77068ae48b9b83823fde5742d62
+msgid "FileContent"
+msgstr ""
+
+#: ../../api/models.md:207 c7175e6a00f144f28c4659c733bc7f49
+msgid ""
+"class FileContent(BaseModel):\n"
+"    path: str\n"
+"    content: str\n"
+"    language: Optional[str]\n"
+"    size: int\n"
+msgstr ""
+
+#: ../../api/models.md:215 456613d79ff04873b53e40a02a0f6a53
+msgid "FileWrite"
+msgstr ""
+
+#: ../../api/models.md:217 2907cfb209454210a7e96e451b54736a
+msgid ""
+"class FileWrite(BaseModel):\n"
+"    content: str\n"
+msgstr ""
+
+#: ../../api/models.md:222 5afb2d0e4bf94a328f944ba8f6ade1fc
+msgid "GitStatus"
+msgstr ""
+
+#: ../../api/models.md:224 51e2b13292e94301ae481ed9da690f90
+msgid ""
+"class GitStatus(BaseModel):\n"
+"    branch: str\n"
+"    ahead: int\n"
+"    behind: int\n"
+"    staged: list[str]\n"
+"    modified: list[str]\n"
+"    untracked: list[str]\n"
+"    deleted: list[str]\n"
+msgstr ""
+
+#: ../../api/models.md:235 c1a9ec7694d9437eb5bebf40788731d6
+msgid "GitCommit"
+msgstr ""
+
+#: ../../api/models.md:237 952c244bad5449ea82ac36ac1f5d37ba
+msgid ""
+"class GitCommit(BaseModel):\n"
+"    hash: str\n"
+"    short_hash: str\n"
+"    message: str\n"
+"    author: str\n"
+"    date: datetime\n"
+msgstr ""
+
+#: ../../api/models.md:246 104baa8fc3f645ad8776a3075bf49cb7
+msgid "GitStage"
+msgstr ""
+
+#: ../../api/models.md:248 9024907349054076b8de9db38d1638fa
+msgid ""
+"class GitStage(BaseModel):\n"
+"    files: list[str]\n"
+msgstr ""
+
+#: ../../api/models.md:253 5f81bc0084d74149850ab741e4fec334
+msgid "GitCommitCreate"
+msgstr ""
+
+#: ../../api/models.md:255 954f01c95ceb4fec8ddd6c712fa6c429
+msgid ""
+"class GitCommitCreate(BaseModel):\n"
+"    message: str = Field(..., min_length=1, max_length=500)\n"
+msgstr ""
+
+#: ../../api/models.md:260 e99af4fb4d1f4947b1da41a9f91fb971
+msgid "Memory Models"
+msgstr ""
+
+#: ../../api/models.md:262 c58d504961f6424dadd12b6edd420e8b
+msgid "MemoryCreate"
+msgstr ""
+
+#: ../../api/models.md:264 581b6e275bd54602b8be0267f02a7d9a
+msgid ""
+"class MemoryCreate(BaseModel):\n"
+"    agent_id: Optional[int] = None\n"
+"    scope: MemoryScope\n"
+"    scope_id: Optional[int] = None\n"
+"    memory_type: MemoryType = MemoryType.FACT\n"
+"    key: str = Field(..., max_length=200)\n"
+"    value: str\n"
+"    tags: list[str] = Field(default_factory=list)\n"
+"    importance: float = Field(default=0.5, ge=0, le=1)\n"
+msgstr ""
+
+#: ../../api/models.md:276 1a3be9db6c224412a0494bfc36cf468f
+msgid "MemoryResponse"
+msgstr ""
+
+#: ../../api/models.md:278 040b18748ce34b10b2a96e6039683214
+msgid ""
+"class MemoryResponse(BaseModel):\n"
+"    id: int\n"
+"    agent_id: Optional[int]\n"
+"    scope: MemoryScope\n"
+"    memory_type: MemoryType\n"
+"    key: str\n"
+"    value: str\n"
+"    importance: float\n"
+"    created_at: datetime\n"
+"\n"
+"    class Config:\n"
+"        from_attributes = True\n"
+msgstr ""
+
+#: ../../api/models.md:293 d6beb60917eb4e08aac1e88443c8ec14
+msgid "MemorySearchResult"
+msgstr ""
+
+#: ../../api/models.md:295 b2e751d019754ea190e26d5db0f89e47
+msgid ""
+"class MemorySearchResult(BaseModel):\n"
+"    id: int\n"
+"    key: str\n"
+"    value: str\n"
+"    similarity: float\n"
+"    scope: MemoryScope\n"
+msgstr ""
+
+#: ../../api/models.md:304 7d6682d581b545ca8b0e30cdcdf4f923
+msgid "MemoryScope"
+msgstr ""
+
+#: ../../api/models.md:306 1d2b466d1ba84c9b998587b082fa4cc5
+msgid ""
+"class MemoryScope(str, Enum):\n"
+"    GLOBAL = \"global\"\n"
+"    CIRCLE = \"circle\"\n"
+"    AGENT = \"agent\"\n"
+"    CONVERSATION = \"conversation\"\n"
+msgstr ""
+
+#: ../../api/models.md:314 49060999d8844ec08a8c9fcbd9bab95c
+msgid "MemoryType"
+msgstr ""
+
+#: ../../api/models.md:316 823128c7b10746dbad2d07f9479e22c7
+msgid ""
+"class MemoryType(str, Enum):\n"
+"    FACT = \"fact\"\n"
+"    PREFERENCE = \"preference\"\n"
+"    EXPERIENCE = \"experience\"\n"
+"    SKILL = \"skill\"\n"
+"    RELATIONSHIP = \"relationship\"\n"
+msgstr ""
+
+#: ../../api/models.md:325 0b82c8cffc78434d88c1c1adaeeddc2b
+msgid "Dashboard Models"
+msgstr ""
+
+#: ../../api/models.md:327 020a29c677ae47cfa20fb3ff82af9b54
+msgid "DashboardStats"
+msgstr ""
+
+#: ../../api/models.md:329 4e3a28171d8e4666ac2b120f2cd85fa5
+msgid ""
+"class DashboardStats(BaseModel):\n"
+"    total_agents: int\n"
+"    active_agents: int\n"
+"    total_circles: int\n"
+"    active_circles: int\n"
+"    conversations_today: int\n"
+"    messages_today: int\n"
+msgstr ""
+
+#: ../../api/models.md:339 5426a151357c489aae63926875d70c72
+msgid "ActivityItem"
+msgstr ""
+
+#: ../../api/models.md:341 72426dbaa7dd4a3fab18a6ae14cd26f4
+msgid ""
+"class ActivityItem(BaseModel):\n"
+"    id: int\n"
+"    type: str\n"
+"    title: str\n"
+"    description: Optional[str]\n"
+"    agent_id: Optional[int]\n"
+"    agent_name: Optional[str]\n"
+"    circle_id: Optional[int]\n"
+"    circle_name: Optional[str]\n"
+"    timestamp: datetime\n"
+msgstr ""
+
+#: ../../api/models.md:354 ed04e0cbea49467a81c027af8f2d661e
+msgid "Common Models"
+msgstr ""
+
+#: ../../api/models.md:356 09817737a98c4e789675571a82391d3f
+msgid "PaginatedResponse"
+msgstr ""
+
+#: ../../api/models.md:358 d91c91e7b9724bbb8b00d9913330ffa4
+msgid ""
+"class PaginatedResponse(BaseModel, Generic[T]):\n"
+"    items: list[T]\n"
+"    total: int\n"
+"    page: int\n"
+"    page_size: int\n"
+"    pages: int\n"
+msgstr ""
+
+#: ../../api/models.md:367 5fbb019969aa438dbb291a6ad35f4d7c
+msgid "ErrorResponse"
+msgstr ""
+
+#: ../../api/models.md:369 6a4fdb2cc3e846ea82c34d26b0238d5c
+msgid ""
+"class ErrorResponse(BaseModel):\n"
+"    detail: str\n"
+"    code: Optional[str] = None\n"
+msgstr ""
+
+#: ../../api/models.md:375 767626ab4a334231acb3e882f73f5fd8
+msgid "ValidationErrorResponse"
+msgstr ""
+
+#: ../../api/models.md:377 6c103fc974904b7bba8a24690968c881
+msgid ""
+"class ValidationErrorResponse(BaseModel):\n"
+"    detail: list[ValidationErrorItem]\n"
+"\n"
+"\n"
+"class ValidationErrorItem(BaseModel):\n"
+"    loc: list[str]\n"
+"    msg: str\n"
+"    type: str\n"
+msgstr ""
+

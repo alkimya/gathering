@@ -5,7 +5,7 @@ Main FastAPI application for GatheRing.
 from contextlib import asynccontextmanager
 from typing import Optional
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Query, status
 from fastapi.middleware.cors import CORSMiddleware
 
 from gathering.api.routers import (
@@ -27,6 +27,7 @@ from gathering.api.routers import (
     workspace_router,
     lsp_router,
     plugins_router,
+    tools_router,
 )
 from gathering.api.middleware import (
     AuthenticationMiddleware,
@@ -39,6 +40,7 @@ from gathering.api.websocket import ws_manager, get_ws_manager
 from gathering.api.dependencies import get_database_service
 from gathering.orchestration.background import get_background_executor
 from gathering.orchestration.scheduler import get_scheduler
+from gathering.api.auth import decode_token
 
 
 @asynccontextmanager
@@ -49,6 +51,16 @@ async def lifespan(app: FastAPI):
     """
     # Startup
     print("GatheRing API starting...")
+
+    # Validate production settings
+    settings = get_settings()
+    if settings.is_production:
+        try:
+            settings.require_production_ready()
+            print("✓ Production configuration validated")
+        except ValueError as e:
+            print(f"❌ {e}")
+            raise
 
     # Setup WebSocket broadcasting from Event Bus
     try:
@@ -147,7 +159,12 @@ def create_app(
             origins = settings.cors_origins_list
         else:
             # Restrictive default: only localhost for development
-            origins = ["http://localhost:3000", "http://localhost:5000"]
+            origins = [
+                "http://localhost:3000",
+                "http://localhost:5000",
+                "http://localhost:5173",  # Vite default
+                "http://127.0.0.1:5173",
+            ]
 
         app.add_middleware(
             CORSMiddleware,
@@ -196,13 +213,38 @@ def create_app(
     app.include_router(workspace_router)
     app.include_router(lsp_router)
     app.include_router(plugins_router)
+    app.include_router(tools_router)
 
     # WebSocket endpoint
     if enable_websocket:
+        async def _validate_ws_token(websocket: WebSocket, token: Optional[str]) -> bool:
+            """Validate WebSocket token and close connection if invalid."""
+            settings = get_settings()
+
+            # Skip auth in development mode if auth is disabled
+            if settings.disable_auth and settings.is_development:
+                return True
+
+            if not token:
+                await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+                return False
+
+            token_data = decode_token(token)
+            if not token_data:
+                await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+                return False
+
+            return True
+
         @app.websocket("/ws")
-        async def websocket_endpoint(websocket: WebSocket):
+        async def websocket_endpoint(
+            websocket: WebSocket,
+            token: Optional[str] = Query(None, description="JWT auth token"),
+        ):
             """
             WebSocket endpoint for real-time updates.
+
+            **Authentication**: Pass JWT token as query parameter: `/ws?token=<jwt>`
 
             After connecting, send JSON messages to subscribe to topics:
             ```json
@@ -218,6 +260,10 @@ def create_app(
             }
             ```
             """
+            # Validate token before accepting connection
+            if not await _validate_ws_token(websocket, token):
+                return
+
             conn_id = await ws_manager.connect(websocket)
 
             try:
@@ -262,15 +308,25 @@ def create_app(
                 await ws_manager.disconnect(conn_id)
 
         @app.websocket("/ws/terminal/{project_id}")
-        async def terminal_websocket(websocket: WebSocket, project_id: int):
+        async def terminal_websocket(
+            websocket: WebSocket,
+            project_id: int,
+            token: Optional[str] = Query(None, description="JWT auth token"),
+        ):
             """
             WebSocket endpoint for terminal sessions with real PTY.
+
+            **Authentication**: Pass JWT token as query parameter: `/ws/terminal/{project_id}?token=<jwt>`
 
             Provides real-time terminal I/O for workspace projects.
             """
             import asyncio
             import json
             import os
+
+            # Validate token before accepting connection
+            if not await _validate_ws_token(websocket, token):
+                return
 
             await websocket.accept()
 

@@ -1,0 +1,61 @@
+{
+  "title": "Projets",
+  "subtitle": "Gérer vos projets de développement",
+  "createProject": "Créer un projet",
+  "editProject": "Modifier le projet",
+  "deleteProject": "Supprimer le projet",
+  "projectDetails": "Détails du projet",
+  "openWorkspace": "Ouvrir l'espace de travail",
+  "status": {
+    "active": "Actif",
+    "archived": "Archivé",
+    "onHold": "En pause",
+    "planning": "Planification",
+    "completed": "Terminé"
+  },
+  "fields": {
+    "name": "Nom",
+    "path": "Chemin",
+    "description": "Description",
+    "branch": "Branche",
+    "repository": "Dépôt",
+    "techStack": "Stack technique",
+    "languages": "Langages",
+    "frameworks": "Frameworks"
+  },
+  "tabs": {
+    "overview": "Vue d'ensemble",
+    "taskBoard": "Tableau des tâches",
+    "files": "Fichiers",
+    "settings": "Paramètres"
+  },
+  "stats": {
+    "totalProjects": "Total des projets",
+    "activeProjects": "Projets actifs",
+    "totalTasks": "Total des tâches",
+    "completionRate": "Taux de complétion",
+    "linkedCircles": "Cercles liés"
+  },
+  "taskProgress": {
+    "title": "Progression des tâches",
+    "overallProgress": "Progression globale",
+    "total": "Total",
+    "done": "Terminé",
+    "inProgress": "En cours",
+    "toDo": "À faire"
+  },
+  "projectInfo": "Infos projet",
+  "linkedCircles": "Cercles liés",
+  "noCircleLinked": "Aucun cercle lié",
+  "tasksFromCircle": "Tâches du cercle lié",
+  "linkCircle": "Liez un cercle à ce projet pour gérer les tâches.",
+  "createTasksInCircle": "Créez des tâches dans le cercle lié pour les voir ici.",
+  "empty": {
+    "title": "Aucun projet",
+    "description": "Créez votre premier projet pour commencer à gérer votre code."
+  },
+  "noTasks": {
+    "title": "Aucune tâche",
+    "titleYet": "Pas encore de tâches"
+  }
+}

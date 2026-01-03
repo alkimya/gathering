@@ -28,11 +28,13 @@ import {
   ExternalLink,
   Wifi,
   WifiOff,
+  Plus,
+  Circle,
 } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
-import { agents, conversations, circles } from '../../services/api';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { conversations, circles } from '../../services/api';
 import { useWebSocket } from '../../hooks/useWebSocket';
-import type { Agent, ConversationDetail, ConversationMessage, Circle, WebSocketEvent } from '../../types';
+import type { Agent, ConversationDetail, ConversationMessage, Circle as CircleType, WebSocketEvent } from '../../types';
 
 interface WorkspaceContext {
   projectId: number;
@@ -93,7 +95,7 @@ function AgentSelector({
         <div className="px-4 pb-3 space-y-2">
           {agentList.length === 0 ? (
             <p className="text-xs text-zinc-500 py-2">
-              No agents available. Create agents first.
+              No agents in this circle. Add agents to the circle first.
             </p>
           ) : (
             agentList.map((agent) => (
@@ -370,21 +372,68 @@ export function WorkspaceAgentPanel({
     }
   }, [activeConversation, subscribe]);
 
-  // Fetch agents
-  const { data: agentsData, isLoading: agentsLoading } = useQuery({
-    queryKey: ['agents'],
-    queryFn: () => agents.list(),
-  });
-
-  // Fetch circles
+  // Fetch circles list
   const { data: circlesData, isLoading: circlesLoading } = useQuery({
     queryKey: ['circles'],
     queryFn: () => circles.list(),
   });
 
-  const agentList = agentsData?.agents || [];
+  const queryClient = useQueryClient();
   const circleList = circlesData?.circles || [];
-  const runningCircles = circleList.filter((c: Circle) => c.status === 'running');
+  const runningCircles = circleList.filter((c: CircleType) => c.status === 'running');
+  const stoppedCircles = circleList.filter((c: CircleType) => c.status === 'stopped');
+
+  // Fetch circle details (includes agents) when a circle is selected
+  const { data: circleDetail, isLoading: circleDetailLoading } = useQuery({
+    queryKey: ['circle-detail', selectedCircle],
+    queryFn: () => circles.get(selectedCircle),
+    enabled: !!selectedCircle, // Only fetch when a circle is selected
+  });
+
+  // Get agents from the selected circle only
+  const agentList = circleDetail?.agents || [];
+  const agentsLoading = circleDetailLoading && !!selectedCircle;
+
+  // Quick circle creation state
+  const [showQuickCreate, setShowQuickCreate] = useState(false);
+  const [newCircleName, setNewCircleName] = useState('');
+  const [isCreatingCircle, setIsCreatingCircle] = useState(false);
+
+  // Create and start circle mutation
+  const createCircleMutation = useMutation({
+    mutationFn: async (name: string) => {
+      // Create the circle
+      await circles.create({ name, require_review: true, auto_route: true });
+      // Start it immediately
+      await circles.start(name);
+      return name;
+    },
+    onSuccess: (name) => {
+      queryClient.invalidateQueries({ queryKey: ['circles'] });
+      setSelectedCircle(name);
+      setShowQuickCreate(false);
+      setNewCircleName('');
+      setIsCreatingCircle(false);
+    },
+    onError: () => {
+      setIsCreatingCircle(false);
+    },
+  });
+
+  // Start existing circle mutation
+  const startCircleMutation = useMutation({
+    mutationFn: (name: string) => circles.start(name),
+    onSuccess: (_, name) => {
+      queryClient.invalidateQueries({ queryKey: ['circles'] });
+      setSelectedCircle(name);
+    },
+  });
+
+  const handleQuickCreateCircle = () => {
+    if (!newCircleName.trim()) return;
+    setIsCreatingCircle(true);
+    createCircleMutation.mutate(newCircleName.trim());
+  };
 
   // Auto-select first running circle
   useEffect(() => {
@@ -392,6 +441,11 @@ export function WorkspaceAgentPanel({
       setSelectedCircle(runningCircles[0].name);
     }
   }, [runningCircles, selectedCircle]);
+
+  // Reset agent selection when circle changes
+  useEffect(() => {
+    setSelectedAgents(new Set());
+  }, [selectedCircle]);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -643,15 +697,109 @@ export function WorkspaceAgentPanel({
 
           {/* Circle Selection */}
           <div className="p-4 border-b border-white/5">
-            <label className="text-xs text-zinc-500 mb-2 block">Circle</label>
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-xs text-zinc-500">Circle</label>
+              {!showQuickCreate && (
+                <button
+                  onClick={() => setShowQuickCreate(true)}
+                  className="text-xs text-purple-400 hover:text-purple-300 flex items-center gap-1 transition-colors"
+                >
+                  <Plus className="w-3 h-3" />
+                  New
+                </button>
+              )}
+            </div>
             {circlesLoading ? (
               <div className="flex items-center gap-2 text-zinc-500 text-sm">
                 <Loader2 className="w-4 h-4 animate-spin" />
                 Loading circles...
               </div>
+            ) : showQuickCreate ? (
+              /* Quick create circle form */
+              <div className="space-y-2">
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={newCircleName}
+                    onChange={(e) => setNewCircleName(e.target.value)}
+                    placeholder="circle-name"
+                    className="flex-1 px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-purple-500/50"
+                    onKeyDown={(e) => e.key === 'Enter' && handleQuickCreateCircle()}
+                    autoFocus
+                  />
+                  <button
+                    onClick={handleQuickCreateCircle}
+                    disabled={isCreatingCircle || !newCircleName.trim()}
+                    className="px-3 py-2 bg-emerald-500/20 text-emerald-400 rounded-lg text-sm hover:bg-emerald-500/30 disabled:opacity-50 flex items-center gap-1 transition-colors"
+                  >
+                    {isCreatingCircle ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Check className="w-4 h-4" />
+                    )}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowQuickCreate(false);
+                      setNewCircleName('');
+                    }}
+                    className="px-3 py-2 bg-white/5 text-zinc-400 rounded-lg text-sm hover:bg-white/10 transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+                <p className="text-xs text-zinc-500">
+                  Creates and starts a new circle immediately
+                </p>
+              </div>
             ) : runningCircles.length === 0 ? (
-              <div className="text-amber-400 text-sm bg-amber-500/10 p-2 rounded-lg">
-                No running circles. Please create and start a circle first.
+              /* No running circles - show options */
+              <div className="space-y-2">
+                {stoppedCircles.length > 0 ? (
+                  /* Has stopped circles - allow starting one */
+                  <div className="space-y-2">
+                    <p className="text-xs text-amber-400 mb-2">
+                      No active circles. Start one or create a new one.
+                    </p>
+                    {stoppedCircles.slice(0, 3).map((circle: CircleType) => (
+                      <button
+                        key={circle.name}
+                        onClick={() => startCircleMutation.mutate(circle.name)}
+                        disabled={startCircleMutation.isPending}
+                        className="w-full flex items-center justify-between px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-sm transition-colors"
+                      >
+                        <div className="flex items-center gap-2">
+                          <Circle className="w-4 h-4 text-zinc-500" />
+                          <span className="text-white">{circle.name}</span>
+                          <span className="text-xs text-zinc-500">({circle.agent_count} agents)</span>
+                        </div>
+                        <div className="flex items-center gap-1 text-emerald-400">
+                          {startCircleMutation.isPending ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <>
+                              <Play className="w-3 h-3" />
+                              <span className="text-xs">Start</span>
+                            </>
+                          )}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  /* No circles at all */
+                  <div className="text-center py-3">
+                    <Circle className="w-8 h-8 text-zinc-600 mx-auto mb-2" />
+                    <p className="text-sm text-zinc-400 mb-2">No circles yet</p>
+                    <button
+                      onClick={() => setShowQuickCreate(true)}
+                      className="px-3 py-1.5 bg-purple-500/20 text-purple-400 rounded-lg text-sm hover:bg-purple-500/30 flex items-center gap-1 mx-auto transition-colors"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Create your first circle
+                    </button>
+                  </div>
+                )}
               </div>
             ) : (
               <select
@@ -659,7 +807,7 @@ export function WorkspaceAgentPanel({
                 onChange={(e) => setSelectedCircle(e.target.value)}
                 className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:border-purple-500/50"
               >
-                {runningCircles.map((circle: Circle) => (
+                {runningCircles.map((circle: CircleType) => (
                   <option key={circle.name} value={circle.name} className="bg-zinc-900">
                     {circle.name} ({circle.agent_count} agents)
                   </option>
@@ -668,13 +816,15 @@ export function WorkspaceAgentPanel({
             )}
           </div>
 
-          {/* Agent Selection */}
-          <AgentSelector
-            agents={agentList}
-            selectedAgents={selectedAgents}
-            onToggle={toggleAgent}
-            isLoading={agentsLoading}
-          />
+          {/* Agent Selection - only show when a circle is selected */}
+          {selectedCircle && (
+            <AgentSelector
+              agents={agentList}
+              selectedAgents={selectedAgents}
+              onToggle={toggleAgent}
+              isLoading={agentsLoading}
+            />
+          )}
 
           {/* Topic */}
           <div className="p-4 border-b border-white/5">

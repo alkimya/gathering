@@ -550,7 +550,6 @@ class AnthropicProvider(BaseLLMProvider):
                 "model": self._resolve_model(),
                 "messages": chat_messages,
                 "max_tokens": kwargs.get("max_tokens", 4096),
-                "stream": True,
             }
 
             if system_msg:

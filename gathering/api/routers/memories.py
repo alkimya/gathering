@@ -6,8 +6,10 @@ Provides endpoints for agent memory operations and knowledge base management.
 
 from typing import List, Optional
 
-from fastapi import APIRouter, HTTPException, Depends, Query
+from fastapi import APIRouter, HTTPException, Depends, Query, UploadFile, File, Form
 from pydantic import BaseModel, Field
+
+from gathering.utils.document_extractor import DocumentExtractor, chunk_text
 
 router = APIRouter(prefix="/memories", tags=["memories"])
 
@@ -92,12 +94,39 @@ class KnowledgeSearchResponse(BaseModel):
     total: int
 
 
+class KnowledgeListResponse(BaseModel):
+    """Knowledge list response."""
+    entries: List[KnowledgeResponse]
+    total: int
+    page: int
+    page_size: int
+
+
+class KnowledgeStats(BaseModel):
+    """Knowledge base statistics."""
+    total_entries: int
+    by_category: dict
+    recent_entries: List[KnowledgeResponse]
+
+
 class MemoryStats(BaseModel):
     """Memory statistics."""
     total_memories: int
     active_memories: int
     embedded_memories: int
     avg_importance: Optional[float]
+
+
+class DocumentUploadResponse(BaseModel):
+    """Response after uploading a document."""
+    id: int
+    title: str
+    filename: str
+    format: str
+    char_count: int
+    chunk_count: int
+    category: Optional[str] = None
+    tags: Optional[List[str]] = None
 
 
 # =============================================================================
@@ -324,6 +353,76 @@ async def search_knowledge(
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@router.get("/knowledge", response_model=KnowledgeListResponse)
+async def list_knowledge(
+    category: Optional[str] = Query(None, description="Filter by category"),
+    page: int = Query(1, ge=1, description="Page number"),
+    page_size: int = Query(20, ge=1, le=100, description="Items per page"),
+):
+    """
+    List knowledge base entries with pagination.
+    """
+    try:
+        manager = get_memory_manager()
+
+        # Get entries from the knowledge base
+        entries = await manager.list_knowledge(
+            category=category,
+            limit=page_size,
+            offset=(page - 1) * page_size,
+        )
+
+        total = await manager.count_knowledge(category=category)
+
+        return KnowledgeListResponse(
+            entries=[
+                KnowledgeResponse(
+                    id=e.id,
+                    title=e.title,
+                    content=e.content,
+                    category=e.category,
+                    tags=e.tags,
+                )
+                for e in entries
+            ],
+            total=total,
+            page=page,
+            page_size=page_size,
+        )
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/knowledge/stats", response_model=KnowledgeStats)
+async def get_knowledge_stats():
+    """
+    Get knowledge base statistics.
+    """
+    try:
+        manager = get_memory_manager()
+
+        stats = await manager.get_knowledge_stats()
+
+        return KnowledgeStats(
+            total_entries=stats.get("total", 0),
+            by_category=stats.get("by_category", {}),
+            recent_entries=[
+                KnowledgeResponse(
+                    id=e.id,
+                    title=e.title,
+                    content=e.content,
+                    category=e.category,
+                    tags=e.tags,
+                )
+                for e in stats.get("recent", [])
+            ],
+        )
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 # =============================================================================
 # BATCH OPERATIONS
 # =============================================================================
@@ -373,3 +472,112 @@ async def remember_batch(
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# =============================================================================
+# DOCUMENT UPLOAD
+# =============================================================================
+
+
+@router.post("/knowledge/upload", response_model=DocumentUploadResponse)
+async def upload_document(
+    file: UploadFile = File(..., description="Document file (MD, CSV, PDF, TXT)"),
+    title: Optional[str] = Form(None, description="Document title (defaults to filename)"),
+    category: Optional[str] = Form(None, description="Category: docs, best_practice, decision, faq"),
+    tags: Optional[str] = Form(None, description="Comma-separated tags"),
+    is_global: bool = Form(False, description="Globally accessible"),
+    author_agent_id: Optional[int] = Form(None, description="Author agent ID"),
+    chunk_large_docs: bool = Form(True, description="Chunk large documents for better search"),
+):
+    """
+    Upload a document to the knowledge base.
+
+    Supported formats:
+    - Markdown (.md, .markdown)
+    - CSV (.csv)
+    - PDF (.pdf) - requires pypdf
+    - Plain text (.txt)
+
+    Large documents are automatically chunked for better semantic search.
+    """
+    # Validate file format
+    if not file.filename:
+        raise HTTPException(status_code=400, detail="Filename is required")
+
+    if not DocumentExtractor.is_supported(file.filename, file.content_type):
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unsupported file format. Supported: {', '.join(DocumentExtractor.SUPPORTED_EXTENSIONS)}"
+        )
+
+    try:
+        # Read file content
+        content = await file.read()
+
+        # Extract text
+        extracted_text, metadata = DocumentExtractor.extract(
+            content=content,
+            filename=file.filename,
+            content_type=file.content_type,
+        )
+
+        if not extracted_text.strip():
+            raise HTTPException(status_code=400, detail="Document is empty or could not be parsed")
+
+        # Parse tags
+        tag_list = [t.strip() for t in tags.split(',')] if tags else None
+
+        # Use filename as title if not provided
+        doc_title = title or file.filename
+
+        manager = get_memory_manager()
+
+        # Chunk large documents
+        chunks = []
+        if chunk_large_docs and len(extracted_text) > 3000:
+            chunks = chunk_text(extracted_text, chunk_size=2000, overlap=200)
+        else:
+            chunks = [{'content': extracted_text, 'index': 0}]
+
+        # Store main document
+        main_id = await manager.add_knowledge(
+            title=doc_title,
+            content=extracted_text if len(chunks) == 1 else f"[Document with {len(chunks)} chunks]\n\n{extracted_text[:500]}...",
+            category=category,
+            is_global=is_global,
+            tags=tag_list,
+            source_url=f"file://{file.filename}",
+            author_agent_id=author_agent_id,
+        )
+
+        # Store chunks as separate entries if document was chunked
+        if len(chunks) > 1:
+            for chunk in chunks:
+                chunk_title = f"{doc_title} (chunk {chunk['index'] + 1}/{len(chunks)})"
+                await manager.add_knowledge(
+                    title=chunk_title,
+                    content=chunk['content'],
+                    category=category,
+                    is_global=is_global,
+                    tags=(tag_list or []) + [f"doc:{main_id}", "chunk"],
+                    source_url=f"file://{file.filename}#chunk-{chunk['index']}",
+                    author_agent_id=author_agent_id,
+                )
+
+        return DocumentUploadResponse(
+            id=main_id,
+            title=doc_title,
+            filename=file.filename,
+            format=metadata.get('format', 'unknown'),
+            char_count=len(extracted_text),
+            chunk_count=len(chunks),
+            category=category,
+            tags=tag_list,
+        )
+
+    except HTTPException:
+        raise
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")

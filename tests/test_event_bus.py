@@ -308,8 +308,11 @@ class TestEventBus:
 
     def test_history_circular_buffer(self, bus):
         """Test that history is limited to max size."""
+        from collections import deque
         bus.clear_history()
+        # Recreate deque with smaller maxlen for testing
         bus._max_history = 10
+        bus._event_history = deque(maxlen=10)
 
         # Publish 20 events
         for i in range(20):

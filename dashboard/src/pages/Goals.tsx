@@ -278,13 +278,18 @@ function GoalDetailModal({
   });
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="goal-detail-title"
+    >
       <div className="absolute inset-0 modal-overlay" onClick={onClose} />
       <div className="relative glass-card rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-auto">
         <div className="p-6 border-b border-white/5">
           <div className="flex items-start justify-between">
             <div>
-              <h2 className="text-xl font-bold text-white">{goal.title}</h2>
+              <h2 id="goal-detail-title" className="text-xl font-bold text-white">{goal.title}</h2>
               <div className="flex items-center gap-2 mt-2">
                 <StatusBadge status={goal.status} />
                 <PriorityBadge priority={goal.priority} />
@@ -292,6 +297,7 @@ function GoalDetailModal({
             </div>
             <button
               onClick={onClose}
+              aria-label="Close dialog"
               className="p-2 text-zinc-400 hover:text-white transition-colors"
             >
               <XCircle className="w-5 h-5" />
@@ -455,11 +461,16 @@ function CreateGoalModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="create-goal-title"
+    >
       <div className="absolute inset-0 modal-overlay" onClick={onClose} />
       <div className="relative glass-card rounded-2xl w-full max-w-lg max-h-[90vh] overflow-auto">
         <div className="p-6 border-b border-white/5">
-          <h2 className="text-xl font-bold text-white">Create Goal</h2>
+          <h2 id="create-goal-title" className="text-xl font-bold text-white">Create Goal</h2>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
@@ -707,54 +718,27 @@ export function Goals() {
         </button>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="glass-card rounded-xl p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
-              <Target className="w-5 h-5 text-purple-400" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-white">{stats.total}</p>
-              <p className="text-xs text-zinc-500">Total Goals</p>
-            </div>
-          </div>
+      {/* Compact Stats Bar */}
+      <div className="glass-card rounded-xl px-5 py-3 flex flex-wrap items-center gap-x-8 gap-y-2">
+        <div className="flex items-center gap-2">
+          <Target className="w-4 h-4 text-purple-400" />
+          <span className="text-white font-semibold">{stats.total}</span>
+          <span className="text-zinc-500 text-sm">goals</span>
         </div>
-
-        <div className="glass-card rounded-xl p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
-              <Play className="w-5 h-5 text-blue-400" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-white">{stats.active}</p>
-              <p className="text-xs text-zinc-500">Active</p>
-            </div>
-          </div>
+        <div className="flex items-center gap-2">
+          <Play className="w-4 h-4 text-blue-400" />
+          <span className="text-white font-semibold">{stats.active}</span>
+          <span className="text-zinc-500 text-sm">active</span>
         </div>
-
-        <div className="glass-card rounded-xl p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-zinc-500/20 flex items-center justify-center">
-              <Clock className="w-5 h-5 text-zinc-400" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-white">{stats.pending}</p>
-              <p className="text-xs text-zinc-500">Pending</p>
-            </div>
-          </div>
+        <div className="flex items-center gap-2">
+          <Clock className="w-4 h-4 text-zinc-400" />
+          <span className="text-white font-semibold">{stats.pending}</span>
+          <span className="text-zinc-500 text-sm">pending</span>
         </div>
-
-        <div className="glass-card rounded-xl p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
-              <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-white">{stats.completed}</p>
-              <p className="text-xs text-zinc-500">Completed</p>
-            </div>
-          </div>
+        <div className="flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+          <span className="text-white font-semibold">{stats.completed}</span>
+          <span className="text-zinc-500 text-sm">completed</span>
         </div>
       </div>
 

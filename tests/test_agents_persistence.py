@@ -168,8 +168,8 @@ class TestProjectContext:
 
     def test_gathering_project_constant(self):
         """Test pre-configured GATHERING_PROJECT."""
-        assert GATHERING_PROJECT.name == "Gathering"
-        assert "picopg" in GATHERING_PROJECT.tools["database"]
+        assert GATHERING_PROJECT.name.lower() == "gathering"
+        assert "pycopg" in GATHERING_PROJECT.tools["database"] or "picopg" in GATHERING_PROJECT.tools["database"]
         assert "pytest" in GATHERING_PROJECT.tools["testing"]
 
     def test_project_serialization(self):

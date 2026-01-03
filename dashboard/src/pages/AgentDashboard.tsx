@@ -21,6 +21,7 @@ import {
   Circle,
 } from 'lucide-react';
 import { agents } from '../services/api';
+import { AgentSkillsPanel } from '../components/AgentSkillsPanel';
 import type { AgentDetail } from '../types';
 
 // Types
@@ -110,36 +111,33 @@ function formatDueDate(timestamp: string): { text: string; urgent: boolean } {
   return { text: date.toLocaleDateString('fr-FR'), urgent: false };
 }
 
-// Stat Card Component
-function StatCard({
-  title,
+// Compact Stat Item Component
+function StatItem({
+  label,
   value,
   icon,
   color,
-  trend,
+  to,
 }: {
-  title: string;
+  label: string;
   value: number | string;
   icon: React.ReactNode;
   color: string;
-  trend?: { value: number; positive: boolean };
+  to?: string;
 }) {
-  return (
-    <div className="glass-card rounded-xl p-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-zinc-400 text-sm">{title}</p>
-          <p className="text-2xl font-bold text-white mt-1">{value}</p>
-          {trend && (
-            <p className={`text-xs mt-1 ${trend.positive ? 'text-emerald-400' : 'text-red-400'}`}>
-              {trend.positive ? '+' : ''}{trend.value}% today
-            </p>
-          )}
-        </div>
-        <div className={`p-3 rounded-xl ${color}`}>{icon}</div>
-      </div>
+  const content = (
+    <div className={`flex items-center gap-2 ${to ? 'hover:text-white cursor-pointer' : ''}`}>
+      <span className={color}>{icon}</span>
+      <span className="text-white font-semibold">{value}</span>
+      <span className="text-zinc-500 text-sm">{label}</span>
+      {to && <ChevronRight className="w-3 h-3 text-zinc-600" />}
     </div>
   );
+
+  if (to) {
+    return <Link to={to}>{content}</Link>;
+  }
+  return content;
 }
 
 // Task Item Component
@@ -309,53 +307,60 @@ export function AgentDashboard() {
         </div>
       </div>
 
-      {/* Stats Grid */}
+      {/* Compact Stats Bar */}
       {stats && (
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          <StatCard
-            title="Tasks Today"
+        <div className="glass-card rounded-xl px-4 py-3 flex flex-wrap items-center gap-x-6 gap-y-2">
+          <StatItem
+            label="tasks"
             value={stats.tasks_today}
-            icon={<FileText className="w-5 h-5 text-blue-400" />}
-            color="bg-blue-500/20"
+            icon={<FileText className="w-4 h-4" />}
+            color="text-blue-400"
+            to="/board"
           />
-          <StatCard
-            title="Completed"
+          <StatItem
+            label="done"
             value={stats.tasks_completed}
-            icon={<CheckCircle className="w-5 h-5 text-emerald-400" />}
-            color="bg-emerald-500/20"
-            trend={{ value: 15, positive: true }}
+            icon={<CheckCircle className="w-4 h-4" />}
+            color="text-emerald-400"
           />
-          <StatCard
-            title="In Progress"
+          <StatItem
+            label="active"
             value={stats.tasks_in_progress}
-            icon={<Activity className="w-5 h-5 text-cyan-400" />}
-            color="bg-cyan-500/20"
+            icon={<Activity className="w-4 h-4" />}
+            color="text-cyan-400"
           />
-          <StatCard
-            title="Reviews"
+          <StatItem
+            label="reviews"
             value={stats.reviews_pending}
-            icon={<Clock className="w-5 h-5 text-amber-400" />}
-            color="bg-amber-500/20"
+            icon={<Clock className="w-4 h-4" />}
+            color="text-amber-400"
           />
-          <StatCard
-            title="Tokens Used"
+          <StatItem
+            label="tokens"
             value={stats.tokens_used.toLocaleString()}
-            icon={<Zap className="w-5 h-5 text-purple-400" />}
-            color="bg-purple-500/20"
+            icon={<Zap className="w-4 h-4" />}
+            color="text-purple-400"
           />
-          <StatCard
-            title="Messages"
+          <StatItem
+            label="messages"
             value={stats.messages_sent}
-            icon={<MessageSquare className="w-5 h-5 text-pink-400" />}
-            color="bg-pink-500/20"
+            icon={<MessageSquare className="w-4 h-4" />}
+            color="text-pink-400"
+            to="/conversations"
           />
         </div>
       )}
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Tasks Column */}
+        {/* Center Column - Skills */}
         <div className="lg:col-span-2 space-y-6">
+          {/* Agent Skills */}
+          <AgentSkillsPanel agentId={Number(agentId)} agentName={agentName} />
+        </div>
+
+        {/* Right Column */}
+        <div className="space-y-6">
           {/* My Tasks */}
           <div className="glass-card rounded-2xl p-6">
             <div className="flex items-center justify-between mb-4">
@@ -404,10 +409,7 @@ export function AgentDashboard() {
               )}
             </div>
           </div>
-        </div>
 
-        {/* Right Column */}
-        <div className="space-y-6">
           {/* Recent Conversations */}
           <div className="glass-card rounded-2xl p-6">
             <div className="flex items-center justify-between mb-4">

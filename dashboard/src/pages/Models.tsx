@@ -18,7 +18,9 @@ import {
   Globe,
   HardDrive,
   Sparkles,
+  Key,
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { providers, models } from '../services/api';
 import type { Provider, Model } from '../types';
 
@@ -174,17 +176,23 @@ function AddProviderModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 modal-overlay flex items-center justify-center z-50 p-4">
+    <div
+      className="fixed inset-0 modal-overlay flex items-center justify-center z-50 p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="add-provider-title"
+    >
       <div className="glass-card rounded-2xl p-6 w-full max-w-md">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center glow-purple">
               <Server className="w-5 h-5 text-white" />
             </div>
-            <h2 className="text-xl font-bold text-white">Add Provider</h2>
+            <h2 id="add-provider-title" className="text-xl font-bold text-white">Add Provider</h2>
           </div>
           <button
             onClick={onClose}
+            aria-label="Close dialog"
             className="p-2 text-zinc-400 hover:text-white hover:bg-white/5 rounded-lg transition-all"
           >
             <X className="w-5 h-5" />
@@ -302,17 +310,23 @@ function AddModelModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 modal-overlay flex items-center justify-center z-50 p-4">
+    <div
+      className="fixed inset-0 modal-overlay flex items-center justify-center z-50 p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="add-model-title"
+    >
       <div className="glass-card rounded-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center glow-blue">
               <Cpu className="w-5 h-5 text-white" />
             </div>
-            <h2 className="text-xl font-bold text-white">Add Model</h2>
+            <h2 id="add-model-title" className="text-xl font-bold text-white">Add Model</h2>
           </div>
           <button
             onClick={onClose}
+            aria-label="Close dialog"
             className="p-2 text-zinc-400 hover:text-white hover:bg-white/5 rounded-lg transition-all"
           >
             <X className="w-5 h-5" />
@@ -521,6 +535,13 @@ export function Models() {
             />
             Show deprecated
           </label>
+          <Link
+            to="/settings"
+            className="px-4 py-2.5 glass-card hover:bg-white/10 rounded-xl text-sm font-medium text-zinc-300 flex items-center gap-2 transition-all"
+          >
+            <Key className="w-4 h-4" />
+            API Keys
+          </Link>
           <button
             onClick={() => setShowAddProvider(true)}
             className="px-4 py-2.5 glass-card hover:bg-white/10 rounded-xl text-sm font-medium text-zinc-300 flex items-center gap-2 transition-all"

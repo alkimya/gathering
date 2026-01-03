@@ -1,0 +1,864 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026, GatheRing Team
+# This file is distributed under the same license as the GatheRing package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: GatheRing 0.2.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-01-02 14:08+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.17.0\n"
+
+#: ../../user/workspace.md:1 1122864de3484b1395757a49f8f44813
+msgid "Workspace"
+msgstr ""
+
+#: ../../user/workspace.md:3 7488e297cb4748f49b981afaa9f0cafd
+msgid ""
+"The Workspace is GatheRing's integrated development environment. It "
+"provides a complete toolset for managing projects, editing code, and "
+"collaborating with AI agents."
+msgstr ""
+
+#: ../../user/workspace.md:5 41c10c31fc6d4ee7b4a587a05a2ece24
+msgid "Overview"
+msgstr ""
+
+#: ../../user/workspace.md:7 fa40ec307ec843b0bf11212f67ada34a
+msgid "The workspace includes:"
+msgstr ""
+
+#: ../../user/workspace.md:9 eaa68435a3eb4080943d15ab2a7dc5aa
+msgid "**File Explorer**: Navigate and manage project files"
+msgstr ""
+
+#: ../../user/workspace.md:10 b54b3f3592b842958e1c48bdb2d332e6
+msgid "**Code Editor**: Monaco-based editor with syntax highlighting"
+msgstr ""
+
+#: ../../user/workspace.md:11 982efdc43991465b952278c9fc30152e
+msgid "**Terminal**: Integrated terminal for command execution"
+msgstr ""
+
+#: ../../user/workspace.md:12 3346c6cdd21b4746a748daf7a6e48d4b
+msgid "**Git Panel**: Visual git operations"
+msgstr ""
+
+#: ../../user/workspace.md:13 944c1e4834c24ee8b83a0dda450103a5
+msgid "**Media Viewers**: Support for images, audio, video, PDF"
+msgstr ""
+
+#: ../../user/workspace.md:15 618aa66b1c014681b7e16f6f444b7fcf
+msgid "Accessing the Workspace"
+msgstr ""
+
+#: ../../user/workspace.md:17 32f70daa4d104173948facb1483ed4ef
+#, python-brace-format
+msgid "Navigate to: `http://localhost:3000/workspace/{workspace_id}`"
+msgstr ""
+
+#: ../../user/workspace.md:19 f92191db42d84d34997c75b9d691641f
+msgid "For example: <http://localhost:3000/workspace/1>"
+msgstr ""
+
+#: ../../user/workspace.md:21 df73708cb4da4873874852229492f6e8
+msgid "File Explorer"
+msgstr ""
+
+#: ../../user/workspace.md:23 ../../user/workspace.md:106
+#: 9cb9928a7bd146129196d55de51d8f14 a1c692f234fe4373a69f81ad0f029fba
+msgid "Features"
+msgstr ""
+
+#: ../../user/workspace.md:25 22d960ac14bc43daa176c608309b7154
+msgid "Directory tree navigation"
+msgstr ""
+
+#: ../../user/workspace.md:26 ce213952c44546af9970bad32c26136f
+msgid "File creation, renaming, deletion"
+msgstr ""
+
+#: ../../user/workspace.md:27 342ff7493f4848ceb109e27930a88add
+msgid "Drag and drop support"
+msgstr ""
+
+#: ../../user/workspace.md:28 1abd9305e7554cd5be37da0f7dbf031a
+msgid "Search within files"
+msgstr ""
+
+#: ../../user/workspace.md:29 c3dffe4a41844295b877466d8d8ec7ed
+msgid "File type icons"
+msgstr ""
+
+#: ../../user/workspace.md:31 ../../user/workspace.md:75
+#: 4d8bd5494ecf4a908a577248ada3998c c4fdc1eb18644dc9a96d975b88141d60
+msgid "Keyboard Shortcuts"
+msgstr ""
+
+#: ../../user/workspace.md 94dd4cc0f68245fcb13e91e666cd8d89
+#: a621a3a33e3340539874726cbbda409a
+msgid "Shortcut"
+msgstr ""
+
+#: ../../user/workspace.md 826deaad709544a396faf1c181d9ce5e
+#: f5ac83e42cbc4e0bb79fcd9b4b8fd50e
+msgid "Action"
+msgstr ""
+
+#: ../../user/workspace.md 389a9248b2b8480aab526cdb0c68a955
+msgid "`Ctrl+N`"
+msgstr ""
+
+#: ../../user/workspace.md 4d7036819678465ebbe515e5d5bfe23d
+msgid "New file"
+msgstr ""
+
+#: ../../user/workspace.md 62f7a2db163b45b3aa5b8dbebe60b1d3
+msgid "`Ctrl+Shift+N`"
+msgstr ""
+
+#: ../../user/workspace.md b9015def4ceb42e7a6ab1fa3abcf7dd5
+msgid "New folder"
+msgstr ""
+
+#: ../../user/workspace.md c4a1fbb1b57c426fbd90cdbb74965b96
+msgid "`F2`"
+msgstr ""
+
+#: ../../user/workspace.md ../../user/workspace.md:48
+#: 5f4402072c9f42ee992546ddacd8f8a9 bfba9327e9024250a55507dbfc21e485
+msgid "Rename"
+msgstr ""
+
+#: ../../user/workspace.md 5aa797d387f14a0ebb41c9958230461e
+msgid "`Delete`"
+msgstr ""
+
+#: ../../user/workspace.md ../../user/workspace.md:49
+#: 36b094c953fc471dbebfa35865071c21 bfd192bac22d43de83f58ded1ccf63a0
+msgid "Delete"
+msgstr ""
+
+#: ../../user/workspace.md 420ebfaaa17c40dc94487fd2b8fff41c
+msgid "`Ctrl+C`"
+msgstr ""
+
+#: ../../user/workspace.md 84900d9e2f294a8a8544e57e1751389f
+msgid "Copy"
+msgstr ""
+
+#: ../../user/workspace.md 0390e524732b42ccb74e779644455c1b
+msgid "`Ctrl+V`"
+msgstr ""
+
+#: ../../user/workspace.md 536e7cc038644f4785c75ebeef825558
+msgid "Paste"
+msgstr ""
+
+#: ../../user/workspace.md:42 77ec022d2cef4eb09053d1fa999bcb86
+msgid "Context Menu"
+msgstr ""
+
+#: ../../user/workspace.md:44 e7e79a8f2f8b4cff99d7330fc79a7d9e
+msgid "Right-click on files/folders for options:"
+msgstr ""
+
+#: ../../user/workspace.md:46 8dbf56b42668407e87e4439dad45f48f
+msgid "Open"
+msgstr ""
+
+#: ../../user/workspace.md:47 d5c83f4eff2d45ab9ddbb781694ce7c9
+msgid "Open to the Side"
+msgstr ""
+
+#: ../../user/workspace.md:50 0af9ec26128248ecb352cc882ca94d55
+msgid "Copy Path"
+msgstr ""
+
+#: ../../user/workspace.md:51 eab3420d9ccf4802ba83670ebb2c41b8
+msgid "Copy Relative Path"
+msgstr ""
+
+#: ../../user/workspace.md:53 c150ac61419046df9ee74103af928512
+msgid "Code Editor"
+msgstr ""
+
+#: ../../user/workspace.md:55 16195380cb934b10bff911c3a1a9e4ab
+msgid "Syntax Highlighting"
+msgstr ""
+
+#: ../../user/workspace.md:57 104e6901382f49869900cd2aad058c94
+msgid "Supported languages include:"
+msgstr ""
+
+#: ../../user/workspace.md:59 19d994719ff048d8ad01d64b777e4388
+msgid "Python, JavaScript, TypeScript"
+msgstr ""
+
+#: ../../user/workspace.md:60 6c71cef4ddff4b7899ac33e902fc7427
+msgid "HTML, CSS, SCSS"
+msgstr ""
+
+#: ../../user/workspace.md:61 f1de2250b3f4454c837361438c3fc43b
+msgid "JSON, YAML, TOML"
+msgstr ""
+
+#: ../../user/workspace.md:62 69000ef665594d959661022259ca87d0
+msgid "Markdown, RST"
+msgstr ""
+
+#: ../../user/workspace.md:63 da46ae8e855742fd9e6ffbba4b9cacb9
+msgid "SQL, Shell scripts"
+msgstr ""
+
+#: ../../user/workspace.md:64 58073a39bad34a7ea8de29bad07f6b01
+msgid "And many more..."
+msgstr ""
+
+#: ../../user/workspace.md:66 c5c1603c980c49f9a2b23e5fc2d00d74
+msgid "Editor Features"
+msgstr ""
+
+#: ../../user/workspace.md:68 9e72f9d14a574deba1170141c0366838
+msgid "Line numbers"
+msgstr ""
+
+#: ../../user/workspace.md:69 590d2fa36dce482fbfd4cd4a2d297eaf
+msgid "Code folding"
+msgstr ""
+
+#: ../../user/workspace.md:70 8b693acd54dd4d6b8d9b8c585a60ef02
+msgid "Minimap"
+msgstr ""
+
+#: ../../user/workspace.md:71 57d5b3153a764a18a752dfea94ebe37b
+msgid "Bracket matching"
+msgstr ""
+
+#: ../../user/workspace.md:72 3920575df64a4c38ad7cbced40268e6b
+msgid "Auto-indentation"
+msgstr ""
+
+#: ../../user/workspace.md:73 11a8dd29648144bba0b537a6c3eb9ec5
+msgid "Multiple cursors"
+msgstr ""
+
+#: ../../user/workspace.md ca2b03b62ed645f3895b1f209ad82e89
+msgid "`Ctrl+S`"
+msgstr ""
+
+#: ../../user/workspace.md 03e50e5e3df4451dafae06d52f204a82
+msgid "Save"
+msgstr ""
+
+#: ../../user/workspace.md 1d710455c8d2463d9f3f037ef56ab931
+msgid "`Ctrl+Z`"
+msgstr ""
+
+#: ../../user/workspace.md 11924c47414f4f4c9a991c47c55157cf
+msgid "Undo"
+msgstr ""
+
+#: ../../user/workspace.md 24717535a3094c339c8a356da578c653
+msgid "`Ctrl+Shift+Z`"
+msgstr ""
+
+#: ../../user/workspace.md fba08846700e4167aca23770c1e179fa
+msgid "Redo"
+msgstr ""
+
+#: ../../user/workspace.md 5ef6f7aed8a84448a8b4cf8ae794b829
+msgid "`Ctrl+F`"
+msgstr ""
+
+#: ../../user/workspace.md 807adea445234b07877403d8d9b36278
+msgid "Find"
+msgstr ""
+
+#: ../../user/workspace.md e9f2d3948e814f1483cfb3692884f57c
+msgid "`Ctrl+H`"
+msgstr ""
+
+#: ../../user/workspace.md efad313ffce347c9ad3b7a880aeb0d51
+msgid "Replace"
+msgstr ""
+
+#: ../../user/workspace.md b6e189fcf3f0417a8e03055af53775dd
+msgid "`Ctrl+/`"
+msgstr ""
+
+#: ../../user/workspace.md 6c84e992e7d8495faf658a4974772514
+msgid "Toggle comment"
+msgstr ""
+
+#: ../../user/workspace.md fd584c3e7d7e4949904713cfa1b70036
+msgid "`Ctrl+D`"
+msgstr ""
+
+#: ../../user/workspace.md e39289c9e9a34df0bcfaa61bec3b0093
+msgid "Select next occurrence"
+msgstr ""
+
+#: ../../user/workspace.md 7fb5c38ea436426994ba45f973ddb24a
+msgid "`Alt+Up/Down`"
+msgstr ""
+
+#: ../../user/workspace.md 08ebdeed7db64b4da9cfd787fcd5b897
+msgid "Move line"
+msgstr ""
+
+#: ../../user/workspace.md:88 41e7e6018aaf4c57b55eec9a46adeebc
+msgid "LSP Integration"
+msgstr ""
+
+#: ../../user/workspace.md:90 4b1ee0d9ae844d428b2dd29721950a9d
+msgid "The editor includes Language Server Protocol support for:"
+msgstr ""
+
+#: ../../user/workspace.md:92 14fafbf8968047d6a9b9ab58d0ede45c
+msgid "**Python**: pylsp with pyright"
+msgstr ""
+
+#: ../../user/workspace.md:93 f7d6e2101c8e495c8fe776b87bb5cdda
+msgid "**TypeScript/JavaScript**: tsserver"
+msgstr ""
+
+#: ../../user/workspace.md:94 05ba18b5bb3c4c14b201246751a79f8b
+msgid "**Rust**: rust-analyzer"
+msgstr ""
+
+#: ../../user/workspace.md:96 cc992e52b53b4afa901060b249cf0818
+msgid "Features provided:"
+msgstr ""
+
+#: ../../user/workspace.md:98 a860bc42f0944eb8a8d985fddf4a93b0
+msgid "Autocompletion"
+msgstr ""
+
+#: ../../user/workspace.md:99 b41c1d62abc44a079d7e509b8aebf5a4
+msgid "Hover documentation"
+msgstr ""
+
+#: ../../user/workspace.md:100 ad287b37cb2b4ccea8552ba0ad99c38a
+msgid "Go to definition"
+msgstr ""
+
+#: ../../user/workspace.md:101 f74a1582d9064b97b54bd784512e0fc4
+msgid "Find references"
+msgstr ""
+
+#: ../../user/workspace.md:102 8708b8babdc54116a523f8bb078b598a
+msgid "Diagnostics/errors"
+msgstr ""
+
+#: ../../user/workspace.md:104 2261582cc4cc4bf083c981243726114b
+msgid "Terminal"
+msgstr ""
+
+#: ../../user/workspace.md:108 e5457207d680428da6a4116d99e30c4a
+msgid "Full terminal emulation (xterm.js)"
+msgstr ""
+
+#: ../../user/workspace.md:109 ef093ebf41ef42d2b9620a141d479465
+msgid "Multiple terminal tabs"
+msgstr ""
+
+#: ../../user/workspace.md:110 50d5893b1adb4f98abe0d3d154636ad4
+msgid "Resizable panels"
+msgstr ""
+
+#: ../../user/workspace.md:111 31a4ab80980440daa25a5dcc602fe609
+msgid "Command history"
+msgstr ""
+
+#: ../../user/workspace.md:112 166a21037cd746ec9b8c49367e23574b
+msgid "Copy/paste support"
+msgstr ""
+
+#: ../../user/workspace.md:114 efd3163a9b244ad4b25c2b4317bf90ce
+msgid "Usage"
+msgstr ""
+
+#: ../../user/workspace.md:116 5509580fa54c4f8e984d36539661580f
+msgid "Click the terminal icon or press `` Ctrl+` ``"
+msgstr ""
+
+#: ../../user/workspace.md:117 2ede470cd09b4bb1812d96f7bbda3b83
+msgid "Type commands as in a regular terminal"
+msgstr ""
+
+#: ../../user/workspace.md:118 7d958279ccb949129ff47d44fdf603be
+msgid "Use `Ctrl+C` to interrupt"
+msgstr ""
+
+#: ../../user/workspace.md:119 3abb3b5ec0c54b24a29767a6144725a7
+msgid "Use `Ctrl+Shift+C` / `Ctrl+Shift+V` for copy/paste"
+msgstr ""
+
+#: ../../user/workspace.md:121 e6dbaf661f324836ad5bce36be3eea6e
+msgid "Terminal Sessions"
+msgstr ""
+
+#: ../../user/workspace.md:123 fa479bdd827d4a1dbc2fde9ac425fa77
+msgid ""
+"# The terminal runs in the workspace directory\n"
+"$ pwd\n"
+"/home/user/project\n"
+"\n"
+"# Run any command\n"
+"$ npm install\n"
+"$ python manage.py runserver\n"
+"$ git status\n"
+msgstr ""
+
+#: ../../user/workspace.md:134 21ed38721580467ea589223090bc52a0
+msgid "Git Integration"
+msgstr ""
+
+#: ../../user/workspace.md:136 6e5a1cea1a1c411b8dcbbf7c546f2bf4
+msgid "Git Panel"
+msgstr ""
+
+#: ../../user/workspace.md:138 466a1009f36140a78fabcc968020ea36
+msgid "The Git panel shows:"
+msgstr ""
+
+#: ../../user/workspace.md:140 a779433ff22540f588128f4912475675
+msgid "Current branch"
+msgstr ""
+
+#: ../../user/workspace.md:141 bae20aee96ed4e50a61412042e0df272
+msgid "Changed files (staged/unstaged)"
+msgstr ""
+
+#: ../../user/workspace.md:142 a1efdef2a43247d2afbe69c598fa80b8
+msgid "Commit history"
+msgstr ""
+
+#: ../../user/workspace.md:143 962135e3fdb14825a63f01f6c52d17d8
+msgid "Remote status"
+msgstr ""
+
+#: ../../user/workspace.md:145 758e0dfd5608467db824a428ae6914b7
+msgid "Operations"
+msgstr ""
+
+#: ../../user/workspace.md:147 5a900c2b509646e4b3282a601f025135
+msgid "Viewing Status"
+msgstr ""
+
+#: ../../user/workspace.md:149 e9a55930e2be4fd4bc9512e57e6f2bb2
+msgid "The panel automatically shows:"
+msgstr ""
+
+#: ../../user/workspace.md:151 31c66fb6d0ad4c7f9ebff0ad19a1a3c1
+msgid "Modified files (M)"
+msgstr ""
+
+#: ../../user/workspace.md:152 0b1f2c237b6f423fa6abe9c058c6ab9f
+msgid "Added files (A)"
+msgstr ""
+
+#: ../../user/workspace.md:153 c9f02a8923f44801b88f4c89492d5c01
+msgid "Deleted files (D)"
+msgstr ""
+
+#: ../../user/workspace.md:154 40e8c35d203c49dbaeae8ae144c21887
+msgid "Untracked files (U)"
+msgstr ""
+
+#: ../../user/workspace.md:156 72a4c4a0bb034b99a65f424af4d9dcf7
+msgid "Staging Changes"
+msgstr ""
+
+#: ../../user/workspace.md:158 bc8cd6198b5d4c1e973a2dd7dca723fa
+msgid "Click the `+` button next to a file to stage"
+msgstr ""
+
+#: ../../user/workspace.md:159 603dca91d5684bb791a13e95d91b9112
+msgid "Click `-` to unstage"
+msgstr ""
+
+#: ../../user/workspace.md:160 542129a8bc1b4879884df43669a0754a
+msgid "Use \"Stage All\" for all changes"
+msgstr ""
+
+#: ../../user/workspace.md:162 9c4f9031a9454c329fff6998b1e4af48
+msgid "Committing"
+msgstr ""
+
+#: ../../user/workspace.md:164 813401d3b5be4a039f34615c3e706684
+msgid "Stage your changes"
+msgstr ""
+
+#: ../../user/workspace.md:165 5dc83a5c7de14a97aab8b58fe848a6be
+msgid "Enter a commit message"
+msgstr ""
+
+#: ../../user/workspace.md:166 29552ad3f3244319b5abb204a0d3d6c2
+msgid "Click \"Commit\""
+msgstr ""
+
+#: ../../user/workspace.md:168 98699774ad6b42f2bb6e16813e9d86ff
+msgid "Viewing Diffs"
+msgstr ""
+
+#: ../../user/workspace.md:170 dc1520ac17524e0797e33fa8dda3e98e
+msgid "Click on a changed file to see the diff:"
+msgstr ""
+
+#: ../../user/workspace.md:172 51b61f529fec485a950c4a8309f64382
+msgid "Green: Added lines"
+msgstr ""
+
+#: ../../user/workspace.md:173 f4a82f35b5cd4d958980dd0f192aac78
+msgid "Red: Removed lines"
+msgstr ""
+
+#: ../../user/workspace.md:174 0975432346f24d8ab486dec289f8b2cb
+msgid "Yellow: Modified lines"
+msgstr ""
+
+#: ../../user/workspace.md:176 3e27285e10ba4db0a3e8859bc7058199
+msgid "Other Operations"
+msgstr ""
+
+#: ../../user/workspace.md:178 38b7ab8e2408459e8e27685fea798b6e
+msgid "**Pull**: Fetch and merge remote changes"
+msgstr ""
+
+#: ../../user/workspace.md:179 14d36e904c2742b78e4019c4227b2807
+msgid "**Push**: Push commits to remote"
+msgstr ""
+
+#: ../../user/workspace.md:180 1c5c4817b0404fd0bb67ea1c69f6498e
+msgid "**Branch**: Create or switch branches"
+msgstr ""
+
+#: ../../user/workspace.md:181 1ab041d2ea9547449b947fce145ff49f
+msgid "**Stash**: Save work in progress"
+msgstr ""
+
+#: ../../user/workspace.md:183 7c043003d59543b98666fc5612196c9c
+msgid "Media Viewers"
+msgstr ""
+
+#: ../../user/workspace.md:185 0f481080cb234795a4fae615188e4d74
+msgid "Image Viewer"
+msgstr ""
+
+#: ../../user/workspace.md:187 cccd0d1c1b394d28a97fbea9cd39c45e
+msgid "Supports: PNG, JPG, GIF, SVG, WebP"
+msgstr ""
+
+#: ../../user/workspace.md:189 ../../user/workspace.md:200
+#: ../../user/workspace.md:211 ../../user/workspace.md:221
+#: 1b0af977967e4166beb2ae6c7d7a8066 2172b019db364b6e8595269db1af0634
+#: 2217a32c93b24df68c1a488659e1642c bae4a8a7ee664cca863651f8c41910f6
+msgid "Features:"
+msgstr ""
+
+#: ../../user/workspace.md:191 322a19480ca84d5dabe5c8d71e081007
+msgid "Zoom in/out"
+msgstr ""
+
+#: ../../user/workspace.md:192 e328241be4d7451a9708f78f9a52aaab
+msgid "Pan/drag"
+msgstr ""
+
+#: ../../user/workspace.md:193 a63785ee88af4e0a9e6ec5205fa1e8ab
+msgid "Fit to window"
+msgstr ""
+
+#: ../../user/workspace.md:194 5f5d23a3af5e4d7db09f6b109c6a50a4
+msgid "Actual size"
+msgstr ""
+
+#: ../../user/workspace.md:196 ec831125d597402aaf40209df608c390
+msgid "Audio Player"
+msgstr ""
+
+#: ../../user/workspace.md:198 76248362f49e49b1aacb7d4ff65a9f43
+msgid "Supports: MP3, WAV, OGG, FLAC"
+msgstr ""
+
+#: ../../user/workspace.md:202 ../../user/workspace.md:213
+#: 25c3c02a89c84f0da1481e3490994b9c a48187bba9af4137b6eccf6a5a19a73a
+msgid "Play/pause"
+msgstr ""
+
+#: ../../user/workspace.md:203 ../../user/workspace.md:214
+#: 2d29591e6eb04893889eb1b0d33943d5 da8d130c06bb4305955b61c86135928d
+msgid "Seek bar"
+msgstr ""
+
+#: ../../user/workspace.md:204 ../../user/workspace.md:215
+#: 01af5339239d4f9ea40ed9e46421858d a668df68108f43b6b0acff5d1d8a057d
+msgid "Volume control"
+msgstr ""
+
+#: ../../user/workspace.md:205 2bca36c7eb7e42738e62d9e33b7ec297
+msgid "Waveform visualization"
+msgstr ""
+
+#: ../../user/workspace.md:207 31fa7a306ee74523a8eafcb6c4295a5c
+msgid "Video Player"
+msgstr ""
+
+#: ../../user/workspace.md:209 ebfe80c6db6d48a3947573865761da48
+msgid "Supports: MP4, WebM, OGG"
+msgstr ""
+
+#: ../../user/workspace.md:216 6c91e9540a4045ffa63df0e56c046f9a
+msgid "Fullscreen mode"
+msgstr ""
+
+#: ../../user/workspace.md:217 61c68c7f33bf4a108761ee19354caa5b
+msgid "Playback speed"
+msgstr ""
+
+#: ../../user/workspace.md:219 2b5e703ea3964e04bc385ba4d3a2b50b
+msgid "PDF Viewer"
+msgstr ""
+
+#: ../../user/workspace.md:223 6ac6609a276247109742d290e2f42188
+msgid "Page navigation"
+msgstr ""
+
+#: ../../user/workspace.md:224 3acc4823ee794671939e7b242d7c048e
+msgid "Zoom control"
+msgstr ""
+
+#: ../../user/workspace.md:225 fac8aab2622141f0a1e1b50a84d69902
+msgid "Text search"
+msgstr ""
+
+#: ../../user/workspace.md:226 168681aac0774f1b9cb4c39b1fb04bfd
+msgid "Thumbnail view"
+msgstr ""
+
+#: ../../user/workspace.md:228 55a337b578d5476caf37c2c045740d8d
+msgid "Layout"
+msgstr ""
+
+#: ../../user/workspace.md:230 42851bb2cded4aaebd8f697a2f709ffa
+msgid "Panels"
+msgstr ""
+
+#: ../../user/workspace.md:232 2cf872149b414efd8045329842a6d3f7
+msgid "The workspace has resizable panels:"
+msgstr ""
+
+#: ../../user/workspace.md:234 bd10edf7d8e94d4d93c3da80ae16d5a8
+msgid ""
+"┌─────────────┬──────────────────────────┐\n"
+"│             │                          │\n"
+"│   File      │       Editor             │\n"
+"│   Explorer  │                          │\n"
+"│             │                          │\n"
+"├─────────────┼──────────────────────────┤\n"
+"│   Git       │       Terminal           │\n"
+"│   Panel     │                          │\n"
+"└─────────────┴──────────────────────────┘\n"
+msgstr ""
+
+#: ../../user/workspace.md:246 2b36d76b10fa4573a71762cf84715f0c
+msgid "Resizing"
+msgstr ""
+
+#: ../../user/workspace.md:248 2c6ee337e7e44a9e96c614f45a41dc78
+msgid "Drag panel borders to resize"
+msgstr ""
+
+#: ../../user/workspace.md:249 abc3c441526b4f908fb7950e18a37ad8
+msgid "Double-click to collapse/expand"
+msgstr ""
+
+#: ../../user/workspace.md:250 46bdb6f802b54e1f95fa3152171df66b
+msgid "Panels remember their size"
+msgstr ""
+
+#: ../../user/workspace.md:252 d4bc282785d84324b4094394c10b411f
+msgid "Themes"
+msgstr ""
+
+#: ../../user/workspace.md:254 5b4c4bf797f6411bade395ed96cbaac3
+msgid "The editor supports themes:"
+msgstr ""
+
+#: ../../user/workspace.md:256 8e1c442f91264af689d424c86141c748
+msgid "Light mode"
+msgstr ""
+
+#: ../../user/workspace.md:257 2ab5833e52284ddbb0839abe9eaf0582
+msgid "Dark mode"
+msgstr ""
+
+#: ../../user/workspace.md:258 257f676f38394b8781dbd8a09eae14d1
+msgid "High contrast"
+msgstr ""
+
+#: ../../user/workspace.md:260 29bbe5d18b1b4b0f8447cf10090ffc3a
+msgid "API Endpoints"
+msgstr ""
+
+#: ../../user/workspace.md:262 747ae6c1c8ab4ab88e4a1f570871bc88
+msgid "Workspace Info"
+msgstr ""
+
+#: ../../user/workspace.md:264 65ab0344dfb54e8da15405e6773bb3fa
+msgid "curl http://localhost:8000/workspace/1/info\n"
+msgstr ""
+
+#: ../../user/workspace.md:268 e7baf2e664814108b9d5376980049100
+msgid "File Operations"
+msgstr ""
+
+#: ../../user/workspace.md:270 ebddce81a48243f3b8b7368d5bb03ff9
+#, python-brace-format
+msgid ""
+"# List files\n"
+"curl http://localhost:8000/workspace/1/files\n"
+"\n"
+"# Read file\n"
+"curl http://localhost:8000/workspace/1/files/src/main.py\n"
+"\n"
+"# Write file\n"
+"curl -X PUT http://localhost:8000/workspace/1/files/src/main.py \\\n"
+"  -H \"Content-Type: application/json\" \\\n"
+"  -d '{\"content\": \"print(\\\"Hello\\\")\"}'\n"
+"\n"
+"# Delete file\n"
+"curl -X DELETE http://localhost:8000/workspace/1/files/src/old.py\n"
+msgstr ""
+
+#: ../../user/workspace.md:286 38049776076e488fa764331c458ad444
+msgid "Git Operations"
+msgstr ""
+
+#: ../../user/workspace.md:288 18821dc2a7ec4772903857ad0fcf5ead
+#, python-brace-format
+msgid ""
+"# Get status\n"
+"curl http://localhost:8000/workspace/1/git/status\n"
+"\n"
+"# Get commits\n"
+"curl http://localhost:8000/workspace/1/git/commits\n"
+"\n"
+"# Stage file\n"
+"curl -X POST http://localhost:8000/workspace/1/git/stage \\\n"
+"  -d '{\"files\": [\"src/main.py\"]}'\n"
+"\n"
+"# Commit\n"
+"curl -X POST http://localhost:8000/workspace/1/git/commit \\\n"
+"  -d '{\"message\": \"Add feature\"}'\n"
+msgstr ""
+
+#: ../../user/workspace.md:304 7b5116a43a9a4c4fa5e05b803faf01c3
+msgid "WebSocket Streaming"
+msgstr ""
+
+#: ../../user/workspace.md:306 2768e8f1461d414b8da063be740c1ac1
+msgid "Real-time updates via WebSocket:"
+msgstr ""
+
+#: ../../user/workspace.md:308 95dc86e2abb3408f8b942939a022a016
+msgid ""
+"const ws = new WebSocket('ws://localhost:8000/ws/workspace/1');\n"
+"\n"
+"ws.onmessage = (event) => {\n"
+"  const data = JSON.parse(event.data);\n"
+"\n"
+"  switch(data.type) {\n"
+"    case 'file_changed':\n"
+"      // Handle file change\n"
+"      break;\n"
+"    case 'git_status':\n"
+"      // Handle git update\n"
+"      break;\n"
+"    case 'terminal_output':\n"
+"      // Handle terminal output\n"
+"      break;\n"
+"  }\n"
+"};\n"
+msgstr ""
+
+#: ../../user/workspace.md:328 4563dea9b69742eba8ad8467146f96ba
+msgid "Best Practices"
+msgstr ""
+
+#: ../../user/workspace.md:330 bbd59b3e5d5d486b9c79fb9f78bca413
+msgid "1. Use Keyboard Shortcuts"
+msgstr ""
+
+#: ../../user/workspace.md:332 14b05397d3194a4a902f7a27983923a6
+msgid "Learn the shortcuts for faster navigation."
+msgstr ""
+
+#: ../../user/workspace.md:334 83c0223650c847b3a23db7ac9816bfd9
+msgid "2. Organize Files"
+msgstr ""
+
+#: ../../user/workspace.md:336 33293942b75e47558e4a40328f03abb7
+msgid "Keep a clean project structure:"
+msgstr ""
+
+#: ../../user/workspace.md:338 32dc7ed5a7d14cec91e4629fea1fa964
+msgid ""
+"project/\n"
+"├── src/\n"
+"├── tests/\n"
+"├── docs/\n"
+"└── README.md\n"
+msgstr ""
+
+#: ../../user/workspace.md:346 3efd90cb94754a56a29c7b5fcf13780f
+msgid "3. Commit Often"
+msgstr ""
+
+#: ../../user/workspace.md:348 14e7d065dc2244089511c57ea8c9415d
+msgid "Make small, focused commits with clear messages."
+msgstr ""
+
+#: ../../user/workspace.md:350 e527a818e47a432daa841a8261c1dc33
+msgid "4. Use the Terminal"
+msgstr ""
+
+#: ../../user/workspace.md:352 00b0e543d28e4dab889b784928ab0704
+msgid "The integrated terminal avoids context switching."
+msgstr ""
+
+#: ../../user/workspace.md:354 709b007e282c4778bde17c055188e5fd
+msgid "5. Review Diffs"
+msgstr ""
+
+#: ../../user/workspace.md:356 ac89942d85ac4801b95aa5e14e9c59cc
+msgid "Always review changes before committing."
+msgstr ""
+
+#: ../../user/workspace.md:358 d21586c033844cfb94b7d3cf60ef6b53
+msgid "Related Topics"
+msgstr ""
+
+#: ../../user/workspace.md:360 0e8dd9d19d8342ea97408e2b9721fbf6
+msgid "[Circles](circles.md) - Agent collaboration"
+msgstr ""
+
+#: ../../user/workspace.md:361 d3d7dafc8297440082e95b92f5ee1e84
+msgid "[Agents](agents.md) - AI agents in the workspace"
+msgstr ""
+
+#: ../../user/workspace.md:362 b96e59824c5747e299938d97035513f2
+msgid "[API Reference](../api/reference.md) - Complete API documentation"
+msgstr ""
+

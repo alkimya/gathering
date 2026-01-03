@@ -7,21 +7,21 @@ describe('AgentTypingIndicator', () => {
     render(<AgentTypingIndicator agentName="Sophie" phase="thinking" />);
 
     expect(screen.getByText('Sophie')).toBeInTheDocument();
-    expect(screen.getByText('réfléchit')).toBeInTheDocument();
+    expect(screen.getByText('is thinking')).toBeInTheDocument();
   });
 
   it('renders processing phase correctly', () => {
     render(<AgentTypingIndicator agentName="Olivia" phase="processing" />);
 
     expect(screen.getByText('Olivia')).toBeInTheDocument();
-    expect(screen.getByText('traite')).toBeInTheDocument();
+    expect(screen.getByText('is processing')).toBeInTheDocument();
   });
 
   it('renders generating phase correctly', () => {
     render(<AgentTypingIndicator agentName="Claude" phase="generating" />);
 
     expect(screen.getByText('Claude')).toBeInTheDocument();
-    expect(screen.getByText('génère une réponse')).toBeInTheDocument();
+    expect(screen.getByText('is generating a response')).toBeInTheDocument();
   });
 
   it('returns null for idle phase', () => {
@@ -39,7 +39,7 @@ describe('AgentTypingIndicator', () => {
   it('uses default phase (thinking) when not provided', () => {
     render(<AgentTypingIndicator agentName="Test" />);
 
-    expect(screen.getByText('réfléchit')).toBeInTheDocument();
+    expect(screen.getByText('is thinking')).toBeInTheDocument();
   });
 
   it('hides icon when showIcon is false', () => {

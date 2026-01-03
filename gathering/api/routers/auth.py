@@ -16,12 +16,15 @@ from gathering.api.auth import (
     UserLogin,
     UserResponse,
     authenticate_user,
+    blacklist_token,
     create_access_token,
     create_user,
+    get_blacklist_stats,
     get_current_active_user,
     get_user_by_email,
     require_admin,
     ACCESS_TOKEN_EXPIRE_HOURS,
+    oauth2_scheme_required,
 )
 
 
@@ -188,3 +191,42 @@ async def verify_token(
         "role": current_user.role,
         "expires_at": current_user.exp.isoformat() if current_user.exp else None,
     }
+
+
+@router.post("/logout")
+async def logout(
+    token: Annotated[str, Depends(oauth2_scheme_required)],
+    current_user: Annotated[TokenData, Depends(get_current_active_user)]
+):
+    """
+    Logout the current user by blacklisting their token.
+
+    The token will be invalidated until its original expiry time.
+    Subsequent requests with this token will be rejected.
+
+    Requires valid JWT token in Authorization header.
+    """
+    success = blacklist_token(token)
+
+    if not success:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Failed to invalidate token",
+        )
+
+    return {
+        "message": "Successfully logged out",
+        "user_id": current_user.sub,
+    }
+
+
+@router.get("/blacklist/stats")
+async def get_token_blacklist_stats(
+    current_user: Annotated[TokenData, Depends(require_admin)]
+):
+    """
+    Get token blacklist statistics (admin only).
+
+    Returns the number of blacklisted tokens and last cleanup time.
+    """
+    return get_blacklist_stats()

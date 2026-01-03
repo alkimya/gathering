@@ -1,0 +1,647 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026, GatheRing Team
+# This file is distributed under the same license as the GatheRing package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: GatheRing 0.2.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-01-02 14:08+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.17.0\n"
+
+#: ../../api/reference.md:1 1577532269df49c8a57762a4362dd22b
+msgid "GatheRing API Reference"
+msgstr ""
+
+#: ../../api/reference.md:3 8012068a05364f3f9eff8b5d622392a1
+msgid "Core Interfaces"
+msgstr ""
+
+#: ../../api/reference.md:5 ad21e37ea537475c8a303817cb02e33f
+msgid "IAgent"
+msgstr ""
+
+#: ../../api/reference.md:7 613d7386bcf14055b1a07558fc2fba73
+msgid "The main interface for AI agents in the GatheRing framework."
+msgstr ""
+
+#: ../../api/reference.md:9 3ef68e01eb1d4217a21ef0fafe7012a1
+#, python-brace-format
+msgid ""
+"from gathering.core import IAgent\n"
+"\n"
+"agent = IAgent.from_config({\n"
+"    \"name\": \"Assistant\",\n"
+"    \"llm_provider\": \"openai\",\n"
+"    \"model\": \"gpt-4\",\n"
+"    \"age\": 30,\n"
+"    \"history\": \"10 years of experience\"\n"
+"})\n"
+msgstr ""
+
+#: ../../api/reference.md:21 ../../api/reference.md:85
+#: ../../api/reference.md:208 035830b1bf874497864991b5eb1eea48
+#: 5a97ea840b7c4eba9c3e6294e85162e7 c036c57034424ce98e24bc2e885f598e
+msgid "Methods"
+msgstr ""
+
+#: ../../api/reference.md:23 95a5ed4bcfa8474082f2860ce0fd9070
+msgid "`from_config(config: Dict[str, Any]) -> IAgent`"
+msgstr ""
+
+#: ../../api/reference.md:25 edd4e22188ea44dc9bafa9def7b4908c
+msgid "Create an agent from configuration dictionary."
+msgstr ""
+
+#: ../../api/reference.md:27 ../../api/reference.md:49
+#: ../../api/reference.md:101 5f60afdf47064e6aaa758e382abb51a2
+#: 9f5293fa84194466b0a57bef565c7b4b d6a8139921824e21883109dfb7c026bb
+msgid "**Parameters:**"
+msgstr ""
+
+#: ../../api/reference.md:29 c1def78a0b9f4d05a7b3b5e79e4a199e
+msgid "`config` (dict): Agent configuration"
+msgstr ""
+
+#: ../../api/reference.md:30 caf0957f40f8430190582d3596df0bb2
+msgid "`name` (str, required): Agent name"
+msgstr ""
+
+#: ../../api/reference.md:31 c915e21f5e904c2785f5ce02b26d2f0d
+msgid ""
+"`llm_provider` (str, required): LLM provider (\"openai\", \"anthropic\", "
+"\"ollama\")"
+msgstr ""
+
+#: ../../api/reference.md:32 84214697f56149eebd07c43e515c9d6e
+msgid "`model` (str): Model name (default: \"gpt-4\")"
+msgstr ""
+
+#: ../../api/reference.md:33 3c06729f6cd54d549483a1cedc3a29d8
+msgid "`age` (int, optional): Agent age"
+msgstr ""
+
+#: ../../api/reference.md:34 1ff2c94fe31742b9870e6747b7c8298c
+msgid "`history` (str, optional): Agent background"
+msgstr ""
+
+#: ../../api/reference.md:35 b22891707d84431ab9b9a002583bcce0
+msgid "`personality_blocks` (list, optional): List of personality trait names"
+msgstr ""
+
+#: ../../api/reference.md:36 01fab1d85f894f42ba1a79ec399ae307
+msgid "`competencies` (list, optional): List of competency names"
+msgstr ""
+
+#: ../../api/reference.md:37 136aea22017940ec9d953981399fb779
+msgid "`tools` (list, optional): List of tool names"
+msgstr ""
+
+#: ../../api/reference.md:39 71394dfab771423da0a812c00629b824
+msgid "**Returns:** IAgent instance"
+msgstr ""
+
+#: ../../api/reference.md:41 39e34f7d41d340bd8d3b96dbda483f49
+msgid "**Raises:**"
+msgstr ""
+
+#: ../../api/reference.md:43 2d38c7728388436c9821947ce43e7d04
+msgid "`ConfigurationError`: If configuration is invalid"
+msgstr ""
+
+#: ../../api/reference.md:45 3e43a441eec54d1ba6c1eb513bba5d64
+msgid ""
+"`process_message(message: str, context: Optional[Dict[str, Any]] = None) "
+"-> str`"
+msgstr ""
+
+#: ../../api/reference.md:47 9133af5f869241c5bfd1abc45f9479fb
+msgid "Process a message and generate response."
+msgstr ""
+
+#: ../../api/reference.md:51 6437ebf772924073aeaa26f3227d956f
+msgid "`message` (str): Input message"
+msgstr ""
+
+#: ../../api/reference.md:52 115a7b386af64c769233acf210ddfa8e
+msgid "`context` (dict, optional): Additional context"
+msgstr ""
+
+#: ../../api/reference.md:54 2040d53f30b445fea1539543a74f3c5d
+msgid "**Returns:** Response string"
+msgstr ""
+
+#: ../../api/reference.md:56 252da926aa624798b14e946ada5ee552
+msgid "`add_tool(tool: ITool) -> None`"
+msgstr ""
+
+#: ../../api/reference.md:58 30e3657891a94336b3d2da530eaa2dfa
+msgid "Add a tool to the agent's toolkit."
+msgstr ""
+
+#: ../../api/reference.md:60 862da7302f7f4fc6b1ee385d0bcb6485
+msgid "`add_personality_block(block: IPersonalityBlock) -> None`"
+msgstr ""
+
+#: ../../api/reference.md:62 440e840f719445a8967fa50ca9aff247
+msgid "Add a personality trait to the agent."
+msgstr ""
+
+#: ../../api/reference.md:64 2703ba7293e146989490024043041eae
+msgid "`get_system_prompt() -> str`"
+msgstr ""
+
+#: ../../api/reference.md:66 55dd024987ec4eb49ea57454925dca79
+msgid "Get the complete system prompt including personality."
+msgstr ""
+
+#: ../../api/reference.md:68 756fa9214eba47ed93f180e30ea98346
+msgid "`get_tool_usage_history() -> List[Dict[str, Any]]`"
+msgstr ""
+
+#: ../../api/reference.md:70 3c08efbe9b8b4d6ebfe3a691cdb2f308
+msgid "Get history of tool usage."
+msgstr ""
+
+#: ../../api/reference.md:72 4ff4961585c64d53ba9e6a0ada195590
+msgid "ILLMProvider"
+msgstr ""
+
+#: ../../api/reference.md:74 a6e5e89bc3fd43aab52195e73f9a8afb
+msgid "Interface for Language Model providers."
+msgstr ""
+
+#: ../../api/reference.md:76 5d1b0472563245419633b4dce4eb5fd7
+#, python-brace-format
+msgid ""
+"from gathering.core import ILLMProvider\n"
+"\n"
+"provider = ILLMProvider.create(\"openai\", {\n"
+"    \"api_key\": \"your-api-key\",\n"
+"    \"model\": \"gpt-4\"\n"
+"})\n"
+msgstr ""
+
+#: ../../api/reference.md:87 a2eb6dc913834f01be4f877262df5ab2
+msgid "`create(provider_name: str, config: Dict[str, Any]) -> ILLMProvider`"
+msgstr ""
+
+#: ../../api/reference.md:89 60339c2507f8413699966d528e2b068b
+msgid "Factory method to create provider instances."
+msgstr ""
+
+#: ../../api/reference.md:91 e2ebbfa5d4e24b0185dedad8f186c757
+msgid "**Supported Providers:**"
+msgstr ""
+
+#: ../../api/reference.md:93 aec1f67a18664eaaa37e1465d720073d
+msgid "`openai`: OpenAI GPT models"
+msgstr ""
+
+#: ../../api/reference.md:94 52ae635a34c440819a656c1ba75629ee
+msgid "`anthropic`: Anthropic Claude models"
+msgstr ""
+
+#: ../../api/reference.md:95 0297c16847d4425ab6c69625ea1a0103
+msgid "`ollama`: Local Ollama models"
+msgstr ""
+
+#: ../../api/reference.md:97 6bd2fcddd0fb457694604a00058cd760
+msgid ""
+"`complete(messages: List[Dict[str, str]], tools: Optional[List[Dict[str, "
+"Any]]] = None) -> Dict[str, Any]`"
+msgstr ""
+
+#: ../../api/reference.md:99 7087dba0a14e417683d59912741d0aac
+msgid "Get completion from the LLM."
+msgstr ""
+
+#: ../../api/reference.md:103 bd0bde008d534abea21e9a28214321b6
+msgid "`messages`: List of message dictionaries with \"role\" and \"content\""
+msgstr ""
+
+#: ../../api/reference.md:104 c25f50a7493d43188e6b820817709ec2
+msgid "`tools`: Optional list of tool schemas"
+msgstr ""
+
+#: ../../api/reference.md:106 653f2dc2870145868410971c70d287c8
+msgid "**Returns:** Response dictionary with \"role\" and \"content\""
+msgstr ""
+
+#: ../../api/reference.md:108 edbb95915abc4e60a2ef899da90d0eb0
+msgid ""
+"`stream(messages: List[Dict[str, str]], tools: Optional[List[Dict[str, "
+"Any]]] = None) -> AsyncGenerator[str, None]`"
+msgstr ""
+
+#: ../../api/reference.md:110 3c86f594983b46eaa520eda744f20f36
+msgid "Stream completion from the LLM."
+msgstr ""
+
+#: ../../api/reference.md:112 eb06041fc0f1410f9de4ad3e6017bcbc
+msgid "ITool"
+msgstr ""
+
+#: ../../api/reference.md:114 a814284a1297451899132226eadc7d30
+msgid "Interface for external tools."
+msgstr ""
+
+#: ../../api/reference.md:116 f66796bcbb2045efb6b9a428f38d0158
+#, python-brace-format
+msgid ""
+"from gathering.core import CalculatorTool\n"
+"\n"
+"calculator = CalculatorTool.from_config({\n"
+"    \"name\": \"calculator\",\n"
+"    \"type\": \"calculator\"\n"
+"})\n"
+"\n"
+"result = calculator.execute(\"15 * 25 + 10\")\n"
+"print(result.output)  # 385\n"
+msgstr ""
+
+#: ../../api/reference.md:128 0b4bafd20f6c4e04963d152915af0510
+msgid "Available Tools"
+msgstr ""
+
+#: ../../api/reference.md:130 b9c203446e6f4aa18b944f3a1c456f8d
+msgid "CalculatorTool"
+msgstr ""
+
+#: ../../api/reference.md:132 0dc5a796cac34226b4d1a325c76b55a9
+msgid "Basic mathematical operations."
+msgstr ""
+
+#: ../../api/reference.md:134 5241d05ad6584ff6a0f8ca0f5a814fbd
+#, python-brace-format, python-format
+msgid ""
+"calculator = CalculatorTool.from_config({\"name\": \"calc\"})\n"
+"result = calculator.execute(\"15% of 2500\")\n"
+"# result.output = 375.0\n"
+msgstr ""
+
+#: ../../api/reference.md:140 4a27cda4363d44ffb621260c1a987076
+msgid "FileSystemTool"
+msgstr ""
+
+#: ../../api/reference.md:142 1950b0b1a251458fb2119da7f99d167a
+msgid "File system operations with permission control."
+msgstr ""
+
+#: ../../api/reference.md:144 3348b6243d634e7aae93266e4ee76ba8
+#, python-brace-format
+msgid ""
+"fs_tool = FileSystemTool.from_config({\n"
+"    \"name\": \"filesystem\",\n"
+"    \"permissions\": [\"read\", \"write\"],\n"
+"    \"base_path\": \"/tmp/data\"\n"
+"})\n"
+"\n"
+"result = fs_tool.execute({\n"
+"    \"action\": \"read\",\n"
+"    \"path\": \"file.txt\"\n"
+"})\n"
+msgstr ""
+
+#: ../../api/reference.md:157 4cc2b660f4054ee1b612c4813c30c141
+msgid "Tool Result"
+msgstr ""
+
+#: ../../api/reference.md:159 0a8b117a484047328301b27a366d0849
+msgid ""
+"@dataclass\n"
+"class ToolResult:\n"
+"    success: bool\n"
+"    output: Any\n"
+"    error: Optional[str] = None\n"
+"    execution_time: float = 0.0\n"
+"    metadata: Dict[str, Any] = field(default_factory=dict)\n"
+msgstr ""
+
+#: ../../api/reference.md:169 f245f6e9a4f5421bb0ed9cfdeef7faf9
+msgid "IPersonalityBlock"
+msgstr ""
+
+#: ../../api/reference.md:171 babe88dfb51f4beb961b5f40c89c5417
+msgid "Modular personality components for agents."
+msgstr ""
+
+#: ../../api/reference.md:173 c18213af35314ff4a8aee95b7ed14a55
+#, python-brace-format
+msgid ""
+"from gathering.core import BasicPersonalityBlock\n"
+"\n"
+"curious = BasicPersonalityBlock.from_config({\n"
+"    \"type\": \"trait\",\n"
+"    \"name\": \"curious\",\n"
+"    \"intensity\": 0.8\n"
+"})\n"
+msgstr ""
+
+#: ../../api/reference.md:183 6c420d9195564945bdc51e4b4624cbeb
+msgid "Available Personality Traits"
+msgstr ""
+
+#: ../../api/reference.md:185 3dabcd162aa44024883ab4b23846a4cd
+msgid "`curious`: Asks questions to understand better"
+msgstr ""
+
+#: ../../api/reference.md:186 a8a83a9e2e954b95b8422e9bad7535aa
+msgid "`analytical`: Analyzes information step by step"
+msgstr ""
+
+#: ../../api/reference.md:187 3eb60314c58d4ef4a41345bcfd16bf06
+msgid "`empathetic`: Shows understanding and empathy"
+msgstr ""
+
+#: ../../api/reference.md:188 c609171ce3a74623973a137fa7f99975
+msgid "`formal`: Maintains professional tone"
+msgstr ""
+
+#: ../../api/reference.md:189 4e934f14c08d4486a10af9ab6f8ea364
+msgid "`creative`: Thinks creatively"
+msgstr ""
+
+#: ../../api/reference.md:190 f3d24914cb084a65a6d2257ca1b6006d
+msgid "`logical`: Applies logical reasoning"
+msgstr ""
+
+#: ../../api/reference.md:191 852c2b1d88ee4a1bb732b544caf47f27
+msgid "`cheerful`: Positive and cheerful"
+msgstr ""
+
+#: ../../api/reference.md:192 da359d1ee8714f039ea9332aa85336cc
+msgid "`patient`: Patient in explanations"
+msgstr ""
+
+#: ../../api/reference.md:193 08cfb950a7e5466cabd1f18ffcc221da
+msgid "`knowledgeable`: Demonstrates expertise"
+msgstr ""
+
+#: ../../api/reference.md:194 30b0fd4cd4724781b096ed8cc4c2ed99
+msgid "`eager`: Shows enthusiasm"
+msgstr ""
+
+#: ../../api/reference.md:196 80fc3536214d465fbdd3a895ba01ba60
+msgid "IConversation"
+msgstr ""
+
+#: ../../api/reference.md:198 df479410f5fd4c7b8247e7109b4dc3e2
+msgid "Manages conversations between agents."
+msgstr ""
+
+#: ../../api/reference.md:200 40cfed9131ff425f90f488753211e28f
+msgid ""
+"from gathering.core import BasicConversation\n"
+"\n"
+"conversation = BasicConversation.create([agent1, agent2])\n"
+"conversation.add_message(agent1, \"Hello!\")\n"
+"responses = conversation.process_turn()\n"
+msgstr ""
+
+#: ../../api/reference.md:210 f5610cc3a2e74749bdfbccda278a41be
+msgid "`create(agents: List[IAgent]) -> IConversation`"
+msgstr ""
+
+#: ../../api/reference.md:212 6c9eb8cb3c72445f804fe3735ee80164
+msgid "Create a new conversation."
+msgstr ""
+
+#: ../../api/reference.md:214 fb58c63ba6c940debe776365fed0003c
+msgid "`add_message(agent: IAgent, content: str) -> None`"
+msgstr ""
+
+#: ../../api/reference.md:216 ab3dc3e308a843479dfc971f417ad2be
+msgid "Add a message to the conversation."
+msgstr ""
+
+#: ../../api/reference.md:218 2ce10ac1112c461ca88271fad6f4eba9
+msgid "`process_turn() -> List[Dict[str, Any]]`"
+msgstr ""
+
+#: ../../api/reference.md:220 1e7dbb23f6cd46e4be9180d8c4867a76
+msgid "Process one turn, getting responses from other agents."
+msgstr ""
+
+#: ../../api/reference.md:222 2d9043b6287f41999f3ca4d23347c346
+msgid "`get_history() -> List[Dict[str, Any]]`"
+msgstr ""
+
+#: ../../api/reference.md:224 f9632ddbe4564be6b7a58b2f5dd54ce6
+msgid "Get complete conversation history."
+msgstr ""
+
+#: ../../api/reference.md:226 636e96d4a7134658a91c76317605d060
+msgid "Data Classes"
+msgstr ""
+
+#: ../../api/reference.md:228 3df4839360d848a2bd51f96cfc17a2bd
+msgid "Message"
+msgstr ""
+
+#: ../../api/reference.md:230 4f6dca5004504f678fb3efde5f172abf
+msgid ""
+"@dataclass\n"
+"class Message:\n"
+"    role: str  # \"user\", \"assistant\", \"system\", \"tool\"\n"
+"    content: str\n"
+"    timestamp: datetime\n"
+"    metadata: Dict[str, Any]\n"
+msgstr ""
+
+#: ../../api/reference.md:239 3baf67155ae74e94a8a1742079af7db1
+msgid "ToolPermission"
+msgstr ""
+
+#: ../../api/reference.md:241 3619411df2364f69858cb71c0fc7c4aa
+msgid ""
+"class ToolPermission(Enum):\n"
+"    READ = \"read\"\n"
+"    WRITE = \"write\"\n"
+"    EXECUTE = \"execute\"\n"
+"    DELETE = \"delete\"\n"
+msgstr ""
+
+#: ../../api/reference.md:249 d9ee9a068a3849668d2d34d66707d245
+msgid "Exceptions"
+msgstr ""
+
+#: ../../api/reference.md:251 27a0e3af35cf40248274e052d0ce92dd
+msgid "ConfigurationError"
+msgstr ""
+
+#: ../../api/reference.md:253 a3001f7e26d44981bbca735772991c9d
+msgid "Raised when configuration is invalid."
+msgstr ""
+
+#: ../../api/reference.md:255 40748eb6c2214b029e98620977dbc333
+#, python-brace-format
+msgid ""
+"try:\n"
+"    agent = IAgent.from_config({\"name\": \"\"})\n"
+"except ConfigurationError as e:\n"
+"    print(f\"Config error: {e.message}\")\n"
+"    print(f\"Field: {e.details.get('field')}\")\n"
+msgstr ""
+
+#: ../../api/reference.md:263 6b459f65795248d2876190c24a361479
+msgid "LLMProviderError"
+msgstr ""
+
+#: ../../api/reference.md:265 77aca02d07ea4e35ad1865c21b00f901
+msgid "Raised when LLM provider encounters an error."
+msgstr ""
+
+#: ../../api/reference.md:267 e9f9f1c9aba144afabacc28ef7ada092
+#, python-brace-format
+msgid ""
+"try:\n"
+"    response = provider.complete(messages)\n"
+"except LLMProviderError as e:\n"
+"    print(f\"Provider: {e.details.get('provider')}\")\n"
+"    print(f\"Status: {e.details.get('status_code')}\")\n"
+msgstr ""
+
+#: ../../api/reference.md:275 4f273b8a00924344ab1a7cc8f69fd544
+msgid "ToolExecutionError"
+msgstr ""
+
+#: ../../api/reference.md:277 4c4ee1b45da64613a78df5009083884e
+msgid "Raised when tool execution fails."
+msgstr ""
+
+#: ../../api/reference.md:279 3ea829403a774d869704ea5401988ced
+#, python-brace-format
+msgid ""
+"try:\n"
+"    result = tool.execute(invalid_input)\n"
+"except ToolExecutionError as e:\n"
+"    print(f\"Tool: {e.details.get('tool_name')}\")\n"
+"    print(f\"Error: {e.message}\")\n"
+msgstr ""
+
+#: ../../api/reference.md:287 dc891fc21496426e9d0bf2ad0e46bcdf
+msgid "Complete Examples"
+msgstr ""
+
+#: ../../api/reference.md:289 d6b27fe2c1964fe884c6d9b7336e1cc7
+msgid "Creating a Research Assistant"
+msgstr ""
+
+#: ../../api/reference.md:291 5ed4517f501248eab273ca97229fa697
+#, python-brace-format, python-format
+msgid ""
+"from gathering.core import BasicAgent, CalculatorTool, FileSystemTool\n"
+"\n"
+"# Create agent with tools and personality\n"
+"researcher = BasicAgent.from_config({\n"
+"    \"name\": \"Dr. Research\",\n"
+"    \"age\": 35,\n"
+"    \"history\": \"PhD in Data Science, 10 years experience\",\n"
+"    \"llm_provider\": \"openai\",\n"
+"    \"model\": \"gpt-4\",\n"
+"    \"personality_blocks\": [\"analytical\", \"curious\", \"patient\"],\n"
+"    \"tools\": [\"calculator\", \"filesystem\"]\n"
+"})\n"
+"\n"
+"# Process a research request\n"
+"response = researcher.process_message(\n"
+"    \"Calculate the statistical significance of a 15% improvement \"\n"
+"    \"over a baseline of 2500 data points\"\n"
+")\n"
+"\n"
+"# Check tool usage\n"
+"for usage in researcher.get_tool_usage_history():\n"
+"    print(f\"Used {usage['tool']} at {usage['timestamp']}\")\n"
+msgstr ""
+
+#: ../../api/reference.md:316 e0bcb24d935c40d9820fce7cd36424af
+msgid "Multi-Agent Collaboration"
+msgstr ""
+
+#: ../../api/reference.md:318 aa2e64da04ca44a0bc202df01549d39e
+#, python-brace-format
+msgid ""
+"from gathering.core import BasicAgent, BasicConversation\n"
+"\n"
+"# Create teacher and student agents\n"
+"teacher = BasicAgent.from_config({\n"
+"    \"name\": \"Professor Smith\",\n"
+"    \"age\": 50,\n"
+"    \"llm_provider\": \"openai\",\n"
+"    \"personality_blocks\": [\"patient\", \"knowledgeable\"],\n"
+"    \"competencies\": [\"teaching\", \"mathematics\"]\n"
+"})\n"
+"\n"
+"student = BasicAgent.from_config({\n"
+"    \"name\": \"Alice\",\n"
+"    \"age\": 20,\n"
+"    \"llm_provider\": \"anthropic\",\n"
+"    \"personality_blocks\": [\"curious\", \"eager\"],\n"
+"    \"competencies\": [\"learning\"]\n"
+"})\n"
+"\n"
+"# Create conversation\n"
+"lesson = BasicConversation.create([teacher, student])\n"
+"\n"
+"# Student asks question\n"
+"lesson.add_message(student, \"Can you explain derivatives?\")\n"
+"\n"
+"# Teacher responds\n"
+"responses = lesson.process_turn()\n"
+"for resp in responses:\n"
+"    print(f\"{resp['agent'].name}: {resp['content']}\")\n"
+"\n"
+"# Continue conversation\n"
+"lesson.add_message(student, \"Can you give an example?\")\n"
+"responses = lesson.process_turn()\n"
+msgstr ""
+
+#: ../../api/reference.md:354 818fd18b89a94efe8bf6a0699b53bb74
+msgid "Custom Tool Integration"
+msgstr ""
+
+#: ../../api/reference.md:356 26e08b9dc5e54c4c9c97b1f247afb5cb
+#, python-brace-format
+msgid ""
+"from gathering.core import ITool, ToolResult\n"
+"from typing import Any\n"
+"\n"
+"class WeatherTool(ITool):\n"
+"    @classmethod\n"
+"    def from_config(cls, config: Dict[str, Any]) -> \"WeatherTool\":\n"
+"        return cls(config[\"name\"], \"weather\", config)\n"
+"    \n"
+"    def execute(self, input_data: Any) -> ToolResult:\n"
+"        # Mock weather data\n"
+"        if isinstance(input_data, dict) and \"location\" in input_data:\n"
+"            return ToolResult(\n"
+"                success=True,\n"
+"                output=f\"Weather in {input_data['location']}: Sunny, "
+"22°C\"\n"
+"            )\n"
+"        return ToolResult(\n"
+"            success=False,\n"
+"            error=\"Location required\"\n"
+"        )\n"
+"    \n"
+"    # ... implement other required methods\n"
+"\n"
+"# Use with agent\n"
+"weather_agent = BasicAgent.from_config({\n"
+"    \"name\": \"WeatherBot\",\n"
+"    \"llm_provider\": \"openai\"\n"
+"})\n"
+"weather_agent.add_tool(WeatherTool.from_config({\"name\": \"weather\"}))\n"
+msgstr ""
+

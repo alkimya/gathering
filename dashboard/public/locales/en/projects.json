@@ -1,0 +1,61 @@
+{
+  "title": "Projects",
+  "subtitle": "Manage your development projects",
+  "createProject": "Create Project",
+  "editProject": "Edit Project",
+  "deleteProject": "Delete Project",
+  "projectDetails": "Project Details",
+  "openWorkspace": "Open Workspace",
+  "status": {
+    "active": "Active",
+    "archived": "Archived",
+    "onHold": "On Hold",
+    "planning": "Planning",
+    "completed": "Completed"
+  },
+  "fields": {
+    "name": "Name",
+    "path": "Path",
+    "description": "Description",
+    "branch": "Branch",
+    "repository": "Repository",
+    "techStack": "Tech Stack",
+    "languages": "Languages",
+    "frameworks": "Frameworks"
+  },
+  "tabs": {
+    "overview": "Overview",
+    "taskBoard": "Task Board",
+    "files": "Files",
+    "settings": "Settings"
+  },
+  "stats": {
+    "totalProjects": "Total Projects",
+    "activeProjects": "Active Projects",
+    "totalTasks": "Total Tasks",
+    "completionRate": "Completion Rate",
+    "linkedCircles": "Linked Circles"
+  },
+  "taskProgress": {
+    "title": "Task Progress",
+    "overallProgress": "Overall Progress",
+    "total": "Total",
+    "done": "Done",
+    "inProgress": "In Progress",
+    "toDo": "To Do"
+  },
+  "projectInfo": "Project Info",
+  "linkedCircles": "Linked Circles",
+  "noCircleLinked": "No circle linked",
+  "tasksFromCircle": "Tasks from linked circle",
+  "linkCircle": "Link a circle to this project to manage tasks.",
+  "createTasksInCircle": "Create tasks in the linked circle to see them here.",
+  "empty": {
+    "title": "No projects yet",
+    "description": "Create your first project to start managing your codebase."
+  },
+  "noTasks": {
+    "title": "No tasks",
+    "titleYet": "No tasks yet"
+  }
+}

@@ -6,18 +6,30 @@ Manages application configuration and API keys.
 import os
 from typing import Optional, List, Dict, Any
 from pathlib import Path
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, Field
+
+from gathering.api.dependencies import get_database_service, DatabaseService
 
 # =============================================================================
 # Pydantic Schemas
 # =============================================================================
+
+class ModelInfo(BaseModel):
+    """Brief model info for settings display."""
+    id: int
+    model_name: str
+    model_alias: Optional[str] = None
+    vision: bool = False
+    extended_thinking: bool = False
+
 
 class ProviderSettings(BaseModel):
     api_key: Optional[str] = Field(None, description="API key (masked on read)")
     default_model: Optional[str] = None
     base_url: Optional[str] = None
     is_configured: bool = False
+    models: List[ModelInfo] = Field(default_factory=list, description="Available models from DB")
 
 
 class DatabaseSettings(BaseModel):
@@ -26,6 +38,9 @@ class DatabaseSettings(BaseModel):
     name: str = "gathering"
     user: str = ""
     is_connected: bool = False
+    pool_size: int = 5
+    max_overflow: int = 10
+    extensions: List[str] = Field(default_factory=list, description="Active PostgreSQL extensions")
 
 
 class ApplicationSettings(BaseModel):
@@ -49,6 +64,11 @@ class ProviderUpdate(BaseModel):
 class ApplicationUpdate(BaseModel):
     debug: Optional[bool] = None
     log_level: Optional[str] = None
+
+
+class DatabaseUpdate(BaseModel):
+    pool_size: Optional[int] = Field(None, ge=1, le=50, description="Connection pool size (1-50)")
+    max_overflow: Optional[int] = Field(None, ge=0, le=100, description="Max overflow connections (0-100)")
 
 
 # =============================================================================
@@ -127,33 +147,93 @@ def write_env_file(updates: Dict[str, str]):
 router = APIRouter(prefix="/settings", tags=["settings"])
 
 
+def get_models_by_provider(db: DatabaseService) -> Dict[str, List[ModelInfo]]:
+    """Load models from DB grouped by provider name."""
+    models_by_provider: Dict[str, List[ModelInfo]] = {}
+    try:
+        rows = db.fetch_all("""
+            SELECT m.id, m.model_name, m.model_alias, m.vision, m.extended_thinking, p.name as provider_name
+            FROM models m
+            JOIN providers p ON m.provider_id = p.id
+            WHERE m.is_deprecated = false
+            ORDER BY p.name, m.model_name
+        """)
+        for row in rows:
+            provider_name = row.get("provider_name", "").lower()
+            if provider_name not in models_by_provider:
+                models_by_provider[provider_name] = []
+            models_by_provider[provider_name].append(ModelInfo(
+                id=row["id"],
+                model_name=row["model_name"],
+                model_alias=row.get("model_alias"),
+                vision=row.get("vision", False),
+                extended_thinking=row.get("extended_thinking", False),
+            ))
+    except Exception:
+        pass  # If DB not available, return empty
+    return models_by_provider
+
+
+def get_db_providers(db: DatabaseService) -> List[str]:
+    """Get list of provider names from DB."""
+    try:
+        rows = db.fetch_all("SELECT DISTINCT name FROM providers ORDER BY name")
+        return [row["name"].lower() for row in rows]
+    except Exception:
+        return []
+
+
+def get_pg_extensions(db: DatabaseService) -> List[str]:
+    """Get list of installed PostgreSQL extensions."""
+    try:
+        rows = db.fetch_all("""
+            SELECT extname FROM pg_extension
+            WHERE extname NOT IN ('plpgsql')
+            ORDER BY extname
+        """)
+        return [row["extname"] for row in rows]
+    except Exception:
+        return []
+
+
 @router.get("", response_model=AllSettings)
-async def get_settings():
+async def get_settings(db: DatabaseService = Depends(get_database_service)):
     """Get all application settings."""
     env = read_env_file()
 
-    providers = {
-        "anthropic": ProviderSettings(
-            api_key=mask_key(os.getenv("ANTHROPIC_API_KEY")),
-            default_model=os.getenv("ANTHROPIC_DEFAULT_MODEL", "claude-sonnet-4-5"),
-            is_configured=bool(os.getenv("ANTHROPIC_API_KEY")),
-        ),
-        "openai": ProviderSettings(
-            api_key=mask_key(os.getenv("OPENAI_API_KEY")),
-            default_model=os.getenv("OPENAI_DEFAULT_MODEL", "gpt-4"),
-            is_configured=bool(os.getenv("OPENAI_API_KEY")),
-        ),
-        "deepseek": ProviderSettings(
-            api_key=mask_key(os.getenv("DEEPSEEK_API_KEY")),
-            default_model=os.getenv("DEEPSEEK_DEFAULT_MODEL", "deepseek-coder"),
-            is_configured=bool(os.getenv("DEEPSEEK_API_KEY")),
-        ),
-        "ollama": ProviderSettings(
-            base_url=os.getenv("OLLAMA_BASE_URL", "http://localhost:11434"),
-            default_model=os.getenv("OLLAMA_DEFAULT_MODEL", "llama3.2"),
-            is_configured=True,  # Ollama is local, always "configured"
-        ),
-    }
+    # Load models from database
+    models_by_provider = get_models_by_provider(db)
+
+    # Get providers from DB to include dynamic ones
+    db_providers = get_db_providers(db)
+
+    # Get PostgreSQL extensions
+    pg_extensions = get_pg_extensions(db)
+
+    # Base providers (always shown)
+    base_providers = ["anthropic", "openai", "deepseek", "mistral", "google", "ollama"]
+
+    # Merge with DB providers (case-insensitive)
+    all_provider_names = list(set(base_providers + db_providers))
+
+    providers = {}
+    for provider_name in sorted(all_provider_names):
+        provider_upper = provider_name.upper()
+
+        if provider_name == "ollama":
+            providers[provider_name] = ProviderSettings(
+                base_url=os.getenv("OLLAMA_BASE_URL", "http://localhost:11434"),
+                default_model=os.getenv("OLLAMA_DEFAULT_MODEL", "llama3.2"),
+                is_configured=True,  # Ollama is local, always "configured"
+                models=models_by_provider.get(provider_name, []),
+            )
+        else:
+            providers[provider_name] = ProviderSettings(
+                api_key=mask_key(os.getenv(f"{provider_upper}_API_KEY")),
+                default_model=os.getenv(f"{provider_upper}_DEFAULT_MODEL"),
+                is_configured=bool(os.getenv(f"{provider_upper}_API_KEY")),
+                models=models_by_provider.get(provider_name, []),
+            )
 
     database = DatabaseSettings(
         host=os.getenv("DB_HOST", "localhost"),
@@ -161,6 +241,9 @@ async def get_settings():
         name=os.getenv("DB_NAME", "gathering"),
         user=os.getenv("DB_USER", ""),
         is_connected=True,  # If we got here, DB is connected
+        pool_size=int(os.getenv("DB_POOL_SIZE", "5")),
+        max_overflow=int(os.getenv("DB_MAX_OVERFLOW", "10")),
+        extensions=pg_extensions,
     )
 
     application = ApplicationSettings(
@@ -177,10 +260,18 @@ async def get_settings():
 
 
 @router.patch("/providers/{provider}", response_model=ProviderSettings)
-async def update_provider(provider: str, data: ProviderUpdate):
+async def update_provider(
+    provider: str,
+    data: ProviderUpdate,
+    db: DatabaseService = Depends(get_database_service)
+):
     """Update provider settings."""
-    valid_providers = ["anthropic", "openai", "deepseek", "ollama"]
-    if provider not in valid_providers:
+    # Accept base providers + any provider in DB
+    base_providers = ["anthropic", "openai", "deepseek", "mistral", "google", "ollama"]
+    db_providers = get_db_providers(db)
+    valid_providers = list(set(base_providers + db_providers))
+
+    if provider.lower() not in valid_providers:
         raise HTTPException(status_code=404, detail=f"Unknown provider: {provider}")
 
     updates = {}
@@ -231,10 +322,42 @@ async def update_application(data: ApplicationUpdate):
     )
 
 
+@router.patch("/database", response_model=DatabaseSettings)
+async def update_database(
+    data: DatabaseUpdate,
+    db: DatabaseService = Depends(get_database_service)
+):
+    """Update database pool settings. Requires restart to take effect."""
+    updates = {}
+
+    if data.pool_size is not None:
+        updates["DB_POOL_SIZE"] = str(data.pool_size)
+
+    if data.max_overflow is not None:
+        updates["DB_MAX_OVERFLOW"] = str(data.max_overflow)
+
+    if updates:
+        write_env_file(updates)
+
+    # Get current extensions
+    pg_extensions = get_pg_extensions(db)
+
+    return DatabaseSettings(
+        host=os.getenv("DB_HOST", "localhost"),
+        port=int(os.getenv("DB_PORT", "5432")),
+        name=os.getenv("DB_NAME", "gathering"),
+        user=os.getenv("DB_USER", ""),
+        is_connected=True,
+        pool_size=int(os.getenv("DB_POOL_SIZE", "5")),
+        max_overflow=int(os.getenv("DB_MAX_OVERFLOW", "10")),
+        extensions=pg_extensions,
+    )
+
+
 @router.post("/providers/{provider}/test")
 async def test_provider(provider: str):
     """Test connection to a provider."""
-    valid_providers = ["anthropic", "openai", "deepseek", "ollama"]
+    valid_providers = ["anthropic", "openai", "deepseek", "mistral", "google", "ollama"]
     if provider not in valid_providers:
         raise HTTPException(status_code=404, detail=f"Unknown provider: {provider}")
 
@@ -309,6 +432,36 @@ async def test_provider(provider: str):
                 if response.status_code == 200:
                     return {"success": True, "message": "DeepSeek API key is valid"}
                 elif response.status_code == 401:
+                    return {"success": False, "message": "Invalid API key"}
+                else:
+                    return {"success": False, "message": f"API returned status {response.status_code}"}
+
+        elif provider == "mistral":
+            import httpx
+            async with httpx.AsyncClient() as client:
+                response = await client.get(
+                    "https://api.mistral.ai/v1/models",
+                    headers={"Authorization": f"Bearer {api_key}"},
+                    timeout=10.0,
+                )
+                if response.status_code == 200:
+                    return {"success": True, "message": "Mistral API key is valid"}
+                elif response.status_code == 401:
+                    return {"success": False, "message": "Invalid API key"}
+                else:
+                    return {"success": False, "message": f"API returned status {response.status_code}"}
+
+        elif provider == "google":
+            import httpx
+            async with httpx.AsyncClient() as client:
+                # Google AI Studio / Gemini API uses a different format
+                response = await client.get(
+                    f"https://generativelanguage.googleapis.com/v1/models?key={api_key}",
+                    timeout=10.0,
+                )
+                if response.status_code == 200:
+                    return {"success": True, "message": "Google API key is valid"}
+                elif response.status_code == 400 or response.status_code == 403:
                     return {"success": False, "message": "Invalid API key"}
                 else:
                     return {"success": False, "message": f"API returned status {response.status_code}"}

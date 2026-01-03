@@ -1,0 +1,433 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026, GatheRing Team
+# This file is distributed under the same license as the GatheRing package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: GatheRing 0.2.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-01-02 14:08+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.17.0\n"
+
+#: ../../user/circles.md:1 1dd73e28c1e34852b9e02969b9adb244
+msgid "Circles"
+msgstr ""
+
+#: ../../user/circles.md:3 a757fb7b56bf40d1bcd626dc5d4d3079
+msgid ""
+"Circles are the core organizational unit in GatheRing. They represent "
+"groups of AI agents that collaborate on a common theme, project, or "
+"domain."
+msgstr ""
+
+#: ../../user/circles.md:5 642ba1d453c04fefbde9891bfc9ca83b
+msgid "What is a Circle?"
+msgstr ""
+
+#: ../../user/circles.md:7 669dc3f674b948f7a6babe23b44f8df1
+msgid "A **Circle** is:"
+msgstr ""
+
+#: ../../user/circles.md:9 bf76a63ef11f40129b7095d1a1d89afb
+msgid "A container for related agents"
+msgstr ""
+
+#: ../../user/circles.md:10 b75d57b1d5ae46c8a01c83b069b888c8
+msgid "A context for conversations"
+msgstr ""
+
+#: ../../user/circles.md:11 8db9e8ed8fe1414f9a0ceb9207dd5b85
+msgid "A scope for shared memory and knowledge"
+msgstr ""
+
+#: ../../user/circles.md:12 e9b7695c279b4af2adc547237f2e4a6a
+msgid "A boundary for permissions and access"
+msgstr ""
+
+#: ../../user/circles.md:14 22fff7c68e2b4b4c99b454a2ad59def5
+msgid ""
+"Think of a circle as a team room where agents meet to discuss and work "
+"together."
+msgstr ""
+
+#: ../../user/circles.md:16 dff9443eca924d32b7c2cfbc6735d06b
+msgid "Circle Lifecycle"
+msgstr ""
+
+#: ../../user/circles.md:18 f6525288daec49f597cf268ce58b17a5
+msgid ""
+"┌─────────────┐     ┌─────────────┐     ┌─────────────┐\n"
+"│   Created   │────▶│   Active    │────▶│   Archived  │\n"
+"└─────────────┘     └─────────────┘     └─────────────┘\n"
+"                          │\n"
+"                          ▼\n"
+"                    ┌─────────────┐\n"
+"                    │   Paused    │\n"
+"                    └─────────────┘\n"
+msgstr ""
+
+#: ../../user/circles.md:29 4f1e522e00be4596be5713455e747d1f
+msgid "States"
+msgstr ""
+
+#: ../../user/circles.md:31 b02d4e8f472148d8aec565cd3d53c662
+msgid "**Created**: Circle exists but hasn't started"
+msgstr ""
+
+#: ../../user/circles.md:32 77692c61bb724909917e43dbd3020d89
+msgid "**Active**: Circle is running, agents can converse"
+msgstr ""
+
+#: ../../user/circles.md:33 8f63fa54219042cdbc34dc7051afe139
+msgid "**Paused**: Temporarily stopped, can be resumed"
+msgstr ""
+
+#: ../../user/circles.md:34 a840905cbe86440e880aef4d6e21e48d
+msgid "**Archived**: Permanently stopped, read-only"
+msgstr ""
+
+#: ../../user/circles.md:36 78921a23eab24ace8d0185d7ac20343c
+msgid "Creating Circles"
+msgstr ""
+
+#: ../../user/circles.md:38 94c2e7b995734278a8563d14d8e4e796
+msgid "Via API"
+msgstr ""
+
+#: ../../user/circles.md:40 4cf6e7feeadd4d1093927229839b5e63
+#, python-brace-format
+msgid ""
+"curl -X POST http://localhost:8000/circles \\\n"
+"  -H \"Content-Type: application/json\" \\\n"
+"  -d '{\n"
+"    \"name\": \"dev-team\",\n"
+"    \"display_name\": \"Development Team\",\n"
+"    \"description\": \"Frontend and backend developers\",\n"
+"    \"config\": {\n"
+"      \"max_agents\": 10,\n"
+"      \"conversation_mode\": \"round_robin\"\n"
+"    }\n"
+"  }'\n"
+msgstr ""
+
+#: ../../user/circles.md:54 3ee033d5528a45f88c31aa22540f7f1c
+msgid "Via Python"
+msgstr ""
+
+#: ../../user/circles.md:56 af37294f78f946a4bc793d5ca2207317
+#, python-brace-format
+msgid ""
+"from gathering import Circle\n"
+"\n"
+"circle = Circle(\n"
+"    name=\"dev-team\",\n"
+"    display_name=\"Development Team\",\n"
+"    description=\"Frontend and backend developers\",\n"
+"    config={\n"
+"        \"max_agents\": 10,\n"
+"        \"conversation_mode\": \"round_robin\"\n"
+"    }\n"
+")\n"
+"await circle.save()\n"
+msgstr ""
+
+#: ../../user/circles.md:71 0e126b8a47154c03be980c181c2bcd00
+msgid "Managing Agents in Circles"
+msgstr ""
+
+#: ../../user/circles.md:73 5aca32fbc47648e0a8812dc357202c7b
+msgid "Adding Agents"
+msgstr ""
+
+#: ../../user/circles.md:75 c5f57ab78b0b43c293d71547ac216ef4
+#, python-brace-format
+msgid ""
+"# Add an agent to a circle\n"
+"curl -X POST http://localhost:8000/circles/dev-team/agents \\\n"
+"  -H \"Content-Type: application/json\" \\\n"
+"  -d '{\"agent_id\": 1}'\n"
+msgstr ""
+
+#: ../../user/circles.md:82 0dd6ca911ed743029c507fcaa3246fb0
+msgid "Removing Agents"
+msgstr ""
+
+#: ../../user/circles.md:84 7733b97d5dd243d48d828d3d02bb5487
+msgid "curl -X DELETE http://localhost:8000/circles/dev-team/agents/1\n"
+msgstr ""
+
+#: ../../user/circles.md:88 5dde544f23e9428aba4a8b757449a236
+msgid "Listing Circle Agents"
+msgstr ""
+
+#: ../../user/circles.md:90 5b5dacc344cb49d2b623672866f5d98c
+msgid "curl http://localhost:8000/circles/dev-team/agents\n"
+msgstr ""
+
+#: ../../user/circles.md:94 fa87dafbb00d402aa16e2c821b1ec7bc
+msgid "Circle Configuration"
+msgstr ""
+
+#: ../../user/circles.md:96 6c08de91a14e48479b2152f7217dc971
+msgid "Conversation Modes"
+msgstr ""
+
+#: ../../user/circles.md ded21d5ebd1c463980b83531ea6d2399
+msgid "Mode"
+msgstr ""
+
+#: ../../user/circles.md d69beb98c6b845248aa308fe52cf1ac2
+msgid "Description"
+msgstr ""
+
+#: ../../user/circles.md 372c354f8cc74edf942ee998097358b3
+msgid "`round_robin`"
+msgstr ""
+
+#: ../../user/circles.md 602ce5e5272a4a0e8e40de76ae102fd2
+msgid "Agents take turns in order"
+msgstr ""
+
+#: ../../user/circles.md a12c708f210b4b42a3410493d9422f0f
+msgid "`reactive`"
+msgstr ""
+
+#: ../../user/circles.md 7a377ded25f24ca6a47dbb179710c0ec
+msgid "Agents respond when relevant"
+msgstr ""
+
+#: ../../user/circles.md eb9be27e979a433d9807d96a4ef4ad8d
+msgid "`moderated`"
+msgstr ""
+
+#: ../../user/circles.md 62da66c4b3e843a7ae11c3c479e8b5bd
+msgid "A lead agent directs conversation"
+msgstr ""
+
+#: ../../user/circles.md 6dfb45deaa8f49529aae04bee0085bcd
+msgid "`free_form`"
+msgstr ""
+
+#: ../../user/circles.md e9c593a4cf2c47289658a5228d420a84
+msgid "Any agent can speak anytime"
+msgstr ""
+
+#: ../../user/circles.md:105 43e00d912e3940b3be9c2dce9cdc4885
+msgid "Example Configuration"
+msgstr ""
+
+#: ../../user/circles.md:107 1b8bad465fd5496d9928dc7f1f6b23a7
+#, python-brace-format
+msgid ""
+"{\n"
+"  \"name\": \"research-team\",\n"
+"  \"config\": {\n"
+"    \"max_agents\": 5,\n"
+"    \"conversation_mode\": \"moderated\",\n"
+"    \"moderator_agent_id\": 1,\n"
+"    \"turn_timeout\": 30,\n"
+"    \"max_turns_per_conversation\": 50,\n"
+"    \"memory_scope\": \"circle\",\n"
+"    \"allow_tools\": true\n"
+"  }\n"
+"}\n"
+msgstr ""
+
+#: ../../user/circles.md:122 a0dafd9b8e4341a39319779a6eb199b9
+msgid "Circle Operations"
+msgstr ""
+
+#: ../../user/circles.md:124 68a30fba04c14a6fb5876a211f4803e0
+msgid "Start a Circle"
+msgstr ""
+
+#: ../../user/circles.md:126 ca7acb20e11a42f988ac2c61a780b234
+msgid "curl -X POST http://localhost:8000/circles/dev-team/start\n"
+msgstr ""
+
+#: ../../user/circles.md:130 e86c1c54120e4ce0b114e9ecf972251f
+msgid "Pause a Circle"
+msgstr ""
+
+#: ../../user/circles.md:132 28bd0d70257a4678bba6812ab7fcbff7
+msgid "curl -X POST http://localhost:8000/circles/dev-team/pause\n"
+msgstr ""
+
+#: ../../user/circles.md:136 15d3b24253554a38b15ab77ba8861e78
+msgid "Resume a Circle"
+msgstr ""
+
+#: ../../user/circles.md:138 9a6d36cb8626492d8077008523c3b4dc
+msgid "curl -X POST http://localhost:8000/circles/dev-team/resume\n"
+msgstr ""
+
+#: ../../user/circles.md:142 8692d606db32419eae87e99b4462f0e6
+msgid "Archive a Circle"
+msgstr ""
+
+#: ../../user/circles.md:144 42b9dfad279e4b9888bf18d3377e991f
+msgid "curl -X POST http://localhost:8000/circles/dev-team/archive\n"
+msgstr ""
+
+#: ../../user/circles.md:148 5af7bfeffd9d4043853138c844006996
+msgid "Conversations in Circles"
+msgstr ""
+
+#: ../../user/circles.md:150 de714d3b2d1d407797d916b1ff437bb6
+msgid "Conversations happen within circles:"
+msgstr ""
+
+#: ../../user/circles.md:152 937bbce850df43d9b6bfb416e5f99014
+#, python-brace-format
+msgid ""
+"curl -X POST http://localhost:8000/conversations \\\n"
+"  -H \"Content-Type: application/json\" \\\n"
+"  -d '{\n"
+"    \"circle_name\": \"dev-team\",\n"
+"    \"topic\": \"API Design Review\",\n"
+"    \"agent_ids\": [1, 2, 3],\n"
+"    \"initial_prompt\": \"Let'\\''s review the new REST API design\"\n"
+"  }'\n"
+msgstr ""
+
+#: ../../user/circles.md:163 fc51f919ae99497d8ac1aa1e0c58b6bd
+msgid "Advancing Conversations"
+msgstr ""
+
+#: ../../user/circles.md:165 111f71209fbd4c0983f82b81835bd999
+#, python-brace-format
+msgid ""
+"curl -X POST http://localhost:8000/conversations/1/advance \\\n"
+"  -H \"Content-Type: application/json\" \\\n"
+"  -d '{\"prompt\": \"What about error handling?\"}'\n"
+msgstr ""
+
+#: ../../user/circles.md:171 68cc22a288484426845fc1185114b168
+msgid "Circle Memory"
+msgstr ""
+
+#: ../../user/circles.md:173 9eaa3721eeb3442fba740102fd707534
+msgid "Each circle has its own memory scope:"
+msgstr ""
+
+#: ../../user/circles.md:175 cd427d5e668e4b1996ba3e4d271df67d
+msgid "**Circle-scoped memories**: Shared by all agents in the circle"
+msgstr ""
+
+#: ../../user/circles.md:176 a03670e71c354ae1a7329959607bace3
+msgid "**Agent-scoped memories**: Private to each agent"
+msgstr ""
+
+#: ../../user/circles.md:177 32d1746f21574c46820c8d21904c80be
+msgid "**Conversation memories**: Specific to each conversation"
+msgstr ""
+
+#: ../../user/circles.md:179 ead418b293424130b81ff148196b6945
+msgid "Accessing Circle Memory"
+msgstr ""
+
+#: ../../user/circles.md:181 1ec2e83c55224ab593270835193f7429
+#, python-brace-format
+msgid ""
+"# Get circle knowledge\n"
+"curl http://localhost:8000/circles/dev-team/knowledge\n"
+"\n"
+"# Add knowledge to circle\n"
+"curl -X POST http://localhost:8000/circles/dev-team/knowledge \\\n"
+"  -H \"Content-Type: application/json\" \\\n"
+"  -d '{\n"
+"    \"title\": \"API Standards\",\n"
+"    \"content\": \"All APIs must follow REST conventions...\",\n"
+"    \"category\": \"best_practice\"\n"
+"  }'\n"
+msgstr ""
+
+#: ../../user/circles.md:195 24f23c97ffbc4c81aafe6c9306dc429e
+msgid "Best Practices"
+msgstr ""
+
+#: ../../user/circles.md:197 c3cd5720d8b2453499a39c9517597787
+msgid "1. Name Circles Meaningfully"
+msgstr ""
+
+#: ../../user/circles.md:199 c2c8b03d16584957aa944da2d0d12da2
+msgid "Use descriptive names that reflect the circle's purpose:"
+msgstr ""
+
+#: ../../user/circles.md:201 3e4b5b98a979404dbc4395d5e3fd0b50
+msgid "`dev-team` - Development team"
+msgstr ""
+
+#: ../../user/circles.md:202 fe3058af42024aeab7b77c021315c0ac
+msgid "`security-review` - Security reviewers"
+msgstr ""
+
+#: ../../user/circles.md:203 a0af17cf0949415f9d2e4542ac227a86
+msgid "`customer-support` - Support agents"
+msgstr ""
+
+#: ../../user/circles.md:205 1916038faa274b19875de80c4ce4b2f5
+msgid "2. Limit Circle Size"
+msgstr ""
+
+#: ../../user/circles.md:207 e36d51fc47924d00933a5968a28dba87
+msgid "Keep circles focused with 3-7 agents for best results."
+msgstr ""
+
+#: ../../user/circles.md:209 3c3deba9bb52475e9c3fdc0a460dd9a5
+msgid "3. Define Clear Roles"
+msgstr ""
+
+#: ../../user/circles.md:211 1ece6662e6c84fe7a9f29bc35a127f27
+msgid "Each agent in a circle should have a distinct role:"
+msgstr ""
+
+#: ../../user/circles.md:213 db2d5d03294f493a970d6653878b4625
+msgid ""
+"circle.add_agent(architect, role=\"lead\")\n"
+"circle.add_agent(developer, role=\"implementer\")\n"
+"circle.add_agent(reviewer, role=\"quality\")\n"
+msgstr ""
+
+#: ../../user/circles.md:219 72bd8f9979834cce93aea9abf510fbfb
+msgid "4. Use Appropriate Conversation Modes"
+msgstr ""
+
+#: ../../user/circles.md:221 4e5313e9f8a4436484c4654311814a8e
+msgid "**Brainstorming**: Use `free_form`"
+msgstr ""
+
+#: ../../user/circles.md:222 40ec771750cb41828b1bffc82f1d60ea
+msgid "**Technical review**: Use `moderated`"
+msgstr ""
+
+#: ../../user/circles.md:223 8c577ef42cfc48dcb1e945df42493eb7
+msgid "**Pair work**: Use `round_robin`"
+msgstr ""
+
+#: ../../user/circles.md:225 a4254e5fdd4a4020a38659a0e668d9b8
+msgid "Related Topics"
+msgstr ""
+
+#: ../../user/circles.md:227 f3d9ca841b3a4d73afd62ff9a68ac3c9
+msgid "[Agents](agents.md) - Creating and configuring agents"
+msgstr ""
+
+#: ../../user/circles.md:228 01d20f20d1174ef4a4fa77d2d90caab9
+msgid "[Workspace](workspace.md) - Using the integrated workspace"
+msgstr ""
+
+#: ../../user/circles.md:229 cddca2de06aa48118991fc404234d01a
+msgid "[API Reference](../api/reference.md) - Complete API documentation"
+msgstr ""
+

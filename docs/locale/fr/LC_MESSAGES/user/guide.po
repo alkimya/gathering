@@ -1,0 +1,813 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026, GatheRing Team
+# This file is distributed under the same license as the GatheRing package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: GatheRing 0.2.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-01-02 14:08+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.17.0\n"
+
+#: ../../user/guide.md:1 572f8a918b3b4dcdab7f4dac086423ff
+msgid "GatheRing User Guide"
+msgstr ""
+
+#: ../../user/guide.md:3 d6fb48ff1d4d4128952819ea41b79827
+msgid ""
+"Welcome to GatheRing, a collaborative multi-agent AI framework that "
+"enables you to create and manage intelligent agents with unique "
+"personalities, skills, and tools."
+msgstr ""
+
+#: ../../user/guide.md:5 31fa1032038a47a7bce6e837e121088c
+msgid "Table of Contents"
+msgstr ""
+
+#: ../../user/guide.md:7 c0968dcbe3a54a08aca935a708b0443d
+msgid "[Getting Started](#getting-started)"
+msgstr ""
+
+#: ../../user/guide.md:8 88295a6914064dc495ab0ebbb4b05d4b
+msgid "[Creating Your First Agent](#creating-your-first-agent)"
+msgstr ""
+
+#: ../../user/guide.md:9 2995cdbcafbd46acbcffe7fd43395179
+msgid "[Agent Personalities](#agent-personalities)"
+msgstr ""
+
+#: ../../user/guide.md:10 6a080561a3bc4c50b4a22842d118e712
+msgid "[Using Tools](#using-tools)"
+msgstr ""
+
+#: ../../user/guide.md:11 19f0857df9d54bd29b485049558e4749
+msgid "[Multi-Agent Conversations](#multi-agent-conversations)"
+msgstr ""
+
+#: ../../user/guide.md:12 6b5e1a26c4db4ece8b4e7c7b6e72e1b2
+msgid "[Best Practices](#best-practices)"
+msgstr ""
+
+#: ../../user/guide.md:13 f4d6924f15a54c4d9cdd8f62d5ce16bd
+msgid "[Troubleshooting](#troubleshooting)"
+msgstr ""
+
+#: ../../user/guide.md:15 3083bbe4954b4f268d63b77399905291
+msgid "Getting Started"
+msgstr ""
+
+#: ../../user/guide.md:17 704d025b0fa54355a87d023ea4ab491d
+msgid "Installation"
+msgstr ""
+
+#: ../../user/guide.md:19 da60e2988f694976b5fe77019d285a9c
+msgid "**Clone the repository:**"
+msgstr ""
+
+#: ../../user/guide.md:21 9738d57ba27e484387dc3bd80d84531e
+msgid ""
+"git clone https://github.com/alkimya/gathering.git\n"
+"cd gathering\n"
+msgstr ""
+
+#: ../../user/guide.md:26 f3faf858cb0c4ac0a7f08030f5cf587d
+msgid "**Create a virtual environment:**"
+msgstr ""
+
+#: ../../user/guide.md:28 fa7891f2023c4e2a882ba921656834ef
+msgid ""
+"python -m venv venv\n"
+"source venv/bin/activate  # On Windows: venv\\Scripts\\activate\n"
+msgstr ""
+
+#: ../../user/guide.md:33 6587b7ee0b8047168ab47bf15f4da311
+msgid "**Install dependencies:**"
+msgstr ""
+
+#: ../../user/guide.md:35 43a6fa947b3e47d18c985f0d31d66702
+msgid "pip install -r requirements.txt\n"
+msgstr ""
+
+#: ../../user/guide.md:39 96e228111d1e4501b4a13d1799346ad6
+msgid "**Verify installation:**"
+msgstr ""
+
+#: ../../user/guide.md:41 7bb9bfd1b63c4445b1cc5e0f3dd731d4
+msgid "python quick_start.py\n"
+msgstr ""
+
+#: ../../user/guide.md:45 111f20b299a54955880249f626367298
+msgid "Quick Start"
+msgstr ""
+
+#: ../../user/guide.md:47 b894ec2271e148f6967641f77be4983a
+msgid "Here's the simplest way to create and use an agent:"
+msgstr ""
+
+#: ../../user/guide.md:49 1e817d1017af4bbc9d788452faa454e0
+#, python-brace-format
+msgid ""
+"from gathering.core import BasicAgent\n"
+"\n"
+"# Create a simple agent\n"
+"assistant = BasicAgent.from_config({\n"
+"    \"name\": \"Helper\",\n"
+"    \"llm_provider\": \"openai\",\n"
+"    \"model\": \"gpt-4\"\n"
+"})\n"
+"\n"
+"# Have a conversation\n"
+"response = assistant.process_message(\"Hello! How can you help me?\")\n"
+"print(response)\n"
+msgstr ""
+
+#: ../../user/guide.md:64 f2e7a86734574617afe866a745520cc4
+msgid "Creating Your First Agent"
+msgstr ""
+
+#: ../../user/guide.md:66 e760111e6bd743828e05e81e7b7febb5
+msgid "Basic Agent Configuration"
+msgstr ""
+
+#: ../../user/guide.md:68 4568ac08167544ad82a08d7c36cf0611
+msgid "Every agent needs at minimum a name and an LLM provider:"
+msgstr ""
+
+#: ../../user/guide.md:70 bccc3bb9cffc4ae0a0930d80423857c2
+#, python-brace-format
+msgid ""
+"config = {\n"
+"    \"name\": \"Assistant\",\n"
+"    \"llm_provider\": \"openai\",  # or \"anthropic\", \"ollama\"\n"
+"    \"model\": \"gpt-4\"           # model depends on provider\n"
+"}\n"
+"\n"
+"agent = BasicAgent.from_config(config)\n"
+msgstr ""
+
+#: ../../user/guide.md:80 8825bd4f1ed84ed290da31b033c4ea07
+msgid "Adding Background and History"
+msgstr ""
+
+#: ../../user/guide.md:82 b42bbecc03fa47be953999139486f546
+msgid "Make your agents more interesting with personal details:"
+msgstr ""
+
+#: ../../user/guide.md:84 bb84c39e5f064edaa763517d91760b20
+#, python-brace-format
+msgid ""
+"config = {\n"
+"    \"name\": \"Dr. Sarah Chen\",\n"
+"    \"age\": 42,\n"
+"    \"history\": \"15 years as a marine biologist, PhD from MIT, \"\n"
+"               \"specialized in coral reef ecosystems\",\n"
+"    \"llm_provider\": \"anthropic\",\n"
+"    \"model\": \"claude-3\"\n"
+"}\n"
+"\n"
+"marine_expert = BasicAgent.from_config(config)\n"
+msgstr ""
+
+#: ../../user/guide.md:97 30a619679f82428f88f9bc07d2d0e81f
+msgid "Complete Agent Example"
+msgstr ""
+
+#: ../../user/guide.md:99 757a4194795048fbb00e9ff0ea4a5024
+msgid "Here's a fully configured agent:"
+msgstr ""
+
+#: ../../user/guide.md:101 acfa4e36cdec4592b7a112b128e07932
+#, python-brace-format
+msgid ""
+"teacher_config = {\n"
+"    \"name\": \"Professor Williams\",\n"
+"    \"age\": 55,\n"
+"    \"history\": \"30 years teaching mathematics at university level, \"\n"
+"               \"author of several textbooks on calculus\",\n"
+"    \"llm_provider\": \"openai\",\n"
+"    \"model\": \"gpt-4\",\n"
+"    \"personality_blocks\": [\"patient\", \"knowledgeable\", "
+"\"analytical\"],\n"
+"    \"competencies\": [\"mathematics\", \"teaching\", "
+"\"curriculum_design\"],\n"
+"    \"tools\": [\"calculator\", \"filesystem\"]\n"
+"}\n"
+"\n"
+"math_teacher = BasicAgent.from_config(teacher_config)\n"
+msgstr ""
+
+#: ../../user/guide.md:117 3d9ee6078cfe4277a4697faf8900b05c
+msgid "Agent Personalities"
+msgstr ""
+
+#: ../../user/guide.md:119 8bbe2b5ab298422e9083917c40332a03
+msgid "Understanding Personality Blocks"
+msgstr ""
+
+#: ../../user/guide.md:121 8e419e8c0d0843d58443c0a1ccee6961
+msgid ""
+"Personality blocks are modular traits that influence how agents "
+"communicate:"
+msgstr ""
+
+#: ../../user/guide.md:123 1bc9d48475524511b45c750691fff00e
+#, python-brace-format
+msgid ""
+"from gathering.core import BasicPersonalityBlock\n"
+"\n"
+"# Create individual personality traits\n"
+"curious = BasicPersonalityBlock.from_config({\n"
+"    \"type\": \"trait\",\n"
+"    \"name\": \"curious\",\n"
+"    \"intensity\": 0.8  # 0.0 to 1.0\n"
+"})\n"
+"\n"
+"agent.add_personality_block(curious)\n"
+msgstr ""
+
+#: ../../user/guide.md:136 7432765ba53c493a8f7c1a4f22fd392d
+msgid "Available Personality Traits"
+msgstr ""
+
+#: ../../user/guide.md c3f1fc667e7848bc80ae24ae7175f767
+msgid "Trait"
+msgstr ""
+
+#: ../../user/guide.md 5a25443439f747abb2b931b0436b5e64
+msgid "Description"
+msgstr ""
+
+#: ../../user/guide.md abf9565b61a449af9fb41bcc0d79355f
+msgid "Example Behavior"
+msgstr ""
+
+#: ../../user/guide.md b3ce71a925ce44dabd4395cbc4a400c8
+msgid "`curious`"
+msgstr ""
+
+#: ../../user/guide.md 44dd5367459f4bd7932f6aabc30c489d
+msgid "Asks questions to learn more"
+msgstr ""
+
+#: ../../user/guide.md 59c93e3d511f4ba583a56436b87abd94
+msgid "\"That's interesting! Can you tell me more about...\""
+msgstr ""
+
+#: ../../user/guide.md 6509cec0d8d6427e9a4f43187c880745
+msgid "`analytical`"
+msgstr ""
+
+#: ../../user/guide.md 6690552503124e8081929264b83b6374
+msgid "Breaks down problems systematically"
+msgstr ""
+
+#: ../../user/guide.md 149b3813fd004d2d8c2f629d8823f335
+msgid "\"Let's analyze this step by step...\""
+msgstr ""
+
+#: ../../user/guide.md e77f5b65b0704c5f92a9b9f6e3765610
+msgid "`empathetic`"
+msgstr ""
+
+#: ../../user/guide.md 98fd101278a043c39dca410990a83da7
+msgid "Shows understanding and care"
+msgstr ""
+
+#: ../../user/guide.md 29341a46bd7a457498697db34ddb4852
+msgid "\"I understand how you feel...\""
+msgstr ""
+
+#: ../../user/guide.md 4760f7a65bd944af9c37af72a445bda4
+msgid "`formal`"
+msgstr ""
+
+#: ../../user/guide.md bd95a0b1dd11445687e2d4c742831c17
+msgid "Professional communication style"
+msgstr ""
+
+#: ../../user/guide.md 99360846c3294636ac7c9bcf5f059298
+msgid "\"I would be pleased to assist you with...\""
+msgstr ""
+
+#: ../../user/guide.md 5a4babca9d874be9bfe5a8b3b7dd9476
+msgid "`creative`"
+msgstr ""
+
+#: ../../user/guide.md 60be71ddd1744a2786201f9d7ecf5586
+msgid "Thinks outside the box"
+msgstr ""
+
+#: ../../user/guide.md f9c3698c39374097b699d978ab307756
+msgid "\"Here's an innovative approach...\""
+msgstr ""
+
+#: ../../user/guide.md bb7d6ea555f643c1ab8d88ef67e47451
+msgid "`cheerful`"
+msgstr ""
+
+#: ../../user/guide.md 755cc48615d54ef1b4c63208c56c807d
+msgid "Positive and upbeat"
+msgstr ""
+
+#: ../../user/guide.md 8177bedc681d44e9b2ad0f8ab6c21f3b
+msgid "\"Great question! I'm happy to help!\""
+msgstr ""
+
+#: ../../user/guide.md 2195de383a8d4c66b060387cd5b1c550
+msgid "`patient`"
+msgstr ""
+
+#: ../../user/guide.md 360f7c9ba6b34edb9e6e4bd05e45f193
+msgid "Takes time to explain thoroughly"
+msgstr ""
+
+#: ../../user/guide.md 7edb1f8a634e48c89aeeaa80ba51d7e5
+msgid "\"Let me explain this in detail...\""
+msgstr ""
+
+#: ../../user/guide.md:148 e48353fa4c684a47a8caf15caec19437
+msgid "Combining Personalities"
+msgstr ""
+
+#: ../../user/guide.md:150 b149518381cd4a08bce5fcd7b104de7d
+msgid "Agents can have multiple personality traits:"
+msgstr ""
+
+#: ../../user/guide.md:152 4ede29985ac7490980d4229f84eae33c
+#, python-brace-format
+msgid ""
+"# Create a friendly teacher\n"
+"teacher = BasicAgent.from_config({\n"
+"    \"name\": \"Ms. Johnson\",\n"
+"    \"llm_provider\": \"openai\",\n"
+"    \"personality_blocks\": [\"patient\", \"cheerful\", "
+"\"knowledgeable\"]\n"
+"})\n"
+"\n"
+"# Create a serious researcher\n"
+"researcher = BasicAgent.from_config({\n"
+"    \"name\": \"Dr. Smith\",\n"
+"    \"llm_provider\": \"anthropic\",\n"
+"    \"personality_blocks\": [\"analytical\", \"formal\", \"logical\"]\n"
+"})\n"
+msgstr ""
+
+#: ../../user/guide.md:168 ecaf1e79a3e24cae9aefbfbb06355866
+msgid "Personality Intensity"
+msgstr ""
+
+#: ../../user/guide.md:170 723893b3ed05402ca2cbce79a243074e
+msgid "Control how strongly traits influence behavior:"
+msgstr ""
+
+#: ../../user/guide.md:172 74b23f304ed2413f9d7c22b1a85033c2
+#, python-brace-format
+msgid ""
+"# Subtle curiosity\n"
+"BasicPersonalityBlock.from_config({\n"
+"    \"name\": \"curious\",\n"
+"    \"intensity\": 0.3  # Occasionally asks questions\n"
+"})\n"
+"\n"
+"# Strong curiosity\n"
+"BasicPersonalityBlock.from_config({\n"
+"    \"name\": \"curious\", \n"
+"    \"intensity\": 0.9  # Frequently asks follow-up questions\n"
+"})\n"
+msgstr ""
+
+#: ../../user/guide.md:186 7b49e49bfc4c478f900a1b15c9ec1358
+msgid "Using Tools"
+msgstr ""
+
+#: ../../user/guide.md:188 2b8364e7553c42b5ac2e4caa818ca7ca
+msgid "Available Tools"
+msgstr ""
+
+#: ../../user/guide.md:190 26a8a619a14c481595f8bdb5e6f8d66d
+msgid "Calculator Tool"
+msgstr ""
+
+#: ../../user/guide.md:192 e1923d94cbcd4bd6a68503511b3be07c
+msgid "For mathematical operations:"
+msgstr ""
+
+#: ../../user/guide.md:194 17b399e587db43d6bcb9c934566392da
+#, python-brace-format, python-format
+msgid ""
+"agent = BasicAgent.from_config({\n"
+"    \"name\": \"MathBot\",\n"
+"    \"llm_provider\": \"openai\",\n"
+"    \"tools\": [\"calculator\"]\n"
+"})\n"
+"\n"
+"response = agent.process_message(\"What's 15% of 2500?\")\n"
+"# Agent will use calculator to compute: 375\n"
+msgstr ""
+
+#: ../../user/guide.md:205 b61ed1cf863e4b35b863a3a79c556964
+msgid "FileSystem Tool"
+msgstr ""
+
+#: ../../user/guide.md:207 2f304ccc97f7435dbbe12002f74978cf
+msgid "For reading and writing files:"
+msgstr ""
+
+#: ../../user/guide.md:209 edbf74b0b3db4ca2adddf50ec2ef90e0
+#, python-brace-format
+msgid ""
+"agent = BasicAgent.from_config({\n"
+"    \"name\": \"FileManager\",\n"
+"    \"llm_provider\": \"openai\",\n"
+"    \"tools\": [\"filesystem\"]\n"
+"})\n"
+"\n"
+"# Agent can now read/write files when needed\n"
+"response = agent.process_message(\n"
+"    \"Save this shopping list to a file: milk, eggs, bread\"\n"
+")\n"
+msgstr ""
+
+#: ../../user/guide.md:222 bc44872e3c244a96b9bdb11ccd5b0928
+msgid "Adding Tools to Existing Agents"
+msgstr ""
+
+#: ../../user/guide.md:224 bcc01dc7fe3a4ffdbefc15fb06026521
+#, python-brace-format
+msgid ""
+"from gathering.core import CalculatorTool\n"
+"\n"
+"# Create agent without tools\n"
+"agent = BasicAgent.from_config({\n"
+"    \"name\": \"Assistant\",\n"
+"    \"llm_provider\": \"openai\"\n"
+"})\n"
+"\n"
+"# Add calculator later\n"
+"calculator = CalculatorTool.from_config({\"name\": \"calculator\"})\n"
+"agent.add_tool(calculator)\n"
+msgstr ""
+
+#: ../../user/guide.md:238 3184ef7595184233824a5f2143870036
+msgid "Tool Permissions"
+msgstr ""
+
+#: ../../user/guide.md:240 3e2a84db41dc4acf974def7566fc6cdb
+msgid "Control what tools can do:"
+msgstr ""
+
+#: ../../user/guide.md:242 32bfc61f30264f40a862430839f4f84a
+#, python-brace-format
+msgid ""
+"from gathering.core import FileSystemTool\n"
+"\n"
+"# Read-only file access\n"
+"readonly_fs = FileSystemTool.from_config({\n"
+"    \"name\": \"filesystem\",\n"
+"    \"permissions\": [\"read\"],  # No write permission\n"
+"    \"base_path\": \"/data\"\n"
+"})\n"
+"\n"
+"# Full access\n"
+"full_fs = FileSystemTool.from_config({\n"
+"    \"name\": \"filesystem\",\n"
+"    \"permissions\": [\"read\", \"write\", \"delete\"],\n"
+"    \"base_path\": \"/workspace\"\n"
+"})\n"
+msgstr ""
+
+#: ../../user/guide.md:260 ebcff0a9f6e145608ea59706f2a6262b
+msgid "Multi-Agent Conversations"
+msgstr ""
+
+#: ../../user/guide.md:262 5ba105f0f42e4baa81dad0372ea82204
+msgid "Creating Conversations"
+msgstr ""
+
+#: ../../user/guide.md:264 afc04595564e4c98835ffc8080edcc05
+msgid "Have multiple agents interact:"
+msgstr ""
+
+#: ../../user/guide.md:266 625036d89bf0434b8c0246d61098405f
+#, python-brace-format
+msgid ""
+"from gathering.core import BasicConversation\n"
+"\n"
+"# Create agents\n"
+"interviewer = BasicAgent.from_config({\n"
+"    \"name\": \"Jane\",\n"
+"    \"llm_provider\": \"openai\",\n"
+"    \"personality_blocks\": [\"curious\", \"formal\"]\n"
+"})\n"
+"\n"
+"expert = BasicAgent.from_config({\n"
+"    \"name\": \"Dr. Expert\",\n"
+"    \"llm_provider\": \"anthropic\",\n"
+"    \"personality_blocks\": [\"knowledgeable\", \"patient\"]\n"
+"})\n"
+"\n"
+"# Start conversation\n"
+"interview = BasicConversation.create([interviewer, expert])\n"
+msgstr ""
+
+#: ../../user/guide.md:286 ccb6371ace6348639590f0d99e4c5e0f
+msgid "Managing Conversation Flow"
+msgstr ""
+
+#: ../../user/guide.md:288 82d109028a074959ac246d82a176ae8a
+#, python-brace-format
+msgid ""
+"# Interviewer asks first question\n"
+"interview.add_message(\n"
+"    interviewer, \n"
+"    \"Dr. Expert, can you explain quantum computing?\"\n"
+")\n"
+"\n"
+"# Get expert's response\n"
+"responses = interview.process_turn()\n"
+"print(f\"{responses[0]['agent'].name}: {responses[0]['content']}\")\n"
+"\n"
+"# Continue the conversation\n"
+"interview.add_message(\n"
+"    interviewer,\n"
+"    \"How does that differ from classical computing?\"\n"
+")\n"
+"responses = interview.process_turn()\n"
+msgstr ""
+
+#: ../../user/guide.md:307 4164134864b8473cae6c78d056bc0d0b
+msgid "Saving Conversations"
+msgstr ""
+
+#: ../../user/guide.md:309 4329e9fa73944cbaa66d5b1d403a3adf
+msgid ""
+"# Save conversation to file\n"
+"interview.save(\"conversations/quantum_interview.json\")\n"
+"\n"
+"# Load it later\n"
+"interview.load(\"conversations/quantum_interview.json\")\n"
+"history = interview.get_history()\n"
+msgstr ""
+
+#: ../../user/guide.md:318 09774a27377448f2b0cb4cf8cd13d22c
+msgid "Best Practices"
+msgstr ""
+
+#: ../../user/guide.md:320 25bf983c333143f4bd6a10042be59ae4
+msgid "1. Choose Appropriate Personalities"
+msgstr ""
+
+#: ../../user/guide.md:322 b8c964ef77ec4f32bdda3527ed49148d
+msgid "Match personality to purpose:"
+msgstr ""
+
+#: ../../user/guide.md:324 62ff6786166d43e4b4876115f60d17bb
+msgid "**Customer Service**: `empathetic`, `patient`, `cheerful`"
+msgstr ""
+
+#: ../../user/guide.md:325 cd1ba0ca3cc045e8bc0a034750d36a4a
+msgid "**Technical Support**: `analytical`, `logical`, `patient`"
+msgstr ""
+
+#: ../../user/guide.md:326 ab2bad9407c74219944eca5415751cfb
+msgid "**Teaching**: `knowledgeable`, `patient`, `encouraging`"
+msgstr ""
+
+#: ../../user/guide.md:327 c6a2d72f81f84bd8820c4c83733f2703
+msgid "**Research**: `analytical`, `curious`, `thorough`"
+msgstr ""
+
+#: ../../user/guide.md:329 9301f6d014494ccd9b40b331615eba92
+msgid "2. Provide Rich Backgrounds"
+msgstr ""
+
+#: ../../user/guide.md:331 69360d04d5264ec2bc4fb81d152c20e4
+msgid "Detailed histories make agents more believable:"
+msgstr ""
+
+#: ../../user/guide.md:333 6e1495251ace47f0aac043fffb6f8892
+msgid ""
+"# Good: Specific and relevant\n"
+"\"20 years as a chef in French restaurants, trained at Le Cordon Bleu, \n"
+"specialized in pastry and desserts\"\n"
+"\n"
+"# Less effective: Too vague\n"
+"\"Experienced cook\"\n"
+msgstr ""
+
+#: ../../user/guide.md:342 b9799e5ca4624b99a869dd11a0dec22d
+msgid "3. Use Tools Wisely"
+msgstr ""
+
+#: ../../user/guide.md:344 e778fa088675462e95edbe0cbab045c2
+msgid "Only add tools the agent actually needs:"
+msgstr ""
+
+#: ../../user/guide.md:346 66f03627ca0f4edc81f8a09d47208dba
+#, python-brace-format
+msgid ""
+"# Financial advisor needs calculator\n"
+"financial_advisor = BasicAgent.from_config({\n"
+"    \"name\": \"MoneyWise\",\n"
+"    \"tools\": [\"calculator\"],\n"
+"    \"competencies\": [\"finance\", \"investment\"]\n"
+"})\n"
+"\n"
+"# Therapist probably doesn't\n"
+"therapist = BasicAgent.from_config({\n"
+"    \"name\": \"Dr. Care\",\n"
+"    \"personality_blocks\": [\"empathetic\", \"patient\"],\n"
+"    \"competencies\": [\"psychology\", \"counseling\"]\n"
+"})\n"
+msgstr ""
+
+#: ../../user/guide.md:362 3e271b862619422b9f40e91d8268efa2
+msgid "4. Memory Management"
+msgstr ""
+
+#: ../../user/guide.md:364 f91d7579317f4ce3a7d5eba50536f98d
+msgid "Agents remember conversation history:"
+msgstr ""
+
+#: ../../user/guide.md:366 f8367daeb4774284a42ed84149c302ca
+msgid ""
+"# First interaction\n"
+"agent.process_message(\"My name is Alice\")\n"
+"\n"
+"# Later in conversation\n"
+"response = agent.process_message(\"What's my name?\")\n"
+"# Agent responds: \"Your name is Alice\"\n"
+msgstr ""
+
+#: ../../user/guide.md:375 740ce22767794d68923a03f78492bc9a
+msgid "5. Error Handling"
+msgstr ""
+
+#: ../../user/guide.md:377 69124819c0ad4140b9cd5cdae0a674e1
+msgid "Always handle potential errors:"
+msgstr ""
+
+#: ../../user/guide.md:379 ddee29711f3e42cd8b50763b43df200e
+#, python-brace-format
+msgid ""
+"from gathering.core.exceptions import ConfigurationError, "
+"LLMProviderError\n"
+"\n"
+"try:\n"
+"    agent = BasicAgent.from_config(config)\n"
+"    response = agent.process_message(\"Hello\")\n"
+"except ConfigurationError as e:\n"
+"    print(f\"Invalid configuration: {e.message}\")\n"
+"except LLMProviderError as e:\n"
+"    print(f\"LLM error: {e.message}\")\n"
+msgstr ""
+
+#: ../../user/guide.md:391 ebf102ae94594fa8bdc515193518a3a1
+msgid "Troubleshooting"
+msgstr ""
+
+#: ../../user/guide.md:393 3a84929e67be4611ae20bbae5a32386a
+msgid "Common Issues"
+msgstr ""
+
+#: ../../user/guide.md:395 416985163e4e49a78542bb670b2cf0e8
+msgid "\"Agent name is required\""
+msgstr ""
+
+#: ../../user/guide.md:397 6f22d8b602e94517b313639ec8ebf517
+#, python-brace-format
+msgid ""
+"# Wrong\n"
+"config = {\"llm_provider\": \"openai\"}\n"
+"\n"
+"# Correct\n"
+"config = {\"name\": \"Assistant\", \"llm_provider\": \"openai\"}\n"
+msgstr ""
+
+#: ../../user/guide.md:405 86920293d55e40bebfdc0461885e1093
+msgid "\"Invalid LLM provider\""
+msgstr ""
+
+#: ../../user/guide.md:407 0599cc361814480c91aa71c3f4566a97
+#, python-brace-format
+msgid ""
+"# Wrong\n"
+"config = {\"name\": \"Bot\", \"llm_provider\": \"gpt\"}\n"
+"\n"
+"# Correct - use exact provider names\n"
+"config = {\"name\": \"Bot\", \"llm_provider\": \"openai\"}\n"
+msgstr ""
+
+#: ../../user/guide.md:415 fcbe6bd9311e48d8b3059d6779e8e5a1
+msgid "\"Write permission denied\""
+msgstr ""
+
+#: ../../user/guide.md:417 d068e4d0f87d423ea67dcb34dbdf6c46
+#, python-brace-format
+msgid ""
+"# Add write permission to filesystem tool\n"
+"fs_tool = FileSystemTool.from_config({\n"
+"    \"name\": \"filesystem\",\n"
+"    \"permissions\": [\"read\", \"write\"]  # Include write\n"
+"})\n"
+msgstr ""
+
+#: ../../user/guide.md:425 6da43c740c32478fbeac9d2a767b9665
+msgid "Performance Tips"
+msgstr ""
+
+#: ../../user/guide.md:427 d5d6439d522546529dd9eb1db7a7044b
+msgid "**Reuse agents** instead of creating new ones:"
+msgstr ""
+
+#: ../../user/guide.md:429 9bc0234c3c284002943270d94a6242be
+msgid ""
+"# Create once\n"
+"agent = BasicAgent.from_config(config)\n"
+"\n"
+"# Use many times\n"
+"for question in questions:\n"
+"    response = agent.process_message(question)\n"
+msgstr ""
+
+#: ../../user/guide.md:438 56f6297d0a33483d8f73e116777ad361
+msgid "**Clear memory** for long conversations:"
+msgstr ""
+
+#: ../../user/guide.md:440 3fdf7cb74f9a4ca985134c2f2aa20a17
+msgid ""
+"# After many messages\n"
+"if len(agent.memory.get_conversation_history()) > 100:\n"
+"    agent.memory.clear()\n"
+msgstr ""
+
+#: ../../user/guide.md:446 b5b1f7110b334202a3166b7e9d0bd3a0
+msgid "**Use appropriate models**:"
+msgstr ""
+
+#: ../../user/guide.md:447 a17987f1c91c48dc972ce4393fc1e602
+msgid "Fast responses: Use smaller models"
+msgstr ""
+
+#: ../../user/guide.md:448 8cd96ecce51a4bad8bfcd54a2b58470f
+msgid "Complex tasks: Use larger models"
+msgstr ""
+
+#: ../../user/guide.md:450 2aed1197a0bd453bb38f9d175b03eadb
+msgid "Getting Help"
+msgstr ""
+
+#: ../../user/guide.md:452 6ab068ad71ed434196b29ed6bd34b169
+msgid "Check the [API Reference](api_reference.md)"
+msgstr ""
+
+#: ../../user/guide.md:453 0b70136b964a4954b448d1cf42dc3771
+msgid "Review example code in `examples/`"
+msgstr ""
+
+#: ../../user/guide.md:454 d3b4233349884c26a38acd7523f06ab9
+msgid "Run tests to verify setup: `pytest`"
+msgstr ""
+
+#: ../../user/guide.md:455 2e4b746f121341a993e8ca59357c93ad
+msgid "Check logs for detailed error messages"
+msgstr ""
+
+#: ../../user/guide.md:457 a9b0f45150844346a49bf80a040abb26
+msgid "Next Steps"
+msgstr ""
+
+#: ../../user/guide.md:459 a17617b20a304da8b2ff8885772139ca
+msgid "Now that you understand the basics:"
+msgstr ""
+
+#: ../../user/guide.md:461 a365750104674cbeb5ba8a52a809b1b8
+msgid "Explore advanced personality combinations"
+msgstr ""
+
+#: ../../user/guide.md:462 898ee72260fe42d59a89ffc8e59085d4
+msgid "Create custom tools for your use case"
+msgstr ""
+
+#: ../../user/guide.md:463 a5e6a58510134ee0a649c1178c362131
+msgid "Build multi-agent systems for complex tasks"
+msgstr ""
+
+#: ../../user/guide.md:464 55ed0842df5244499de7938a0d617385
+msgid "Integrate with your applications"
+msgstr ""
+
+#: ../../user/guide.md:466 002eb7497c294d74bbeb1ae5e2fd63ff
+msgid "Happy agent building! 🤖✨"
+msgstr ""
+

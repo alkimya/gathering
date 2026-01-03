@@ -1,0 +1,52 @@
+{
+  "title": "Cercles",
+  "subtitle": "Gérer les équipes d'agents et les espaces de collaboration",
+  "createCircle": "Créer un cercle",
+  "editCircle": "Modifier le cercle",
+  "deleteCircle": "Supprimer le cercle",
+  "circleDetails": "Détails du cercle",
+  "status": {
+    "running": "En cours",
+    "stopped": "Arrêté",
+    "starting": "Démarrage",
+    "stopping": "Arrêt"
+  },
+  "fields": {
+    "name": "Nom",
+    "description": "Description",
+    "requireReview": "Révision requise",
+    "autoRoute": "Routage automatique",
+    "minReviewers": "Réviseurs minimum"
+  },
+  "actions": {
+    "start": "Démarrer",
+    "stop": "Arrêter",
+    "addAgent": "Ajouter un agent",
+    "removeAgent": "Retirer l'agent",
+    "createTask": "Créer une tâche"
+  },
+  "tabs": {
+    "overview": "Vue d'ensemble",
+    "agents": "Agents",
+    "tasks": "Tâches",
+    "conversations": "Conversations",
+    "settings": "Paramètres"
+  },
+  "stats": {
+    "totalCircles": "Total des cercles",
+    "activeCircles": "Cercles actifs",
+    "totalMembers": "Total des membres",
+    "activeTasks": "Tâches actives"
+  },
+  "empty": {
+    "title": "Aucun cercle",
+    "description": "Créez un cercle pour organiser vos agents en équipes."
+  },
+  "tasks": {
+    "pending": "En attente",
+    "inProgress": "En cours",
+    "inReview": "En révision",
+    "completed": "Terminé",
+    "failed": "Échoué"
+  }
+}

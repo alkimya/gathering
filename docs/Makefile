@@ -1,37 +1,65 @@
-# Makefile for Sphinx documentation
-#
+# Makefile for Sphinx documentation with i18n support
 
-# You can set these variables from the command line, and also
-# from the environment for the first two.
+# You can set these variables from the command line.
 SPHINXOPTS    ?=
 SPHINXBUILD   ?= sphinx-build
+SPHINXINTL    ?= sphinx-intl
 SOURCEDIR     = .
 BUILDDIR      = _build
+LOCALEDIR     = locale
 
-# Put it first so that "make" without argument is like "make help".
+# Default language
+LANG          ?= fr
+
+.PHONY: help clean html gettext update-po build-fr build-all
+
 help:
-	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
-
-.PHONY: help Makefile
-
-# Catch-all target: route all unknown targets to Sphinx using the new
-# "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
-%: Makefile
-	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
-
-# Custom targets
-.PHONY: clean livehtml apidoc
+	@echo "GatheRing Documentation Build Commands"
+	@echo "======================================="
+	@echo ""
+	@echo "  make html       - Build HTML documentation (English)"
+	@echo "  make gettext    - Extract translatable strings to .pot files"
+	@echo "  make update-po  - Update .po files from .pot files"
+	@echo "  make build-fr   - Build French documentation"
+	@echo "  make build-all  - Build documentation for all languages"
+	@echo "  make clean      - Remove build directory"
+	@echo ""
+	@echo "Translation Workflow:"
+	@echo "  1. make gettext   - Extract strings"
+	@echo "  2. make update-po - Create/update .po files"
+	@echo "  3. Edit locale/fr/LC_MESSAGES/*.po files"
+	@echo "  4. make build-fr  - Build translated docs"
+	@echo ""
 
 clean:
-	rm -rf $(BUILDDIR)/*
-	rm -rf api/generated
+	rm -rf $(BUILDDIR)
 
-livehtml:
-	sphinx-autobuild -b html $(SOURCEDIR) $(BUILDDIR)/html
+html:
+	$(SPHINXBUILD) -b html $(SOURCEDIR) $(BUILDDIR)/html $(SPHINXOPTS)
+	@echo ""
+	@echo "Build finished. Open $(BUILDDIR)/html/index.html"
 
-apidoc:
-	sphinx-apidoc -f -o api/generated ../gathering
+# Extract translatable strings to .pot files
+gettext:
+	$(SPHINXBUILD) -b gettext $(SOURCEDIR) $(BUILDDIR)/gettext $(SPHINXOPTS)
+	@echo ""
+	@echo "Gettext catalog files generated in $(BUILDDIR)/gettext/"
 
-# Build all documentation formats
-.PHONY: all
-all: clean html latexpdf man
+# Update .po files from .pot files
+update-po:
+	$(SPHINXINTL) update -p $(BUILDDIR)/gettext -l $(LANG)
+	@echo ""
+	@echo "Translation files updated in $(LOCALEDIR)/$(LANG)/LC_MESSAGES/"
+
+# Build French documentation
+build-fr:
+	$(SPHINXBUILD) -b html -D language=fr $(SOURCEDIR) $(BUILDDIR)/html/fr $(SPHINXOPTS)
+	@echo ""
+	@echo "French documentation built. Open $(BUILDDIR)/html/fr/index.html"
+
+# Build all languages
+build-all: html build-fr
+	@echo ""
+	@echo "All documentation built:"
+	@echo "  - English: $(BUILDDIR)/html/index.html"
+	@echo "  - French:  $(BUILDDIR)/html/fr/index.html"

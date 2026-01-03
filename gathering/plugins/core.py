@@ -141,7 +141,7 @@ class CorePlugin(Plugin):
             version="1.0.0",
             description="Essential tools for GatheRing: calculator, file system, git",
             author="GatheRing Team",
-            author_email="gathering.ai@pm.me",
+            author_email="loc.cosnier@pm.me",
             license="MIT",
             homepage="https://github.com/alkimya/gathering",
             tags=["core", "filesystem", "git", "calculator", "shell"],

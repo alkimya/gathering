@@ -176,25 +176,26 @@ async def read_file_raw(
         try:
             full_path = full_path.resolve()
             project_path_resolved = Path(project_path).resolve()
-            if not str(full_path).startswith(str(project_path_resolved)):
-                raise HTTPException(status_code=403, detail="Access denied")
+            # Use relative_to() which raises ValueError if path is outside project
+            try:
+                full_path.relative_to(project_path_resolved)
+            except ValueError:
+                raise HTTPException(status_code=403, detail="Access denied: path outside project")
         except HTTPException:
             raise
         except Exception as e:
             # Log the actual error for debugging
-            import logging
-            logging.error(f"Path resolution error: {e}, path={path}")
+            logger.error(f"Path resolution error: {e}, path={path}")
             raise HTTPException(status_code=403, detail=f"Invalid path: {str(e)}")
 
         # Check if file exists
         if not full_path.exists():
             # Try to find the file with similar name (handle encoding issues)
-            import logging
-            logging.warning(f"File not found: {full_path}, trying to list directory")
+            logger.warning(f"File not found: {full_path}, trying to list directory")
             parent = full_path.parent
             if parent.exists():
                 similar = list(parent.glob(f"*{full_path.stem}*{full_path.suffix}"))
-                logging.warning(f"Similar files: {similar}")
+                logger.warning(f"Similar files: {similar}")
             raise HTTPException(status_code=404, detail=f"File not found: {path}")
 
         if not full_path.is_file():

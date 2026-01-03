@@ -32,6 +32,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { useWebSocket } from '../hooks/useWebSocket';
+import { LanguageSwitcher } from './LanguageSwitcher';
 
 interface NavItem {
   path: string;
@@ -144,6 +145,14 @@ export function Layout() {
 
   return (
     <div className="flex h-screen bg-mesh overflow-hidden">
+      {/* Skip link for keyboard navigation */}
+      <a
+        href="#main-content"
+        className="skip-link"
+      >
+        Skip to main content
+      </a>
+
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div
@@ -157,8 +166,8 @@ export function Layout() {
         className={`
           fixed inset-y-0 left-0 z-30 w-72 sidebar
           transform transition-transform duration-300 ease-out
-          lg:translate-x-0 lg:static lg:inset-auto
-          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+          lg:static lg:inset-auto
         `}
       >
         {/* Logo */}
@@ -318,6 +327,9 @@ export function Layout() {
               <span className="absolute top-1 right-1 w-2 h-2 bg-pink-500 rounded-full animate-pulse" />
             </Link>
 
+            {/* Language switcher */}
+            <LanguageSwitcher />
+
             {/* Connection status */}
             <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 glass-card rounded-full">
               <div className="w-2 h-2 rounded-full bg-emerald-400" />
@@ -332,7 +344,7 @@ export function Layout() {
         </header>
 
         {/* Page content */}
-        <main className="flex-1 overflow-auto p-6">
+        <main id="main-content" className="flex-1 overflow-auto p-6" tabIndex={-1}>
           <Outlet />
         </main>
       </div>
