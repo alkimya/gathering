@@ -664,10 +664,14 @@ CREATE TABLE communication.conversations (
 
     -- Definition
     topic VARCHAR(500),
+    conversation_type VARCHAR(50) DEFAULT 'collaboration',
     participant_agent_ids BIGINT[] DEFAULT '{}',
+    participant_names TEXT[] DEFAULT '{}',
+    initial_prompt TEXT,
 
     -- Turn management
     current_turn INTEGER DEFAULT 0,
+    turns_taken INTEGER DEFAULT 0,
     max_turns INTEGER DEFAULT 50,
     turn_strategy VARCHAR(50) DEFAULT 'round_robin',  -- round_robin, mention_based, free_form
 
@@ -676,8 +680,13 @@ CREATE TABLE communication.conversations (
 
     -- Status
     status public.conversation_status DEFAULT 'pending',
+    is_active BOOLEAN DEFAULT TRUE,
+
+    -- Summary
+    summary TEXT,
 
     started_at TIMESTAMPTZ,
+    completed_at TIMESTAMPTZ,
     ended_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -694,6 +703,7 @@ CREATE TABLE communication.messages (
 
     -- Sender
     agent_id BIGINT REFERENCES agent.agents(id) ON DELETE SET NULL,
+    agent_name VARCHAR(200),  -- Denormalized for performance
     role public.message_role NOT NULL,
 
     -- Content
