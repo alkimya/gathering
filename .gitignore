@@ -40,6 +40,7 @@ config/secrets.py
 .env
 .env.local
 docs/archive/
+personas/
 
 # Documentation
 docs/_build/
