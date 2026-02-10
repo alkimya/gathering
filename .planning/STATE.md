@@ -12,7 +12,7 @@ See: .planning/PROJECT.md (updated 2026-02-10)
 Phase: 4 of 5 (Performance Optimization)
 Plan: 3 of 3 in current phase (COMPLETE)
 Status: Phase 04 complete
-Last activity: 2026-02-11 -- Completed 04-02 (Rate Limiting & Cache Bounding)
+Last activity: 2026-02-11 -- Completed 04-01 (Async DB Service & N+1 Query Elimination)
 
 Progress: [█████████░] 96%
 
@@ -84,6 +84,10 @@ Recent decisions affecting current work:
 - [03-03]: Lazy import patching: patch at source module path for deferred imports in dispatcher functions
 - [03-03]: MockSkill concrete subclass avoids loading real skill modules for SkillRegistry validation testing
 - [03-03]: Workspace path cache cleared per-test for isolation since module-level TTL dict persists between tests
+- [04-01]: AsyncDatabaseService uses pycopg AsyncPooledDatabase with min_size=4, max_size=20 for web concurrency
+- [04-01]: Async pool lifecycle wired into FastAPI lifespan: startup after scheduler, shutdown before scheduler
+- [04-01]: get_circle_members_full() single JOIN replaces 2N+1 per-member get_agent() + skill_names queries
+- [04-01]: Existing sync DatabaseService preserved for CLI/migrations; AsyncDatabaseService is for async route handlers
 - [04-02]: slowapi with in-memory backend by default; Redis backend opt-in via REDIS_URL env var
 - [04-02]: Per-endpoint rate limit decorators are opt-in; default_limits apply globally to all endpoints
 - [04-02]: BoundedLRUDict inherits OrderedDict for drop-in compatibility with existing cache patterns
@@ -106,5 +110,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-11
-Stopped at: Completed 04-02-PLAN.md (Phase 04 complete)
-Resume file: .planning/phases/04-performance-optimization/04-02-SUMMARY.md
+Stopped at: Completed 04-01-PLAN.md (Phase 04 complete)
+Resume file: .planning/phases/04-performance-optimization/04-01-SUMMARY.md
