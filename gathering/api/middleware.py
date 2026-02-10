@@ -162,7 +162,13 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
     Limits requests per IP address based on configuration.
     Uses a sliding window approach.
+
+    .. deprecated::
+        Replaced by slowapi in gathering/api/rate_limit.py.
+        This class is kept for backward compatibility but is no longer
+        added to the application in create_app().
     """
+    # DEPRECATED: Replaced by slowapi in gathering/api/rate_limit.py
 
     def __init__(self, app, requests_per_minute: int = 60):
         super().__init__(app)
