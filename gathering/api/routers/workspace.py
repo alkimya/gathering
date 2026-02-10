@@ -43,10 +43,77 @@ router = APIRouter(prefix="/workspace", tags=["workspace"])
 # ============================================================================
 
 
+_project_path_cache: dict[int, tuple[str, float]] = {}
+_CACHE_TTL = 300  # 5 minutes
+
+
 def get_project_path(project_id: int) -> str:
-    """Get project path. For now, returns the current workspace."""
-    # TODO: Integrate with project database when available
-    # For demo purposes, use the current workspace
+    """Resolve project workspace path.
+
+    Resolution order:
+    1. Database: project.projects.repository_path for this project_id
+    2. Environment: WORKSPACE_ROOT / project subdirectory (or WORKSPACE_ROOT itself)
+    3. Fallback: current working directory (with deprecation warning)
+
+    Results are cached for 5 minutes to avoid repeated DB queries.
+    """
+    import time
+
+    # Check cache first
+    now = time.monotonic()
+    cached = _project_path_cache.get(project_id)
+    if cached is not None:
+        path, expires = cached
+        if now < expires:
+            return path
+
+    resolved = _resolve_project_path(project_id)
+
+    # Cache the result
+    _project_path_cache[project_id] = (resolved, now + _CACHE_TTL)
+    return resolved
+
+
+def _resolve_project_path(project_id: int) -> str:
+    """Internal: resolve project path without caching."""
+    # Strategy 1: Database lookup (repository_path column in project.projects)
+    try:
+        from gathering.api.dependencies import get_database_service
+        db = get_database_service()
+        if db:
+            row = db.execute_one(
+                "SELECT repository_path FROM project.projects WHERE id = %(id)s",
+                {"id": project_id},
+            )
+            if row and row.get("repository_path"):
+                path = row["repository_path"]
+                if os.path.isdir(path):
+                    return path
+                logger.warning(
+                    "Project %d repository_path '%s' does not exist on disk",
+                    project_id,
+                    path,
+                )
+    except Exception as e:
+        logger.debug("DB lookup for project path failed: %s", e)
+
+    # Strategy 2: WORKSPACE_ROOT env var
+    workspace_root = os.environ.get("WORKSPACE_ROOT")
+    if workspace_root:
+        # Try project-specific subdirectory first
+        project_dir = os.path.join(workspace_root, str(project_id))
+        if os.path.isdir(project_dir):
+            return project_dir
+        # Fall back to workspace root itself
+        if os.path.isdir(workspace_root):
+            return workspace_root
+
+    # Strategy 3: Fallback to cwd with deprecation warning
+    logger.warning(
+        "Project %d: no repository_path in DB and WORKSPACE_ROOT not set, "
+        "falling back to cwd. Set WORKSPACE_ROOT env var or update project config.",
+        project_id,
+    )
     return os.getcwd()
 
 
