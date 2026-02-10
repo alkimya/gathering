@@ -12,7 +12,7 @@ GatheRing has a sound architecture with 1071 tests but critical production gaps:
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Auth + Security Foundation** - Persistent auth, SQL injection elimination, security hardening, DB layer consolidation
+- [x] **Phase 1: Auth + Security Foundation** - Persistent auth, SQL injection elimination, security hardening, DB layer consolidation
 - [ ] **Phase 2: Pipeline Execution Engine** - DAG traversal, node execution, validation, error recovery, cancellation
 - [ ] **Phase 3: Schedule Execution + Tool Hardening** - Action dispatch, crash recovery, tool validation, async tools, workspace paths
 - [ ] **Phase 4: Performance Optimization** - Async DB, N+1 elimination, rate limiting, event batching, cache bounds
@@ -33,9 +33,9 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans:** 3 plans
 
 Plans:
-- [ ] 01-01-PLAN.md -- Foundation: library swaps (PyJWT, bcrypt), exception classes, structlog config, auth migration SQL
-- [ ] 01-02-PLAN.md -- Auth persistence: DB-backed users and token blacklist, constant-time auth, audit event logging
-- [ ] 01-03-PLAN.md -- Security hardening: safe_update_builder, path traversal defense, bare exception fixes, comprehensive tests
+- [x] 01-01-PLAN.md -- Foundation: library swaps (PyJWT, bcrypt), exception classes, structlog config, auth migration SQL
+- [x] 01-02-PLAN.md -- Auth persistence: DB-backed users and token blacklist, constant-time auth, audit event logging
+- [x] 01-03-PLAN.md -- Security hardening: safe_update_builder, path traversal defense, bare exception fixes, comprehensive tests
 
 ### Phase 2: Pipeline Execution Engine
 **Goal**: Pipelines execute real work -- DAG traversal runs agent tasks, conditions gate execution, errors recover or fail cleanly, and runs are cancellable
@@ -106,7 +106,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Auth + Security Foundation | 0/3 | Planned | - |
+| 1. Auth + Security Foundation | 3/3 | ✓ Complete | 2026-02-10 |
 | 2. Pipeline Execution Engine | 0/3 | Not started | - |
 | 3. Schedule Execution + Tool Hardening | 0/3 | Not started | - |
 | 4. Performance Optimization | 0/3 | Not started | - |
