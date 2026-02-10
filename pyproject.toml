@@ -48,14 +48,14 @@ openai = "^1.0"
 httpx = "^0.26"
 # Utilities
 structlog = "^24.0"
+asgi-correlation-id = ">=4.0"
 tenacity = "^8.2"
 aiofiles = "^23.0"
 python-multipart = "^0.0.9"
 croniter = "^2.0"
 # Auth
-python-jose = {extras = ["cryptography"], version = "^3.3"}
-passlib = {extras = ["bcrypt"], version = "^1.7"}
-bcrypt = ">=4.0.0,<4.1.0"  # Pinned for passlib compatibility
+PyJWT = {extras = ["crypto"], version = ">=2.9"}
+bcrypt = ">=4.0.0"
 # Monitoring
 psutil = "^5.9"
 

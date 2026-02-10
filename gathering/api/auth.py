@@ -8,10 +8,11 @@ import secrets
 from datetime import datetime, timedelta, timezone
 from typing import Optional, Annotated
 
+import bcrypt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from jose import JWTError, jwt
-from passlib.context import CryptContext
+import jwt
+from jwt.exceptions import PyJWTError
 from pydantic import BaseModel, EmailStr, Field
 
 from gathering.core.config import get_settings
@@ -20,9 +21,6 @@ from gathering.core.config import get_settings
 # =============================================================================
 # Configuration
 # =============================================================================
-
-# Password hashing context
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # OAuth2 scheme for token extraction
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login", auto_error=False)
@@ -92,12 +90,18 @@ class AdminUser(BaseModel):
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify a password against its hash."""
-    return pwd_context.verify(plain_password, hashed_password)
+    return bcrypt.checkpw(
+        plain_password.encode("utf-8"),
+        hashed_password.encode("utf-8"),
+    )
 
 
 def get_password_hash(password: str) -> str:
-    """Hash a password."""
-    return pwd_context.hash(password)
+    """Hash a password using bcrypt."""
+    return bcrypt.hashpw(
+        password.encode("utf-8"),
+        bcrypt.gensalt(),
+    ).decode("utf-8")
 
 
 # =============================================================================
@@ -166,7 +170,7 @@ def decode_token(token: str, check_blacklist: bool = True) -> Optional[TokenData
             role=payload.get("role", "user"),
             exp=datetime.fromtimestamp(payload.get("exp"), tz=timezone.utc) if payload.get("exp") else None
         )
-    except JWTError:
+    except PyJWTError:
         return None
 
 
@@ -229,7 +233,7 @@ def blacklist_token(token: str) -> bool:
             _cleanup_blacklist()
 
         return True
-    except JWTError:
+    except PyJWTError:
         return False
 
 
@@ -282,7 +286,7 @@ def get_admin_from_env() -> Optional[AdminUser]:
         ADMIN_PASSWORD_HASH: Bcrypt hash of admin password
 
     To generate a password hash:
-        python -c "from passlib.context import CryptContext; print(CryptContext(schemes=['bcrypt']).hash('your-password'))"
+        python -c "import bcrypt; print(bcrypt.hashpw(b'your-password', bcrypt.gensalt()).decode())"
     """
     admin_email = os.getenv("ADMIN_EMAIL")
     admin_password_hash = os.getenv("ADMIN_PASSWORD_HASH")
