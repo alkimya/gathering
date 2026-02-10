@@ -29,9 +29,11 @@ from gathering.api.routers import (
     plugins_router,
     tools_router,
 )
+from slowapi.errors import RateLimitExceeded
+from slowapi import _rate_limit_exceeded_handler
+
 from gathering.api.middleware import (
     AuthenticationMiddleware,
-    RateLimitMiddleware,
     RequestLoggingMiddleware,
     SecurityHeadersMiddleware,
 )
@@ -93,10 +95,28 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         print(f"Warning: Could not start scheduler: {e}")
 
+    # Initialize async database pool
+    try:
+        from gathering.api.async_db import AsyncDatabaseService
+        async_db = AsyncDatabaseService.get_instance()
+        await async_db.startup()
+        print("Async database pool opened")
+    except Exception as e:
+        print(f"Warning: Could not initialize async database pool: {e}")
+
     yield
 
     # Shutdown
     print("GatheRing API shutting down...")
+
+    # Close async database pool
+    try:
+        from gathering.api.async_db import AsyncDatabaseService
+        if AsyncDatabaseService._instance is not None:
+            await AsyncDatabaseService.get_instance().shutdown()
+            print("Async database pool closed")
+    except Exception as e:
+        print(f"Warning: Error during async database pool shutdown: {e}")
 
     # Stop the scheduler
     try:
@@ -186,13 +206,11 @@ def create_app(
     if enable_logging:
         app.add_middleware(RequestLoggingMiddleware)
 
-    # Rate limiting (before auth to protect against brute force)
+    # Rate limiting via slowapi (per-endpoint decorators)
     if enable_rate_limit:
-        settings = get_settings()
-        app.add_middleware(
-            RateLimitMiddleware,
-            requests_per_minute=settings.rate_limit_per_minute,
-        )
+        from gathering.api.rate_limit import limiter
+        app.state.limiter = limiter
+        app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
     # Authentication (protects all non-public endpoints)
     if enable_auth:
