@@ -10,28 +10,28 @@ See: .planning/PROJECT.md (updated 2026-02-10)
 ## Current Position
 
 Phase: 1 of 5 (Auth + Security Foundation)
-Plan: 1 of 3 in current phase
+Plan: 2 of 3 in current phase
 Status: Executing phase
-Last activity: 2026-02-10 -- Completed 01-01 (Auth Foundation)
+Last activity: 2026-02-10 -- Completed 01-02 (Auth Persistence)
 
-Progress: [█░░░░░░░░░] 7%
+Progress: [██░░░░░░░░] 13%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 1
-- Average duration: 4min
-- Total execution time: 0.07 hours
+- Total plans completed: 2
+- Average duration: 6min
+- Total execution time: 0.20 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01-auth-security-foundation | 1/3 | 4min | 4min |
+| 01-auth-security-foundation | 2/3 | 12min | 6min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (4min)
-- Trend: Starting
+- Last 5 plans: 01-01 (4min), 01-02 (8min)
+- Trend: Ramping up
 
 *Updated after each plan completion*
 
@@ -50,6 +50,10 @@ Recent decisions affecting current work:
 - [01-01]: Direct bcrypt replaces passlib CryptContext (eliminates wrapper dependency)
 - [01-01]: bcrypt upper bound unpinned to >=4.0.0 (passlib constraint no longer needed)
 - [01-01]: structlog JSON in production, console in debug; correlation ID middleware runs first
+- [01-02]: TokenBlacklist uses write-through pattern (LRU cache + PostgreSQL) for persistence with performance
+- [01-02]: Auth functions accept optional db parameter for dependency injection and testability
+- [01-02]: Audit logging silently catches exceptions to never block auth operations
+- [01-02]: Tests use mock DatabaseService to avoid test-env DB password dependency
 
 ### Pending Todos
 
@@ -64,5 +68,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-10
-Stopped at: Completed 01-01-PLAN.md (Auth Foundation)
-Resume file: .planning/phases/01-auth-security-foundation/01-01-SUMMARY.md
+Stopped at: Completed 01-02-PLAN.md (Auth Persistence)
+Resume file: .planning/phases/01-auth-security-foundation/01-02-SUMMARY.md
