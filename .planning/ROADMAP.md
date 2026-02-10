@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Auth + Security Foundation** - Persistent auth, SQL injection elimination, security hardening, DB layer consolidation
 - [x] **Phase 2: Pipeline Execution Engine** - DAG traversal, node execution, validation, error recovery, cancellation
-- [ ] **Phase 3: Schedule Execution + Tool Hardening** - Action dispatch, crash recovery, tool validation, async tools, workspace paths
+- [x] **Phase 3: Schedule Execution + Tool Hardening** - Action dispatch, crash recovery, tool validation, async tools, workspace paths
 - [ ] **Phase 4: Performance Optimization** - Async DB, N+1 elimination, rate limiting, event batching, cache bounds
 - [ ] **Phase 5: Multi-Instance + Production Hardening** - Distributed coordination, graceful shutdown
 
@@ -66,9 +66,9 @@ Plans:
 **Plans:** 3 plans
 
 Plans:
-- [ ] 03-01-PLAN.md -- Scheduler action dispatchers (run_task, execute_pipeline, send_notification, call_api) and crash recovery with deduplication
-- [ ] 03-02-PLAN.md -- Tool hardening: JSON Schema validation in both registries, async tool execution, workspace path fix
-- [ ] 03-03-PLAN.md -- Comprehensive tests: scheduler recovery, tool validation, async execution, workspace resolution
+- [x] 03-01-PLAN.md -- Scheduler action dispatchers (run_task, execute_pipeline, send_notification, call_api) and crash recovery with deduplication
+- [x] 03-02-PLAN.md -- Tool hardening: JSON Schema validation in both registries, async tool execution, workspace path fix
+- [x] 03-03-PLAN.md -- Comprehensive tests: scheduler recovery, tool validation, async execution, workspace resolution
 
 ### Phase 4: Performance Optimization
 **Goal**: Database access is non-blocking, query patterns are efficient, API endpoints enforce rate limits, and in-memory stores are bounded
@@ -108,6 +108,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 |-------|----------------|--------|-----------|
 | 1. Auth + Security Foundation | 3/3 | ✓ Complete | 2026-02-10 |
 | 2. Pipeline Execution Engine | 3/3 | ✓ Complete | 2026-02-10 |
-| 3. Schedule Execution + Tool Hardening | 0/3 | Not started | - |
+| 3. Schedule Execution + Tool Hardening | 3/3 | ✓ Complete | 2026-02-10 |
 | 4. Performance Optimization | 0/3 | Not started | - |
 | 5. Multi-Instance + Production Hardening | 0/1 | Not started | - |
