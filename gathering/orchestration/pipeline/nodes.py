@@ -176,13 +176,20 @@ async def _handle_action(
     inputs: dict[str, Any],
     context: dict,
 ) -> dict:
-    """Action node: log and return action metadata.
+    """Action node: dispatch real actions via skill execution.
 
-    Real action dispatch will be extended in Phase 3.
+    Supports action types:
+    - send_notification: dispatches via NotificationsSkill
+    - call_api: dispatches via HTTPSkill
+    - execute_pipeline: raises NodeConfigError (nested pipelines not supported)
+    - unknown types: graceful degradation with warning log
+
+    Retryable failures raise NodeExecutionError (triggers tenacity retry).
+    Config errors raise NodeConfigError (no retry).
     """
     action_type = node.config.get("action", "unknown")
 
-    # Summarize inputs (truncate large values)
+    # Summarize inputs for logging (truncate large values)
     summarized_inputs = {}
     for k, v in inputs.items():
         s = str(v)
@@ -194,11 +201,93 @@ async def _handle_action(
         action_type,
     )
 
+    # Build tool_input from node config, merging any upstream inputs
+    tool_input = dict(node.config)
+    tool_input.pop("action", None)  # Remove the action type key itself
+
+    # Dispatch based on action type
+    if action_type == "send_notification":
+        result = await _dispatch_action_notification(node, tool_input, context)
+    elif action_type == "call_api":
+        result = await _dispatch_action_api(node, tool_input, context)
+    elif action_type == "execute_pipeline":
+        raise NodeConfigError(
+            f"Nested pipeline execution not supported from action node '{node.id}'"
+        )
+    else:
+        # Unknown action type -- graceful degradation (matching Phase 2 pattern)
+        logger.warning(
+            "Action node '%s': unknown action type '%s', returning metadata only",
+            node.id,
+            action_type,
+        )
+        result = {"inputs": summarized_inputs}
+
+    # Merge with backward-compatible output keys
     return {
         "action": action_type,
         "executed": True,
-        "inputs": summarized_inputs,
+        **result,
     }
+
+
+async def _dispatch_action_notification(
+    node: PipelineNode,
+    tool_input: dict[str, Any],
+    context: dict,
+) -> dict:
+    """Dispatch notification from an action node via NotificationsSkill."""
+    try:
+        from gathering.skills.notifications.sender import NotificationsSkill
+    except ImportError:
+        logger.warning(
+            "NotificationsSkill not available for action node '%s'", node.id
+        )
+        return {"error": "NotificationsSkill not loadable"}
+
+    try:
+        skill = NotificationsSkill(config=tool_input.get("skill_config"))
+        tool_name = tool_input.get("tool_name", "notify_webhook")
+        result = skill.execute(tool_name, tool_input)
+        if hasattr(result, "success"):
+            return {"success": result.success, "message": result.message}
+        return {"result": str(result)}
+    except Exception as e:
+        raise NodeExecutionError(
+            f"Notification dispatch failed in node '{node.id}': {e}"
+        ) from e
+
+
+async def _dispatch_action_api(
+    node: PipelineNode,
+    tool_input: dict[str, Any],
+    context: dict,
+) -> dict:
+    """Dispatch API call from an action node via HTTPSkill."""
+    try:
+        from gathering.skills.http.client import HTTPSkill
+    except ImportError:
+        logger.warning(
+            "HTTPSkill not available for action node '%s'", node.id
+        )
+        return {"error": "HTTPSkill not loadable"}
+
+    if not tool_input.get("url"):
+        raise NodeConfigError(
+            f"Action node '{node.id}' with action 'call_api' missing 'url' in config"
+        )
+
+    try:
+        skill = HTTPSkill()
+        tool_name = tool_input.get("tool_name", "http_get")
+        result = skill.execute(tool_name, tool_input)
+        if isinstance(result, dict):
+            return result
+        return {"result": str(result)}
+    except Exception as e:
+        raise NodeExecutionError(
+            f"API call failed in node '{node.id}': {e}"
+        ) from e
 
 
 async def _handle_parallel(
