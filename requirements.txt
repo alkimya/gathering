@@ -87,6 +87,9 @@ aiofiles>=23.0,<25.0
 # Scheduling
 croniter>=2.0,<3.0
 
+# JSON Schema validation
+jsonschema>=4.20,<5.0
+
 # Redis cache
 redis>=5.0,<6.0
 

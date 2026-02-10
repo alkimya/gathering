@@ -7,6 +7,12 @@ from typing import Dict, Type, Optional, List, Any
 import importlib
 import logging
 
+try:
+    import jsonschema
+    _HAS_JSONSCHEMA = True
+except ImportError:
+    _HAS_JSONSCHEMA = False
+
 from gathering.skills.base import BaseSkill, SkillPermission
 
 logger = logging.getLogger(__name__)
@@ -256,6 +262,69 @@ class SkillRegistry:
         return tools
 
     @classmethod
+    def _find_skill_for_tool(
+        cls,
+        tool_name: str,
+        skill_name: Optional[str] = None,
+    ) -> Optional[str]:
+        """Find the skill that provides a given tool.
+
+        Args:
+            tool_name: Name of the tool to find.
+            skill_name: Pre-specified skill name (returned as-is if provided).
+
+        Returns:
+            Skill name, or None if not found.
+        """
+        if skill_name is not None:
+            return skill_name
+
+        for name in cls.list_skills():
+            try:
+                skill = cls.get(name)
+                if skill.has_tool(tool_name):
+                    return name
+            except ValueError:
+                continue
+        return None
+
+    @classmethod
+    def _validate_tool_input(
+        cls,
+        tool_name: str,
+        tool_input: Dict[str, Any],
+        skill: BaseSkill,
+    ) -> Optional["SkillResponse"]:
+        """Validate tool_input against the tool's input_schema.
+
+        Returns a SkillResponse on validation failure, or None if valid.
+        """
+        if not _HAS_JSONSCHEMA:
+            logger.debug("jsonschema not installed, skipping validation for '%s'", tool_name)
+            return None
+
+        try:
+            tool_defs = skill.get_tools_definition()
+            tool_def = next((t for t in tool_defs if t["name"] == tool_name), None)
+            if tool_def and tool_def.get("input_schema"):
+                jsonschema.validate(instance=tool_input, schema=tool_def["input_schema"])
+        except jsonschema.ValidationError as e:
+            from gathering.skills.base import SkillResponse
+            path_str = ".".join(str(p) for p in e.absolute_path) if e.absolute_path else "(root)"
+            return SkillResponse(
+                success=False,
+                message=f"Invalid parameters for tool '{tool_name}': {e.message} (at {path_str})",
+                error="validation_error",
+            )
+        except jsonschema.SchemaError as exc:
+            logger.warning(
+                "Malformed input_schema for tool '%s': %s -- skipping validation",
+                tool_name,
+                exc.message,
+            )
+        return None
+
+    @classmethod
     def execute_tool(
         cls,
         tool_name: str,
@@ -266,6 +335,9 @@ class SkillRegistry:
         """
         Execute a tool by name.
 
+        Validates tool_input against the tool's input_schema (if jsonschema
+        is available) before delegating to the skill's execute() method.
+
         Args:
             tool_name: Name of the tool
             tool_input: Tool input parameters
@@ -275,27 +347,64 @@ class SkillRegistry:
         Returns:
             SkillResponse from tool execution
         """
-        # Find skill that provides this tool
+        skill_name = cls._find_skill_for_tool(tool_name, skill_name)
         if skill_name is None:
-            for name in cls.list_skills():
-                try:
-                    skill = cls.get(name)
-                    if skill.has_tool(tool_name):
-                        skill_name = name
-                        break
-                except ValueError:
-                    continue
-
-            if skill_name is None:
-                from gathering.skills.base import SkillResponse
-                return SkillResponse(
-                    success=False,
-                    message=f"No skill found providing tool '{tool_name}'",
-                    error="tool_not_found",
-                )
+            from gathering.skills.base import SkillResponse
+            return SkillResponse(
+                success=False,
+                message=f"No skill found providing tool '{tool_name}'",
+                error="tool_not_found",
+            )
 
         skill = cls.get(skill_name, permissions=permissions)
+
+        # Validate input against schema before execution
+        validation_error = cls._validate_tool_input(tool_name, tool_input, skill)
+        if validation_error is not None:
+            return validation_error
+
         return skill.execute(tool_name, tool_input)
+
+    @classmethod
+    async def execute_tool_async(
+        cls,
+        tool_name: str,
+        tool_input: Dict[str, Any],
+        skill_name: Optional[str] = None,
+        permissions: Optional[List[SkillPermission]] = None,
+    ):
+        """
+        Execute a tool asynchronously by name.
+
+        Validates tool_input against the tool's input_schema, then calls
+        skill.execute_async() which handles async/sync dispatch.
+
+        Args:
+            tool_name: Name of the tool
+            tool_input: Tool input parameters
+            skill_name: Optional skill name (auto-detected if not provided)
+            permissions: Optional permissions to validate
+
+        Returns:
+            SkillResponse from tool execution
+        """
+        skill_name = cls._find_skill_for_tool(tool_name, skill_name)
+        if skill_name is None:
+            from gathering.skills.base import SkillResponse
+            return SkillResponse(
+                success=False,
+                message=f"No skill found providing tool '{tool_name}'",
+                error="tool_not_found",
+            )
+
+        skill = cls.get(skill_name, permissions=permissions)
+
+        # Validate input against schema before execution
+        validation_error = cls._validate_tool_input(tool_name, tool_input, skill)
+        if validation_error is not None:
+            return validation_error
+
+        return await skill.execute_async(tool_name, tool_input)
 
     @classmethod
     def clear_cache(cls) -> None:

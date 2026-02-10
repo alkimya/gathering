@@ -138,10 +138,14 @@ class BaseSkill(ABC):
     ) -> SkillResponse:
         """
         Async version of execute.
-        Default implementation calls sync version.
-        Override for true async operations.
+
+        Default implementation runs the sync execute() in a thread executor
+        to avoid blocking the event loop. Override in subclasses for true
+        async operations.
         """
-        return self.execute(tool_name, tool_input)
+        import asyncio
+        loop = asyncio.get_event_loop()
+        return await loop.run_in_executor(None, self.execute, tool_name, tool_input)
 
     def validate_permissions(
         self, granted_permissions: List[SkillPermission]

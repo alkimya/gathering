@@ -38,6 +38,16 @@ Usage:
 from typing import Dict, List, Optional, Callable, Any
 from dataclasses import dataclass, field
 from enum import Enum
+import asyncio
+import logging
+
+try:
+    import jsonschema
+    _HAS_JSONSCHEMA = True
+except ImportError:
+    _HAS_JSONSCHEMA = False
+
+logger = logging.getLogger(__name__)
 
 
 class ToolCategory(str, Enum):
@@ -328,9 +338,41 @@ class ToolRegistry:
         """
         return [tool for tool in self._tools.values() if tool.plugin_id == plugin_id]
 
+    def _validate_params(self, tool_name: str, tool: ToolDefinition, kwargs: Dict[str, Any]) -> None:
+        """Validate kwargs against tool's JSON Schema parameters.
+
+        Args:
+            tool_name: Tool name (for error messages).
+            tool: Tool definition containing the schema.
+            kwargs: Arguments to validate.
+
+        Raises:
+            ValueError: If validation fails.
+        """
+        if not _HAS_JSONSCHEMA:
+            logger.debug("jsonschema not installed, skipping parameter validation for '%s'", tool_name)
+            return
+
+        if not tool.parameters:
+            return
+
+        try:
+            jsonschema.validate(instance=kwargs, schema=tool.parameters)
+        except jsonschema.ValidationError as e:
+            path_str = ".".join(str(p) for p in e.absolute_path) if e.absolute_path else "(root)"
+            raise ValueError(
+                f"Invalid parameters for tool '{tool_name}': {e.message} (at {path_str})"
+            ) from e
+        except jsonschema.SchemaError as e:
+            logger.warning(
+                "Malformed JSON Schema for tool '%s': %s -- skipping validation",
+                tool_name,
+                e.message,
+            )
+
     def execute(self, tool_name: str, **kwargs) -> Any:
         """
-        Execute a tool.
+        Execute a synchronous tool.
 
         Args:
             tool_name: Tool name to execute.
@@ -340,7 +382,8 @@ class ToolRegistry:
             Tool execution result.
 
         Raises:
-            ValueError: If tool not found.
+            ValueError: If tool not found or parameters invalid.
+            RuntimeError: If tool is async (must use execute_async).
             Exception: If tool execution fails.
 
         Example:
@@ -350,11 +393,57 @@ class ToolRegistry:
         if not tool:
             raise ValueError(f"Tool '{tool_name}' not found in registry")
 
-        # Execute function
-        # TODO: Add parameter validation against JSON schema
-        # TODO: Handle async functions
+        if tool.async_function:
+            raise RuntimeError(
+                f"Async tool '{tool_name}' must be called via execute_async()"
+            )
+
+        self._validate_params(tool_name, tool, kwargs)
+
         try:
             return tool.function(**kwargs)
+        except (ValueError, RuntimeError):
+            raise
+        except Exception as e:
+            raise Exception(
+                f"Error executing tool '{tool_name}': {e}"
+            ) from e
+
+    async def execute_async(self, tool_name: str, **kwargs) -> Any:
+        """
+        Execute a tool asynchronously.
+
+        Async tools are awaited directly. Sync tools are run in a thread executor
+        to avoid blocking the event loop.
+
+        Args:
+            tool_name: Tool name to execute.
+            **kwargs: Tool arguments.
+
+        Returns:
+            Tool execution result.
+
+        Raises:
+            ValueError: If tool not found or parameters invalid.
+            Exception: If tool execution fails.
+
+        Example:
+            >>> result = await tool_registry.execute_async("my_tool", arg1="value")
+        """
+        tool = self.get(tool_name)
+        if not tool:
+            raise ValueError(f"Tool '{tool_name}' not found in registry")
+
+        self._validate_params(tool_name, tool, kwargs)
+
+        try:
+            if tool.async_function:
+                return await tool.function(**kwargs)
+            else:
+                loop = asyncio.get_event_loop()
+                return await loop.run_in_executor(None, lambda: tool.function(**kwargs))
+        except (ValueError, RuntimeError):
+            raise
         except Exception as e:
             raise Exception(
                 f"Error executing tool '{tool_name}': {e}"
