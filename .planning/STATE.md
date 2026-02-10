@@ -9,29 +9,29 @@ See: .planning/PROJECT.md (updated 2026-02-10)
 
 ## Current Position
 
-Phase: 2 of 5 (Pipeline Execution Engine)
-Plan: 2 of 3 in current phase
-Status: Plan 02-02 complete
-Last activity: 2026-02-10 -- Completed 02-02 (Pipeline Execution Engine)
+Phase: 2 of 5 (Pipeline Execution Engine) -- COMPLETE
+Plan: 3 of 3 in current phase
+Status: Phase 02 complete -- all plans executed
+Last activity: 2026-02-10 -- Completed 02-03 (Pipeline Cancellation, Timeout, and Tests)
 
-Progress: [████░░░░░░] 33%
+Progress: [████████░░] 53%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 5
+- Total plans completed: 6
 - Average duration: 7min
-- Total execution time: 0.58 hours
+- Total execution time: 0.68 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-auth-security-foundation | 3/3 | 24min | 8min |
-| 02-pipeline-execution-engine | 2/3 | 11min | 5.5min |
+| 02-pipeline-execution-engine | 3/3 | 17min | 5.7min |
 
 **Recent Trend:**
-- Last 5 plans: 01-02 (8min), 01-03 (12min), 02-01 (4min), 02-02 (7min)
+- Last 5 plans: 01-03 (12min), 02-01 (4min), 02-02 (7min), 02-03 (6min)
 - Trend: Steady
 
 *Updated after each plan completion*
@@ -67,6 +67,9 @@ Recent decisions affecting current work:
 - [02-02]: Condition evaluation avoids eval() -- supports literals and safe input.key lookups
 - [02-02]: Event emission and node run persistence wrapped in try/except to never block pipeline execution
 - [02-02]: CircuitBreaker is per-node with configurable failure_threshold via node config
+- [02-03]: PipelineRunManager uses asyncio.timeout (Python 3.11+) for per-pipeline timeout enforcement
+- [02-03]: Cancellation is two-phase: cooperative request_cancel() first, then forced task.cancel()
+- [02-03]: PipelineRunManager cleanup happens in finally block to prevent resource leaks on any exit path
 
 ### Pending Todos
 
@@ -81,5 +84,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-10
-Stopped at: Completed 02-02-PLAN.md (Pipeline Execution Engine)
-Resume file: .planning/phases/02-pipeline-execution-engine/02-02-SUMMARY.md
+Stopped at: Completed 02-03-PLAN.md (Phase 02 complete)
+Resume file: .planning/phases/02-pipeline-execution-engine/02-03-SUMMARY.md
