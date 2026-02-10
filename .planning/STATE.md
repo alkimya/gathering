@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-10)
 
 **Core value:** Every existing feature works for real -- auth persists, pipelines execute, schedules run, security is solid -- so GatheRing can be deployed to production with confidence.
-**Current focus:** Phase 3 - Schedule Execution & Tool Hardening
+**Current focus:** Phase 4 - Performance Optimization
 
 ## Current Position
 
-Phase: 3 of 5 (Schedule Execution & Tool Hardening)
-Plan: 3 of 3 in current phase (COMPLETE)
-Status: Phase 03 complete
-Last activity: 2026-02-10 -- Completed 03-03 (Scheduler Recovery & Tool Validation Tests)
+Phase: 4 of 5 (Performance Optimization)
+Plan: 3 of 3 in current phase
+Status: Executing phase 04 plans
+Last activity: 2026-02-10 -- Completed 04-03 (Event Bus Concurrency & Deduplication)
 
-Progress: [█████████░] 90%
+Progress: [█████████░] 93%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 9
-- Average duration: 6.0min
-- Total execution time: 0.92 hours
+- Total plans completed: 10
+- Average duration: 5.9min
+- Total execution time: 0.98 hours
 
 **By Phase:**
 
@@ -30,9 +30,10 @@ Progress: [█████████░] 90%
 | 01-auth-security-foundation | 3/3 | 24min | 8min |
 | 02-pipeline-execution-engine | 3/3 | 17min | 5.7min |
 | 03-schedule-execution-tool-hardening | 3/3 | 14min | 4.7min |
+| 04-performance-optimization | 1/3 | 4min | 4min |
 
 **Recent Trend:**
-- Last 5 plans: 02-02 (7min), 02-03 (6min), 03-02 (4min), 03-01 (4min), 03-03 (6min)
+- Last 5 plans: 02-03 (6min), 03-02 (4min), 03-01 (4min), 03-03 (6min), 04-03 (4min)
 - Trend: Steady/Fast
 
 *Updated after each plan completion*
@@ -83,6 +84,10 @@ Recent decisions affecting current work:
 - [03-03]: Lazy import patching: patch at source module path for deferred imports in dispatcher functions
 - [03-03]: MockSkill concrete subclass avoids loading real skill modules for SkillRegistry validation testing
 - [03-03]: Workspace path cache cleared per-test for isolation since module-level TTL dict persists between tests
+- [04-03]: Dedup disabled by default for backward compatibility; callers opt-in via configure(dedup_enabled=True)
+- [04-03]: Semaphore wraps _safe_invoke rather than adding separate wrapper, keeping gather() pattern unchanged
+- [04-03]: Dedup key includes type, source_agent_id, circle_id, and data hash -- distinct data always passes through
+- [04-03]: Dedup cache pruned every 1000 events with 2x window expiry to prevent unbounded memory growth
 
 ### Pending Todos
 
@@ -97,5 +102,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-10
-Stopped at: Completed 03-03-PLAN.md (Phase 03 complete)
-Resume file: .planning/phases/03-schedule-execution-tool-hardening/03-03-SUMMARY.md
+Stopped at: Completed 04-03-PLAN.md
+Resume file: .planning/phases/04-performance-optimization/04-03-SUMMARY.md
