@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-10)
 
 **Core value:** Every existing feature works for real -- auth persists, pipelines execute, schedules run, security is solid -- so GatheRing can be deployed to production with confidence.
-**Current focus:** Phase 2 - Pipeline Execution Engine
+**Current focus:** Phase 3 - Schedule Execution & Tool Hardening
 
 ## Current Position
 
-Phase: 2 of 5 (Pipeline Execution Engine) -- COMPLETE
-Plan: 3 of 3 in current phase
-Status: Phase 02 complete -- all plans executed
-Last activity: 2026-02-10 -- Completed 02-03 (Pipeline Cancellation, Timeout, and Tests)
+Phase: 3 of 5 (Schedule Execution & Tool Hardening)
+Plan: 2 of 3 in current phase
+Status: Executing phase 03
+Last activity: 2026-02-10 -- Completed 03-02 (Tool Registry Hardening)
 
-Progress: [████████░░] 53%
+Progress: [████████░░] 60%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 6
-- Average duration: 7min
-- Total execution time: 0.68 hours
+- Total plans completed: 7
+- Average duration: 6.6min
+- Total execution time: 0.75 hours
 
 **By Phase:**
 
@@ -29,10 +29,11 @@ Progress: [████████░░] 53%
 |-------|-------|-------|----------|
 | 01-auth-security-foundation | 3/3 | 24min | 8min |
 | 02-pipeline-execution-engine | 3/3 | 17min | 5.7min |
+| 03-schedule-execution-tool-hardening | 1/3 | 4min | 4min |
 
 **Recent Trend:**
-- Last 5 plans: 01-03 (12min), 02-01 (4min), 02-02 (7min), 02-03 (6min)
-- Trend: Steady
+- Last 5 plans: 02-01 (4min), 02-02 (7min), 02-03 (6min), 03-02 (4min)
+- Trend: Steady/Fast
 
 *Updated after each plan completion*
 
@@ -70,6 +71,10 @@ Recent decisions affecting current work:
 - [02-03]: PipelineRunManager uses asyncio.timeout (Python 3.11+) for per-pipeline timeout enforcement
 - [02-03]: Cancellation is two-phase: cooperative request_cancel() first, then forced task.cancel()
 - [02-03]: PipelineRunManager cleanup happens in finally block to prevent resource leaks on any exit path
+- [03-02]: jsonschema import guarded with try/except ImportError for graceful degradation if not installed
+- [03-02]: ToolRegistry.execute() raises RuntimeError for async tools -- sync callers must not silently block
+- [03-02]: Workspace path uses project.projects.repository_path (actual DB column) -- no migration needed
+- [03-02]: Workspace cache uses monotonic clock TTL dict (5min) instead of functools.lru_cache
 
 ### Pending Todos
 
@@ -84,5 +89,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-10
-Stopped at: Completed 02-03-PLAN.md (Phase 02 complete)
-Resume file: .planning/phases/02-pipeline-execution-engine/02-03-SUMMARY.md
+Stopped at: Completed 03-02-PLAN.md
+Resume file: .planning/phases/03-schedule-execution-tool-hardening/03-02-SUMMARY.md
