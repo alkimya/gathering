@@ -63,12 +63,12 @@ Plans:
   3. A tool invoked with parameters that violate its JSON schema is rejected before execution with a validation error describing which parameters are invalid
   4. Async tools (marked with async_function flag) execute without blocking the event loop -- concurrent tool invocations run in parallel, not sequentially
   5. Workspace API resolves file paths relative to the project directory, not the server's working directory -- accessing "src/main.py" returns the project file, not the server's src/main.py
-**Plans**: TBD
+**Plans:** 3 plans
 
 Plans:
-- [ ] 03-01: TBD
-- [ ] 03-02: TBD
-- [ ] 03-03: TBD
+- [ ] 03-01-PLAN.md -- Scheduler action dispatchers (run_task, execute_pipeline, send_notification, call_api) and crash recovery with deduplication
+- [ ] 03-02-PLAN.md -- Tool hardening: JSON Schema validation in both registries, async tool execution, workspace path fix
+- [ ] 03-03-PLAN.md -- Comprehensive tests: scheduler recovery, tool validation, async execution, workspace resolution
 
 ### Phase 4: Performance Optimization
 **Goal**: Database access is non-blocking, query patterns are efficient, API endpoints enforce rate limits, and in-memory stores are bounded
