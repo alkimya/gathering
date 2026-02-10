@@ -328,6 +328,37 @@ class DatabaseService:
             WHERE m.circle_id = %(circle_id)s AND m.is_active = true
         """, {'circle_id': circle_id})
 
+    def get_circle_members_full(self, circle_id: int) -> List[Dict]:
+        """Get circle members with full agent details in a single JOIN query.
+
+        Eliminates N+1 queries by fetching member info, agent details,
+        system_prompt, skill_names, provider, and model in one shot.
+        """
+        return self.execute("""
+            SELECT
+                m.id as member_id,
+                m.agent_id,
+                m.role,
+                m.is_active,
+                m.joined_at,
+                m.competencies,
+                m.can_review,
+                a.name as agent_name,
+                a.system_prompt,
+                a.base_prompt,
+                a.skill_names,
+                a.status as agent_status,
+                p.name as provider_name,
+                p.api_type as provider_api_type,
+                mod.model_name,
+                mod.model_alias
+            FROM circle.members m
+            JOIN agent.agents a ON a.id = m.agent_id
+            LEFT JOIN agent.models mod ON a.model_id = mod.id
+            LEFT JOIN agent.providers p ON mod.provider_id = p.id
+            WHERE m.circle_id = %(circle_id)s AND m.is_active = true
+        """, {'circle_id': circle_id})
+
     # Conversation persistence methods
     def create_conversation(self, conv_data: dict) -> Optional[Dict]:
         """Create a new conversation in the database."""
@@ -859,8 +890,9 @@ class CircleRegistry:
                         auto_route=circle_row.get('auto_route', True),
                     )
 
-                    # Load members
-                    members = self._db.get_circle_members_with_info(circle_row['id'])
+                    # Load members with full agent details in a single JOIN query
+                    # (eliminates N+1: no per-member get_agent() or skill_names SELECT)
+                    members = self._db.get_circle_members_full(circle_row['id'])
                     for member in members:
                         from gathering.orchestration import AgentHandle
                         from gathering.llm.providers import LLMProviderFactory
@@ -884,19 +916,9 @@ class CircleRegistry:
                                 agent_name_local = member['agent_name']
                                 agent_id_local = member['agent_id']
 
-                                # Load agent system prompt and skills from DB
-                                agent_data = self._db.get_agent(agent_id_local)
-                                system_prompt = None
-                                skill_names = []
-                                if agent_data:
-                                    system_prompt = agent_data.get('system_prompt') or agent_data.get('base_prompt')
-                                    # skill_names is in the base table, not the view
-                                    skill_row = self._db.execute_one(
-                                        "SELECT skill_names FROM agent.agents WHERE id = %(id)s",
-                                        {'id': agent_id_local}
-                                    )
-                                    if skill_row:
-                                        skill_names = skill_row.get('skill_names') or []
+                                # Extract system prompt and skills directly from JOIN result
+                                system_prompt = member.get('system_prompt') or member.get('base_prompt')
+                                skill_names = member.get('skill_names') or []
 
                                 # Build full system prompt with project context and memory
                                 from gathering.agents.project_context import GATHERING_PROJECT
