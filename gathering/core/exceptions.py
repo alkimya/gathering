@@ -16,6 +16,9 @@ This module provides a hierarchy of exceptions for different error scenarios:
   - ConversationError: Conversation errors
   - RegistryError: Registry operations errors
   - ValidationError: Input validation errors
+  - AuthenticationError: Authentication failures (invalid credentials, expired token)
+  - AuthorizationError: Insufficient permissions for an action
+  - DatabaseError: Database operation failures
 """
 
 from typing import Optional, Any, Dict
@@ -381,6 +384,55 @@ class ValidationError(GatheringError):
             else:
                 messages.append(f"{field}: {error}")
         return messages
+
+
+class AuthenticationError(GatheringError):
+    """Raised when authentication fails (invalid credentials, expired token, etc.)."""
+
+    def __init__(self, message: str, reason: Optional[str] = None):
+        details = {}
+        if reason:
+            details["reason"] = reason
+        super().__init__(message, details)
+        self.reason = reason
+
+
+class AuthorizationError(GatheringError):
+    """Raised when an authenticated user lacks permission for an action."""
+
+    def __init__(
+        self,
+        message: str,
+        required_role: Optional[str] = None,
+        user_role: Optional[str] = None,
+    ):
+        details = {}
+        if required_role:
+            details["required_role"] = required_role
+        if user_role:
+            details["user_role"] = user_role
+        super().__init__(message, details)
+        self.required_role = required_role
+        self.user_role = user_role
+
+
+class DatabaseError(GatheringError):
+    """Raised when database operations fail unexpectedly."""
+
+    def __init__(
+        self,
+        message: str,
+        operation: Optional[str] = None,
+        table: Optional[str] = None,
+    ):
+        details = {}
+        if operation:
+            details["operation"] = operation
+        if table:
+            details["table"] = table
+        super().__init__(message, details)
+        self.operation = operation
+        self.table = table
 
 
 # =============================================================================

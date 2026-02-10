@@ -35,7 +35,9 @@ from gathering.api.middleware import (
     RequestLoggingMiddleware,
     SecurityHeadersMiddleware,
 )
+from asgi_correlation_id import CorrelationIdMiddleware
 from gathering.core.config import get_settings
+from gathering.core.logging import configure_logging
 from gathering.api.websocket import ws_manager
 from gathering.api.dependencies import get_database_service
 from gathering.orchestration.background import get_background_executor
@@ -50,10 +52,12 @@ async def lifespan(app: FastAPI):
     Handles startup and shutdown events.
     """
     # Startup
-    print("GatheRing API starting...")
-
-    # Validate production settings
     settings = get_settings()
+
+    # Configure structured logging (console renderer in debug mode, JSON in production)
+    configure_logging(json_output=not settings.debug, log_level=settings.log_level)
+
+    print("GatheRing API starting...")
     if settings.is_production:
         try:
             settings.require_production_ready()
@@ -193,6 +197,9 @@ def create_app(
     # Authentication (protects all non-public endpoints)
     if enable_auth:
         app.add_middleware(AuthenticationMiddleware)
+
+    # Correlation ID middleware (added last so it runs first in request lifecycle)
+    app.add_middleware(CorrelationIdMiddleware)
 
     # Include routers
     app.include_router(health_router)
