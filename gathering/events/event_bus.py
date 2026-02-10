@@ -13,9 +13,11 @@ Design principles:
 - Type-safe: Enum-based event types
 - Testable: Easy to mock and verify
 - Reliable: Exception isolation per handler
+- Resilient: Backpressure via semaphore, deduplication within configurable window
 """
 
 import asyncio
+import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
@@ -171,14 +173,69 @@ class EventBus:
         self._max_history = 1000
         self._event_history: deque = deque(maxlen=self._max_history)
 
+        # Backpressure: semaphore limits concurrent handler execution
+        self._max_concurrent_handlers: int = 100
+        self._handler_semaphore = asyncio.Semaphore(self._max_concurrent_handlers)
+
+        # Deduplication: suppress identical events within a time window
+        # Disabled by default for backward compatibility; enable via configure()
+        self._dedup_window: float = 1.0  # seconds
+        self._seen_events: Dict[str, float] = {}  # dedup_key -> monotonic timestamp
+        self._dedup_enabled: bool = False
+
         # Statistics
         self._stats = {
             "events_published": 0,
             "events_delivered": 0,
+            "events_deduplicated": 0,
             "handler_errors": 0,
         }
 
         self._initialized = True
+
+    def configure(
+        self,
+        max_concurrent_handlers: Optional[int] = None,
+        dedup_window: Optional[float] = None,
+        dedup_enabled: Optional[bool] = None,
+    ) -> None:
+        """
+        Configure event bus parameters.
+
+        Args:
+            max_concurrent_handlers: Max concurrent handler tasks (default 100)
+            dedup_window: Deduplication window in seconds (default 1.0)
+            dedup_enabled: Enable/disable deduplication (default True)
+        """
+        if max_concurrent_handlers is not None:
+            self._max_concurrent_handlers = max_concurrent_handlers
+            self._handler_semaphore = asyncio.Semaphore(max_concurrent_handlers)
+        if dedup_window is not None:
+            self._dedup_window = dedup_window
+        if dedup_enabled is not None:
+            self._dedup_enabled = dedup_enabled
+
+    def _dedup_key(self, event: Event) -> str:
+        """Compute deduplication key for an event.
+
+        Includes type, source, circle, and a hash of data for specificity.
+        Events with different data will have different keys and will not
+        be deduplicated against each other.
+        """
+        data_hash = hash(frozenset(
+            (k, str(v)) for k, v in sorted(event.data.items())
+        )) if event.data else 0
+        return f"{event.type.value}:{event.source_agent_id}:{event.circle_id}:{data_hash}"
+
+    def _prune_seen_events(self) -> None:
+        """Remove expired entries from dedup cache to prevent memory growth."""
+        now = time.monotonic()
+        expired = [
+            k for k, ts in self._seen_events.items()
+            if (now - ts) > self._dedup_window * 2
+        ]
+        for k in expired:
+            del self._seen_events[k]
 
     def subscribe(
         self,
@@ -249,8 +306,9 @@ class EventBus:
         """
         Publish an event to all subscribers.
 
-        Handlers are executed concurrently. Errors in one handler
-        don't affect others.
+        Handlers are executed concurrently with semaphore-based backpressure.
+        Errors in one handler don't affect others. Identical events within
+        the dedup window are suppressed.
 
         Args:
             event: Event to publish
@@ -262,6 +320,19 @@ class EventBus:
                 source_agent_id=1,
             ))
         """
+        # Deduplication check (before recording in history)
+        if self._dedup_enabled:
+            dedup_key = self._dedup_key(event)
+            now = time.monotonic()
+            if dedup_key in self._seen_events:
+                if (now - self._seen_events[dedup_key]) < self._dedup_window:
+                    self._stats["events_deduplicated"] += 1
+                    return  # Duplicate within window, skip
+            self._seen_events[dedup_key] = now
+            # Periodic cleanup (every 1000 events)
+            if self._stats["events_published"] % 1000 == 0:
+                self._prune_seen_events()
+
         # Record event in history (deque handles size limit automatically)
         self._event_history.append(event)
 
@@ -279,33 +350,37 @@ class EventBus:
             if sub["filter"] and not sub["filter"](event):
                 continue
 
-            # Wrap handler to catch exceptions
+            # Wrap handler to catch exceptions (with semaphore backpressure)
             tasks.append(self._safe_invoke(sub["handler"], event, sub["name"]))
 
-        # Execute all handlers concurrently
+        # Execute all handlers concurrently (bounded by semaphore)
         if tasks:
             await asyncio.gather(*tasks, return_exceptions=True)
             self._stats["events_delivered"] += len(tasks)
 
     async def _safe_invoke(self, handler: Callable, event: Event, handler_name: str) -> None:
         """
-        Invoke handler with exception isolation.
+        Invoke handler with exception isolation and semaphore backpressure.
+
+        The handler_semaphore limits the number of concurrently executing
+        handlers, preventing unbounded task spawning under rapid-fire events.
 
         Args:
             handler: Handler function
             event: Event to pass
             handler_name: Handler name for error logging
         """
-        try:
-            result = handler(event)
-            # Handle both sync and async handlers
-            if asyncio.iscoroutine(result):
-                await result
-        except Exception as e:
-            self._stats["handler_errors"] += 1
-            # Log error but don't propagate
-            # In production, use proper logging
-            print(f"[EventBus] Error in handler '{handler_name}': {e}")
+        async with self._handler_semaphore:
+            try:
+                result = handler(event)
+                # Handle both sync and async handlers
+                if asyncio.iscoroutine(result):
+                    await result
+            except Exception as e:
+                self._stats["handler_errors"] += 1
+                # Log error but don't propagate
+                # In production, use proper logging
+                print(f"[EventBus] Error in handler '{handler_name}': {e}")
 
     def get_history(
         self,
@@ -369,9 +444,12 @@ class EventBus:
         """Reset event bus (useful for testing)."""
         self._subscribers.clear()
         self._event_history.clear()
+        self._seen_events.clear()
+        self._handler_semaphore = asyncio.Semaphore(self._max_concurrent_handlers)
         self._stats = {
             "events_published": 0,
             "events_delivered": 0,
+            "events_deduplicated": 0,
             "handler_errors": 0,
         }
 
