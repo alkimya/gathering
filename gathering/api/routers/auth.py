@@ -22,10 +22,12 @@ from gathering.api.auth import (
     get_blacklist_stats,
     get_current_active_user,
     get_user_by_email,
+    log_auth_event,
     require_admin,
     ACCESS_TOKEN_EXPIRE_HOURS,
     oauth2_scheme_required,
 )
+from gathering.api.dependencies import DatabaseService
 
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -43,7 +45,8 @@ async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
 
     Returns JWT access token valid for 24 hours.
     """
-    user = await authenticate_user(form_data.username, form_data.password)
+    db = DatabaseService.get_instance()
+    user = await authenticate_user(form_data.username, form_data.password, db=db)
 
     if not user:
         raise HTTPException(
@@ -80,7 +83,8 @@ async def login_json(credentials: UserLogin):
 
     Returns JWT access token valid for 24 hours.
     """
-    user = await authenticate_user(credentials.email, credentials.password)
+    db = DatabaseService.get_instance()
+    user = await authenticate_user(credentials.email, credentials.password, db=db)
 
     if not user:
         raise HTTPException(
@@ -115,8 +119,10 @@ async def register(user_data: UserCreate):
 
     Returns the created user (without password).
     """
+    db = DatabaseService.get_instance()
+
     # Check if email already exists
-    existing = await get_user_by_email(user_data.email)
+    existing = await get_user_by_email(user_data.email, db=db)
     if existing:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -124,7 +130,10 @@ async def register(user_data: UserCreate):
         )
 
     # Create user
-    user = await create_user(user_data)
+    user = await create_user(user_data, db=db)
+
+    # Log registration event
+    log_auth_event(db, "user_registered", user_id=user["id"], message=f"New user registered: {user_data.email}")
 
     return UserResponse(
         id=user["id"],
@@ -155,10 +164,11 @@ async def get_current_user_info(
             is_active=True,
         )
 
-    # For database users, fetch from store
+    # For database users, fetch from DB
     from gathering.api.auth import get_user_by_id
 
-    user = await get_user_by_id(current_user.sub)
+    db = DatabaseService.get_instance()
+    user = await get_user_by_id(current_user.sub, db=db)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -206,7 +216,7 @@ async def logout(
 
     Requires valid JWT token in Authorization header.
     """
-    success = blacklist_token(token)
+    success = blacklist_token(token, user_id=current_user.sub)
 
     if not success:
         raise HTTPException(

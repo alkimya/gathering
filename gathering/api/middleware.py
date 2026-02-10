@@ -12,7 +12,8 @@ from fastapi import Request, Response, status
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from gathering.api.auth import decode_token
+from gathering.api.auth import decode_token, log_auth_event
+from gathering.api.dependencies import DatabaseService
 
 
 logger = logging.getLogger("gathering.api")
@@ -91,6 +92,15 @@ class AuthenticationMiddleware(BaseHTTPMiddleware):
         auth_header = request.headers.get("Authorization")
 
         if not auth_header:
+            try:
+                db = DatabaseService.get_instance()
+                log_auth_event(
+                    db, "auth_missing_token",
+                    ip_address=request.client.host if request.client else None,
+                    message=f"Missing auth token for {path}",
+                )
+            except Exception:
+                pass  # Don't block request processing for audit logging failures
             return JSONResponse(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 content={"detail": "Missing authentication token"},
@@ -100,6 +110,15 @@ class AuthenticationMiddleware(BaseHTTPMiddleware):
         # Validate Bearer token format
         parts = auth_header.split()
         if len(parts) != 2 or parts[0].lower() != "bearer":
+            try:
+                db = DatabaseService.get_instance()
+                log_auth_event(
+                    db, "auth_invalid_token",
+                    ip_address=request.client.host if request.client else None,
+                    message=f"Invalid auth header format for {path}",
+                )
+            except Exception:
+                pass
             return JSONResponse(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 content={"detail": "Invalid authentication header format"},
@@ -111,6 +130,15 @@ class AuthenticationMiddleware(BaseHTTPMiddleware):
         # Decode and validate token
         token_data = decode_token(token)
         if token_data is None:
+            try:
+                db = DatabaseService.get_instance()
+                log_auth_event(
+                    db, "auth_invalid_token",
+                    ip_address=request.client.host if request.client else None,
+                    message=f"Invalid or expired token for {path}",
+                )
+            except Exception:
+                pass
             return JSONResponse(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 content={"detail": "Invalid or expired token"},
@@ -240,11 +268,18 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         # Process request
         try:
             response = await call_next(request)
-        except Exception as e:
+        except (ValueError, TypeError, AttributeError, RuntimeError, OSError) as e:
             duration = (time.time() - start_time) * 1000
             logger.error(
                 f"[{request_id}] {request.method} {request.url.path} "
-                f"ERROR: {str(e)} ({duration:.2f}ms)"
+                f"ERROR: {type(e).__name__}: {str(e)} ({duration:.2f}ms)"
+            )
+            raise
+        except Exception as e:
+            duration = (time.time() - start_time) * 1000
+            logger.exception(
+                f"[{request_id}] {request.method} {request.url.path} "
+                f"UNEXPECTED ERROR ({duration:.2f}ms)"
             )
             raise
 
