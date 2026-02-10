@@ -80,12 +80,12 @@ Plans:
   3. API endpoints enforce per-endpoint rate limits -- exceeding the limit returns 429 Too Many Requests with a Retry-After header
   4. Rapid-fire event emissions (100+ events/second) are batched and deduplicated -- the event bus processes them without spawning unbounded tasks or exhausting memory
   5. In-memory caches (token blacklist, file tree, event history) have configurable size bounds and evict least-recently-used entries when full
-**Plans**: TBD
+**Plans:** 3 plans
 
 Plans:
-- [ ] 04-01: TBD
-- [ ] 04-02: TBD
-- [ ] 04-03: TBD
+- [ ] 04-01-PLAN.md -- Async database service (AsyncPooledDatabase lifecycle) and N+1 elimination in circle member retrieval (JOIN optimization)
+- [ ] 04-02-PLAN.md -- slowapi per-endpoint rate limiting replacing hand-rolled middleware, BoundedLRUDict utility for all unbounded in-memory caches
+- [ ] 04-03-PLAN.md -- Event bus deduplication, semaphore backpressure, and comprehensive concurrency tests
 
 ### Phase 5: Multi-Instance + Production Hardening
 **Goal**: Multiple server instances coordinate without duplicate task execution, and the server shuts down gracefully without dropping in-flight requests
