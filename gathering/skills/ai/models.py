@@ -12,6 +12,7 @@ from typing import Dict, Any, List, Optional
 from datetime import datetime
 
 from gathering.skills.base import BaseSkill, SkillResponse, SkillPermission
+from gathering.utils.bounded_lru import BoundedLRUDict
 
 
 class AISkill(BaseSkill):
@@ -72,7 +73,7 @@ class AISkill(BaseSkill):
         self.default_provider = config.get("default_provider", "openai") if config else "openai"
         self.default_model = config.get("default_model") if config else None
         self.api_keys = config.get("api_keys", {}) if config else {}
-        self._embedding_cache: Dict[str, List[float]] = {}
+        self._embedding_cache: BoundedLRUDict = BoundedLRUDict(max_size=2000)
 
     def get_tools_definition(self) -> List[Dict[str, Any]]:
         return [
@@ -696,9 +697,8 @@ class AISkill(BaseSkill):
                     embedding = item["embedding"]
                     embeddings.append(embedding)
 
-                    # Cache
-                    if len(self._embedding_cache) < self.EMBEDDING_CACHE_SIZE:
-                        self._embedding_cache[cache_keys[i]] = embedding
+                    # Cache (BoundedLRUDict handles eviction automatically)
+                    self._embedding_cache[cache_keys[i]] = embedding
 
             except Exception as e:
                 return SkillResponse(success=False, message=str(e), error=str(e))

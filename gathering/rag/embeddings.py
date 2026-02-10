@@ -14,6 +14,8 @@ from typing import Optional, List, Dict, Any
 
 import httpx
 
+from gathering.utils.bounded_lru import BoundedLRUDict
+
 # Import cache (optional dependency)
 try:
     from gathering.cache import CacheManager
@@ -92,7 +94,7 @@ class EmbeddingService:
 
         # Redis cache (preferred) or fallback to in-memory
         self._redis_cache = cache_manager
-        self._memory_cache: Dict[str, List[float]] = {}
+        self._memory_cache: BoundedLRUDict = BoundedLRUDict(max_size=2000)
 
         # Validate configuration
         if self.provider == EmbeddingProvider.OPENAI and not self.api_key:

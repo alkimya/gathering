@@ -278,7 +278,7 @@ class EventBus:
         Returns:
             List of matching events
         """
-        events = self._history
+        events: List[Event] = list(self._history)
 
         if event_type:
             events = [e for e in events if e.type == event_type]

@@ -11,6 +11,7 @@ import hashlib
 from gathering.agents.persona import AgentPersona
 from gathering.agents.project_context import ProjectContext
 from gathering.agents.session import AgentSession, InjectedContext
+from gathering.utils.bounded_lru import BoundedLRUDict
 
 
 class MemoryStore(Protocol):
@@ -195,10 +196,10 @@ class MemoryService:
         self.store = store or InMemoryStore()
         self.embedding_fn = embedding_fn
 
-        # Cache for frequently accessed data
-        self._persona_cache: Dict[int, AgentPersona] = {}
-        self._project_cache: Dict[int, ProjectContext] = {}
-        self._session_cache: Dict[int, AgentSession] = {}
+        # Cache for frequently accessed data (bounded to prevent memory exhaustion)
+        self._persona_cache: BoundedLRUDict = BoundedLRUDict(max_size=500)
+        self._project_cache: BoundedLRUDict = BoundedLRUDict(max_size=100)
+        self._session_cache: BoundedLRUDict = BoundedLRUDict(max_size=500)
 
     def set_persona(self, agent_id: int, persona: AgentPersona) -> None:
         """Cache a persona for an agent."""
