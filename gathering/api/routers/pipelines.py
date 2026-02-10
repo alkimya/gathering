@@ -3,6 +3,8 @@ Pipelines API endpoints.
 Manages automated multi-agent workflows.
 """
 
+import asyncio
+import json
 from typing import Optional, List
 from datetime import datetime
 from fastapi import APIRouter, HTTPException, Depends
@@ -11,6 +13,11 @@ from pydantic import BaseModel, Field
 from gathering.api.dependencies import (
     get_database_service,
     DatabaseService,
+)
+from gathering.orchestration.pipeline import (
+    PipelineExecutor,
+    parse_pipeline_definition,
+    validate_pipeline_dag,
 )
 from gathering.utils.sql import safe_update_builder
 
@@ -241,7 +248,6 @@ async def create_pipeline(
     """Create a new pipeline."""
     _ensure_table_exists(db)
 
-    import json
     nodes_json = json.dumps([n.model_dump() for n in data.nodes])
     edges_json = json.dumps([e.model_dump(by_alias=True) for e in data.edges])
 
@@ -291,11 +297,9 @@ async def update_pipeline(
         update_dict["status"] = data.status
 
     if data.nodes is not None:
-        import json
         update_dict["nodes"] = json.dumps([n.model_dump() for n in data.nodes])
 
     if data.edges is not None:
-        import json
         update_dict["edges"] = json.dumps([e.model_dump(by_alias=True) for e in data.edges])
 
     if not update_dict:
@@ -370,6 +374,36 @@ async def toggle_pipeline(
 
 
 # =============================================================================
+# Pipeline Validation
+# =============================================================================
+
+@router.post("/{pipeline_id}/validate", response_model=dict)
+async def validate_pipeline(
+    pipeline_id: int,
+    db: DatabaseService = Depends(get_database_service),
+):
+    """Validate a pipeline's DAG structure without executing it."""
+    _ensure_table_exists(db)
+
+    pipeline = db.execute_one(
+        "SELECT * FROM circle.pipelines WHERE id = %(id)s",
+        {'id': pipeline_id}
+    )
+    if not pipeline:
+        raise HTTPException(status_code=404, detail="Pipeline not found")
+
+    nodes_data = pipeline['nodes'] if isinstance(pipeline['nodes'], list) else json.loads(pipeline['nodes'] or '[]')
+    edges_data = pipeline['edges'] if isinstance(pipeline['edges'], list) else json.loads(pipeline['edges'] or '[]')
+
+    try:
+        definition = parse_pipeline_definition(nodes_data, edges_data)
+        errors = validate_pipeline_dag(definition)
+        return {"valid": len(errors) == 0, "errors": errors}
+    except ValueError as e:
+        return {"valid": False, "errors": [str(e)]}
+
+
+# =============================================================================
 # Pipeline Runs
 # =============================================================================
 
@@ -396,7 +430,6 @@ async def run_pipeline(
             detail=f"Cannot run pipeline in '{pipeline['status']}' status. Activate it first."
         )
 
-    import json
     trigger_data = data.trigger_data if data else {}
 
     # Create run
@@ -416,37 +449,69 @@ async def run_pipeline(
         WHERE id = %(id)s
     """, {'id': pipeline_id})
 
-    # TODO: Actually execute the pipeline nodes (async task)
-    # For now, just mark as completed after a simulated run
-    import json
-    nodes = pipeline['nodes'] if isinstance(pipeline['nodes'], list) else json.loads(pipeline['nodes'] or '[]')
+    # Parse pipeline definition for execution
+    nodes_data = pipeline['nodes'] if isinstance(pipeline['nodes'], list) else json.loads(pipeline['nodes'] or '[]')
+    edges_data = pipeline['edges'] if isinstance(pipeline['edges'], list) else json.loads(pipeline['edges'] or '[]')
 
-    logs = []
-    for node in nodes:
-        logs.append({
-            'timestamp': datetime.utcnow().isoformat(),
-            'node_id': node.get('id', 'unknown'),
-            'message': f"Executed node: {node.get('name', 'Unnamed')}",
-            'level': 'info',
-        })
+    try:
+        definition = parse_pipeline_definition(nodes_data, edges_data)
+    except ValueError as e:
+        # Validation failed -- mark run as failed and return
+        result = db.execute_one("""
+            UPDATE circle.pipeline_runs
+            SET status = 'failed', completed_at = CURRENT_TIMESTAMP, error_message = %(error)s
+            WHERE id = %(id)s RETURNING *
+        """, {'id': run['id'], 'error': str(e)})
+        db.execute("UPDATE circle.pipelines SET error_count = error_count + 1 WHERE id = %(id)s", {'id': pipeline_id})
+        return _serialize_row(result)
 
-    # Complete the run
+    # Create executor and run
+    executor = PipelineExecutor(
+        pipeline_id=pipeline_id,
+        definition=definition,
+        db=db,
+    )
+
+    # Get retry config from pipeline (or use defaults)
+    max_retries = pipeline.get('max_retries_per_node', 3) or 3
+    timeout_seconds = pipeline.get('timeout_seconds', 3600) or 3600
+
+    try:
+        exec_result = await asyncio.wait_for(
+            executor.execute(
+                run_id=run['id'],
+                trigger_data=trigger_data or {},
+                max_retries=max_retries,
+            ),
+            timeout=timeout_seconds,
+        )
+    except asyncio.TimeoutError:
+        exec_result = {"status": "timeout", "error": f"Pipeline exceeded {timeout_seconds}s timeout"}
+    except Exception as e:
+        exec_result = {"status": "failed", "error": str(e)}
+
+    # Update the run record based on result
+    final_status = exec_result.get("status", "failed")
+    error_msg = exec_result.get("error")
+
     result = db.execute_one("""
         UPDATE circle.pipeline_runs
-        SET status = 'completed', completed_at = CURRENT_TIMESTAMP, logs = %(logs)s::jsonb
-        WHERE id = %(id)s
-        RETURNING *
+        SET status = %(status)s, completed_at = CURRENT_TIMESTAMP,
+            error_message = %(error)s,
+            logs = %(logs)s::jsonb
+        WHERE id = %(id)s RETURNING *
     """, {
         'id': run['id'],
-        'logs': json.dumps(logs),
+        'status': final_status,
+        'error': error_msg,
+        'logs': json.dumps(exec_result.get("node_results", [])),
     })
 
-    # Update success count
-    db.execute("""
-        UPDATE circle.pipelines
-        SET success_count = success_count + 1
-        WHERE id = %(id)s
-    """, {'id': pipeline_id})
+    # Update pipeline success/error counts
+    if final_status == 'completed':
+        db.execute("UPDATE circle.pipelines SET success_count = success_count + 1 WHERE id = %(id)s", {'id': pipeline_id})
+    else:
+        db.execute("UPDATE circle.pipelines SET error_count = error_count + 1 WHERE id = %(id)s", {'id': pipeline_id})
 
     return _serialize_row(result)
 
