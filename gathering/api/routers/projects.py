@@ -14,6 +14,7 @@ from pydantic import BaseModel, Field
 
 from gathering.api.dependencies import get_database_service, DatabaseService
 from gathering.agents.project_context import ProjectContext
+from gathering.utils.sql import safe_update_builder
 
 
 router = APIRouter(prefix="/projects", tags=["projects"])
@@ -358,48 +359,45 @@ async def update_project(
             detail=f"Project {project_id} not found",
         )
 
-    updates = []
-    params: Dict[str, Any] = {"id": project_id, "updated_at": datetime.now(timezone.utc)}
+    PROJECT_UPDATE_COLUMNS = {
+        "name", "display_name", "description", "status",
+        "venv_path", "python_version", "tools", "conventions",
+        "key_files", "commands", "notes",
+    }
+
+    update_dict: Dict[str, Any] = {}
 
     if data.name is not None:
-        updates.append("name = %(name)s")
-        params["name"] = data.name
+        update_dict["name"] = data.name
     if data.display_name is not None:
-        updates.append("display_name = %(display_name)s")
-        params["display_name"] = data.display_name
+        update_dict["display_name"] = data.display_name
     if data.description is not None:
-        updates.append("description = %(description)s")
-        params["description"] = data.description
+        update_dict["description"] = data.description
     if data.status is not None:
-        updates.append("status = %(status)s")
-        params["status"] = data.status
+        update_dict["status"] = data.status
     if data.venv_path is not None:
-        updates.append("venv_path = %(venv_path)s")
-        params["venv_path"] = data.venv_path
+        update_dict["venv_path"] = data.venv_path
     if data.python_version is not None:
-        updates.append("python_version = %(python_version)s")
-        params["python_version"] = data.python_version
+        update_dict["python_version"] = data.python_version
     if data.tools is not None:
-        updates.append("tools = %(tools)s")
-        params["tools"] = json.dumps(data.tools)
+        update_dict["tools"] = json.dumps(data.tools)
     if data.conventions is not None:
-        updates.append("conventions = %(conventions)s")
-        params["conventions"] = json.dumps(data.conventions)
+        update_dict["conventions"] = json.dumps(data.conventions)
     if data.key_files is not None:
-        updates.append("key_files = %(key_files)s")
-        params["key_files"] = json.dumps(data.key_files)
+        update_dict["key_files"] = json.dumps(data.key_files)
     if data.commands is not None:
-        updates.append("commands = %(commands)s")
-        params["commands"] = json.dumps(data.commands)
+        update_dict["commands"] = json.dumps(data.commands)
     if data.notes is not None:
-        updates.append("notes = %(notes)s")
-        params["notes"] = data.notes
+        update_dict["notes"] = data.notes
 
-    updates.append("updated_at = %(updated_at)s")
-
-    if updates:
+    if update_dict:
+        set_clause, params = safe_update_builder(
+            PROJECT_UPDATE_COLUMNS, update_dict,
+            always_set={"updated_at": "CURRENT_TIMESTAMP"},
+        )
+        params["id"] = project_id
         db.execute(
-            f"UPDATE project.projects SET {', '.join(updates)} WHERE id = %(id)s",
+            f"UPDATE project.projects SET {set_clause} WHERE id = %(id)s",
             params,
         )
 

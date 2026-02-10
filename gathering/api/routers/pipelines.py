@@ -12,6 +12,7 @@ from gathering.api.dependencies import (
     get_database_service,
     DatabaseService,
 )
+from gathering.utils.sql import safe_update_builder
 
 
 # =============================================================================
@@ -276,39 +277,44 @@ async def update_pipeline(
     if not existing:
         raise HTTPException(status_code=404, detail="Pipeline not found")
 
-    # Build update query
-    updates = []
-    params = {'id': pipeline_id}
+    # Build update dict from request data
+    PIPELINE_UPDATE_COLUMNS = {"name", "description", "status", "nodes", "edges"}
+    update_dict = {}
 
     if data.name is not None:
-        updates.append("name = %(name)s")
-        params['name'] = data.name
+        update_dict["name"] = data.name
 
     if data.description is not None:
-        updates.append("description = %(description)s")
-        params['description'] = data.description
+        update_dict["description"] = data.description
 
     if data.status is not None:
-        updates.append("status = %(status)s")
-        params['status'] = data.status
+        update_dict["status"] = data.status
 
     if data.nodes is not None:
         import json
-        updates.append("nodes = %(nodes)s::jsonb")
-        params['nodes'] = json.dumps([n.model_dump() for n in data.nodes])
+        update_dict["nodes"] = json.dumps([n.model_dump() for n in data.nodes])
 
     if data.edges is not None:
         import json
-        updates.append("edges = %(edges)s::jsonb")
-        params['edges'] = json.dumps([e.model_dump(by_alias=True) for e in data.edges])
+        update_dict["edges"] = json.dumps([e.model_dump(by_alias=True) for e in data.edges])
 
-    if not updates:
+    if not update_dict:
         # Nothing to update
         return await get_pipeline(pipeline_id, db)
 
-    updates.append("updated_at = CURRENT_TIMESTAMP")
+    set_clause, params = safe_update_builder(
+        PIPELINE_UPDATE_COLUMNS, update_dict,
+        always_set={"updated_at": "CURRENT_TIMESTAMP"},
+    )
+    params["id"] = pipeline_id
 
-    sql = f"UPDATE circle.pipelines SET {', '.join(updates)} WHERE id = %(id)s RETURNING *"
+    # Handle JSONB casts for nodes and edges
+    if "nodes" in update_dict:
+        set_clause = set_clause.replace("nodes = %(nodes)s", "nodes = %(nodes)s::jsonb")
+    if "edges" in update_dict:
+        set_clause = set_clause.replace("edges = %(edges)s", "edges = %(edges)s::jsonb")
+
+    sql = f"UPDATE circle.pipelines SET {set_clause} WHERE id = %(id)s RETURNING *"
     result = db.execute_one(sql, params)
 
     return _serialize_row(result)

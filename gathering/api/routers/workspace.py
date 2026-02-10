@@ -10,8 +10,11 @@ from fastapi.responses import Response
 from pydantic import BaseModel
 from typing import List, Dict, Any, Optional
 from pathlib import Path
+from urllib.parse import unquote
 import mimetypes
 import logging
+import os
+import subprocess
 
 from gathering.workspace import (
     WorkspaceManager,
@@ -44,8 +47,41 @@ def get_project_path(project_id: int) -> str:
     """Get project path. For now, returns the current workspace."""
     # TODO: Integrate with project database when available
     # For demo purposes, use the current workspace
-    import os
     return os.getcwd()
+
+
+def validate_file_path(project_path: str, user_path: str) -> Path:
+    """Validate and resolve a user-provided file path.
+
+    Returns resolved path if safe, raises HTTPException(403) if traversal detected.
+    Handles: ../, %2e%2e/, double-encoded paths, symlink escapes.
+    """
+    # Step 1: URL-decode (double decode for double-encoding attacks)
+    decoded_path = unquote(unquote(user_path))
+
+    # Step 2: Reject any '..' components (before and after decoding)
+    if ".." in decoded_path:
+        raise HTTPException(status_code=403, detail="Path traversal detected")
+
+    # Step 3: Resolve absolute paths
+    project_root = Path(project_path).resolve()
+    target = (project_root / decoded_path).resolve()
+
+    # Step 4: Verify target is within project root
+    try:
+        target.relative_to(project_root)
+    except ValueError:
+        raise HTTPException(status_code=403, detail="Access denied: path outside project")
+
+    # Step 5: Check for symlink escape
+    if target.is_symlink():
+        real_target = Path(os.readlink(target)).resolve() if target.exists() else target.resolve()
+        try:
+            real_target.relative_to(project_root)
+        except ValueError:
+            raise HTTPException(status_code=403, detail="Access denied: symlink escape")
+
+    return target
 
 
 # ============================================================================
@@ -93,8 +129,11 @@ async def get_workspace_info(
             **info,
             "capabilities": capabilities,
         }
-    except Exception as e:
+    except (OSError, IOError, ValueError) as e:
         raise HTTPException(status_code=500, detail=str(e))
+    except Exception as e:
+        logger.exception("Unexpected error in get_workspace_info")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 # ============================================================================
@@ -131,8 +170,11 @@ async def list_files(
             logger.debug(f"Cache SET: file tree for project {project_id}")
 
         return tree
-    except Exception as e:
+    except (OSError, IOError) as e:
         raise HTTPException(status_code=500, detail=str(e))
+    except Exception as e:
+        logger.exception("Unexpected error in list_files")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.get("/{project_id}/file")
@@ -150,8 +192,12 @@ async def read_file(
         raise HTTPException(status_code=404, detail=f"File not found: {path}")
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+    except (OSError, IOError, PermissionError) as e:
+        logger.error(f"File operation error in read_file: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.exception("Unexpected error in read_file")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.get("/{project_id}/file/raw")
@@ -168,33 +214,11 @@ async def read_file_raw(
     project_path = get_project_path(project_id)
 
     try:
-        # Build full file path
-        full_path = Path(project_path) / path
-
-        # Security check: prevent directory traversal
-        try:
-            full_path = full_path.resolve()
-            project_path_resolved = Path(project_path).resolve()
-            # Use relative_to() which raises ValueError if path is outside project
-            try:
-                full_path.relative_to(project_path_resolved)
-            except ValueError:
-                raise HTTPException(status_code=403, detail="Access denied: path outside project")
-        except HTTPException:
-            raise
-        except Exception as e:
-            # Log the actual error for debugging
-            logger.error(f"Path resolution error: {e}, path={path}")
-            raise HTTPException(status_code=403, detail=f"Invalid path: {str(e)}")
+        # Validate and resolve the path securely
+        full_path = validate_file_path(project_path, path)
 
         # Check if file exists
         if not full_path.exists():
-            # Try to find the file with similar name (handle encoding issues)
-            logger.warning(f"File not found: {full_path}, trying to list directory")
-            parent = full_path.parent
-            if parent.exists():
-                similar = list(parent.glob(f"*{full_path.stem}*{full_path.suffix}"))
-                logger.warning(f"Similar files: {similar}")
             raise HTTPException(status_code=404, detail=f"File not found: {path}")
 
         if not full_path.is_file():
@@ -220,8 +244,12 @@ async def read_file_raw(
 
     except HTTPException:
         raise
+    except (OSError, IOError, PermissionError) as e:
+        logger.error(f"File operation error in read_file_raw: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.exception(f"Unexpected error in read_file_raw")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.put("/{project_id}/file")
@@ -243,8 +271,12 @@ async def write_file(
         return result
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+    except (OSError, IOError, PermissionError) as e:
+        logger.error(f"File operation error in write_file: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.exception("Unexpected error in write_file")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.delete("/{project_id}/file")
@@ -262,8 +294,12 @@ async def delete_file(
         raise HTTPException(status_code=404, detail=f"File not found: {path}")
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+    except (OSError, IOError, PermissionError) as e:
+        logger.error(f"File operation error in delete_file: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.exception("Unexpected error in delete_file")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 # ============================================================================
@@ -295,8 +331,13 @@ async def get_git_status(
         logger.debug(f"Cache SET: git status for project {project_id}")
 
         return {"status": status}
-    except Exception as e:
+    except HTTPException:
+        raise
+    except (OSError, subprocess.SubprocessError) as e:
         raise HTTPException(status_code=500, detail=str(e))
+    except Exception as e:
+        logger.exception("Unexpected error in get_git_status")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.get("/{project_id}/git/commits")
@@ -330,8 +371,11 @@ async def get_commits(
             logger.debug(f"Cache SET: git commits for project {project_id}")
 
         return commits
-    except Exception as e:
+    except (OSError, subprocess.SubprocessError) as e:
         raise HTTPException(status_code=500, detail=str(e))
+    except Exception as e:
+        logger.exception("Unexpected error in get_commits")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.get("/{project_id}/git/diff")
@@ -346,8 +390,11 @@ async def get_diff(
     try:
         diff = GitManager.get_diff(project_path, commit, file_path)
         return {"diff": diff}
-    except Exception as e:
+    except (OSError, subprocess.SubprocessError) as e:
         raise HTTPException(status_code=500, detail=str(e))
+    except Exception as e:
+        logger.exception("Unexpected error in get_diff")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.get("/{project_id}/git/branches")
@@ -360,8 +407,11 @@ async def get_branches(
     try:
         branches = GitManager.get_branches(project_path)
         return {"branches": branches}
-    except Exception as e:
+    except (OSError, subprocess.SubprocessError) as e:
         raise HTTPException(status_code=500, detail=str(e))
+    except Exception as e:
+        logger.exception("Unexpected error in get_branches")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.get("/{project_id}/git/file-history")
@@ -376,8 +426,11 @@ async def get_file_history(
     try:
         history = GitManager.get_file_history(project_path, file_path, limit)
         return history
-    except Exception as e:
+    except (OSError, subprocess.SubprocessError) as e:
         raise HTTPException(status_code=500, detail=str(e))
+    except Exception as e:
+        logger.exception("Unexpected error in get_file_history")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.post("/{project_id}/git/stage")
@@ -403,8 +456,11 @@ async def stage_files(
         return result
     except HTTPException:
         raise
-    except Exception as e:
+    except (OSError, subprocess.SubprocessError) as e:
         raise HTTPException(status_code=500, detail=str(e))
+    except Exception as e:
+        logger.exception("Unexpected error in stage_files")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.post("/{project_id}/git/unstage")
@@ -430,8 +486,11 @@ async def unstage_files(
         return result
     except HTTPException:
         raise
-    except Exception as e:
+    except (OSError, subprocess.SubprocessError) as e:
         raise HTTPException(status_code=500, detail=str(e))
+    except Exception as e:
+        logger.exception("Unexpected error in unstage_files")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.post("/{project_id}/git/commit")
@@ -461,8 +520,11 @@ async def create_commit(
         return result
     except HTTPException:
         raise
-    except Exception as e:
+    except (OSError, subprocess.SubprocessError) as e:
         raise HTTPException(status_code=500, detail=str(e))
+    except Exception as e:
+        logger.exception("Unexpected error in create_commit")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.post("/{project_id}/git/push")
@@ -492,8 +554,11 @@ async def push_to_remote(
         return result
     except HTTPException:
         raise
-    except Exception as e:
+    except (OSError, subprocess.SubprocessError) as e:
         raise HTTPException(status_code=500, detail=str(e))
+    except Exception as e:
+        logger.exception("Unexpected error in push_to_remote")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.post("/{project_id}/git/pull")
@@ -520,8 +585,11 @@ async def pull_from_remote(
         return result
     except HTTPException:
         raise
-    except Exception as e:
+    except (OSError, subprocess.SubprocessError) as e:
         raise HTTPException(status_code=500, detail=str(e))
+    except Exception as e:
+        logger.exception("Unexpected error in pull_from_remote")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 # ============================================================================
@@ -552,8 +620,11 @@ async def get_activities(
             activities = activity_tracker.get_activities(project_id, limit)
 
         return activities
+    except (ValueError, KeyError) as e:
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.exception("Unexpected error in get_activities")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.post("/{project_id}/activities")
@@ -580,8 +651,13 @@ async def track_activity(
         )
 
         return activity
+    except HTTPException:
+        raise
+    except (ValueError, KeyError) as e:
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.exception("Unexpected error in track_activity")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.get("/{project_id}/activities/stats")
@@ -590,8 +666,11 @@ async def get_activity_stats(project_id: int):
     try:
         stats = activity_tracker.get_stats(project_id)
         return stats
+    except (ValueError, KeyError) as e:
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.exception("Unexpected error in get_activity_stats")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 # ============================================================================
@@ -619,10 +698,8 @@ async def run_python_code(
     - Limited to current workspace directory
     - No network access (can be added with --network flag)
     """
-    import subprocess
     import tempfile
     import time
-    from pathlib import Path
 
     try:
         project_path = get_project_path(project_id)
@@ -667,21 +744,25 @@ async def run_python_code(
             # Clean up temp file
             try:
                 Path(tmp_path).unlink(missing_ok=True)
-            except Exception:
-                pass  # Ignore cleanup errors
+            except OSError:
+                pass  # Intentional: ignore cleanup errors
 
     except subprocess.TimeoutExpired as e:
         # Cleanup temp file on timeout
         try:
             Path(tmp_path).unlink(missing_ok=True)
-        except Exception:
-            pass
+        except OSError:
+            pass  # Intentional: ignore cleanup errors
         raise HTTPException(
             status_code=408,
             detail=f"Execution timeout (30s limit). Output: {e.stdout if hasattr(e, 'stdout') else 'N/A'}",
         )
+    except (OSError, subprocess.SubprocessError) as e:
+        logger.error(f"Python execution error: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.exception("Unexpected error in run_python_code")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.get("/{project_id}/git/graph")
