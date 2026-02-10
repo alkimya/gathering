@@ -3,8 +3,12 @@ Authentication module for GatheRing API.
 Implements JWT-based authentication with admin from .env and users from database.
 """
 
+import json
+import hashlib
+import logging
 import os
 import secrets
+from collections import OrderedDict
 from datetime import datetime, timedelta, timezone
 from typing import Optional, Annotated
 
@@ -16,6 +20,9 @@ from jwt.exceptions import PyJWTError
 from pydantic import BaseModel, EmailStr, Field
 
 from gathering.core.config import get_settings
+from gathering.api.dependencies import DatabaseService
+
+logger = logging.getLogger(__name__)
 
 
 # =============================================================================
@@ -29,6 +36,43 @@ oauth2_scheme_required = OAuth2PasswordBearer(tokenUrl="/auth/login", auto_error
 # JWT Configuration
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_HOURS = 24
+
+
+# =============================================================================
+# Audit Event Logging
+# =============================================================================
+
+
+def log_auth_event(
+    db,
+    event_type: str,
+    user_id: Optional[str] = None,
+    ip_address: Optional[str] = None,
+    message: str = "",
+    details: Optional[dict] = None,
+    severity: str = "info",
+) -> None:
+    """Log authentication event to audit.security_events table.
+
+    Fails silently (logs warning) to avoid blocking auth operations.
+    """
+    try:
+        db.execute(
+            "INSERT INTO audit.security_events "
+            "(event_type, severity, user_id, ip_address, message, details) "
+            "VALUES (%(event_type)s, %(severity)s, %(user_id)s, "
+            "%(ip_address)s::inet, %(message)s, %(details)s::jsonb)",
+            {
+                "event_type": event_type,
+                "severity": severity,
+                "user_id": user_id,
+                "ip_address": ip_address or "0.0.0.0",
+                "message": message,
+                "details": json.dumps(details or {}),
+            }
+        )
+    except Exception as e:
+        logger.warning(f"Failed to log auth event: {e}")
 
 
 # =============================================================================
@@ -175,101 +219,136 @@ def decode_token(token: str, check_blacklist: bool = True) -> Optional[TokenData
 
 
 # =============================================================================
-# Token Blacklist (for logout/revocation)
+# Token Blacklist (persistent with in-memory LRU cache)
 # =============================================================================
-
-# In-memory blacklist with automatic cleanup
-# Format: {token_hash: expiry_timestamp}
-_token_blacklist: dict[str, float] = {}
-_blacklist_cleanup_interval = 3600  # Clean up every hour
-_last_cleanup = 0.0
 
 
 def _get_token_hash(token: str) -> str:
     """Get a hash of the token for storage (don't store full tokens)."""
-    import hashlib
     return hashlib.sha256(token.encode()).hexdigest()[:32]
 
 
-def _cleanup_blacklist() -> None:
-    """Remove expired tokens from blacklist."""
-    global _last_cleanup
-    now = datetime.now(timezone.utc).timestamp()
+class TokenBlacklist:
+    """Two-layer token blacklist: in-memory LRU cache backed by PostgreSQL.
 
-    if now - _last_cleanup < _blacklist_cleanup_interval:
-        return
-
-    expired = [h for h, exp in _token_blacklist.items() if exp < now]
-    for h in expired:
-        _token_blacklist.pop(h, None)
-
-    _last_cleanup = now
-
-
-def blacklist_token(token: str) -> bool:
+    The cache provides sub-millisecond lookups for hot tokens.
+    The database ensures blacklist survives server restarts.
+    Write-through: every blacklist addition writes to both layers.
     """
-    Add a token to the blacklist (for logout).
 
-    The token will remain blacklisted until its original expiry time.
+    _instance: Optional['TokenBlacklist'] = None
 
-    Args:
-        token: JWT token to blacklist
+    def __init__(self, db=None, cache_max_size: int = 10000):
+        self._db = db
+        self._cache: OrderedDict[str, float] = OrderedDict()
+        self._cache_max_size = cache_max_size
 
-    Returns:
-        True if blacklisted successfully
-    """
+    @classmethod
+    def get_instance(cls, db=None) -> 'TokenBlacklist':
+        if cls._instance is None:
+            cls._instance = cls(db=db or DatabaseService.get_instance())
+        return cls._instance
+
+    @classmethod
+    def reset_instance(cls) -> None:
+        """Reset the singleton instance (for testing)."""
+        cls._instance = None
+
+    def _get_db(self):
+        if self._db is None:
+            self._db = DatabaseService.get_instance()
+        return self._db
+
+    def blacklist(self, token_hash: str, expires_at: float, user_id: str = None, reason: str = "logout") -> None:
+        """Add token to blacklist (write-through to cache and DB)."""
+        # Write to cache
+        self._cache[token_hash] = expires_at
+        if len(self._cache) > self._cache_max_size:
+            self._cache.popitem(last=False)
+
+        # Write to DB
+        try:
+            self._get_db().execute(
+                "INSERT INTO auth.token_blacklist (token_hash, expires_at, user_id, reason) "
+                "VALUES (%(hash)s, to_timestamp(%(exp)s), %(user_id)s, %(reason)s) "
+                "ON CONFLICT (token_hash) DO NOTHING",
+                {"hash": token_hash, "exp": expires_at, "user_id": user_id, "reason": reason}
+            )
+        except Exception as e:
+            logger.warning(f"Failed to persist token blacklist entry: {e}")
+
+    def is_blacklisted(self, token_hash: str) -> bool:
+        """Check if token is blacklisted. Cache first, then DB fallback."""
+        now = datetime.now(timezone.utc).timestamp()
+
+        # Check cache
+        if token_hash in self._cache:
+            exp = self._cache[token_hash]
+            if exp > now:
+                return True
+            else:
+                del self._cache[token_hash]
+                return False
+
+        # Check DB
+        try:
+            result = self._get_db().execute_one(
+                "SELECT EXTRACT(EPOCH FROM expires_at) as exp "
+                "FROM auth.token_blacklist "
+                "WHERE token_hash = %(hash)s AND expires_at > NOW()",
+                {"hash": token_hash}
+            )
+            if result:
+                # Promote to cache
+                self._cache[token_hash] = float(result["exp"])
+                if len(self._cache) > self._cache_max_size:
+                    self._cache.popitem(last=False)
+                return True
+        except Exception as e:
+            logger.warning(f"Failed to check token blacklist in DB: {e}")
+
+        return False
+
+    def get_stats(self) -> dict:
+        """Get blacklist statistics."""
+        try:
+            db_count = self._get_db().execute_one(
+                "SELECT COUNT(*) as count FROM auth.token_blacklist WHERE expires_at > NOW()"
+            )
+            db_total = db_count["count"] if db_count else 0
+        except Exception:
+            db_total = "unknown"
+
+        return {
+            "cache_size": len(self._cache),
+            "cache_max_size": self._cache_max_size,
+            "db_active_tokens": db_total,
+        }
+
+
+def blacklist_token(token: str, user_id: str = None) -> bool:
+    """Add a token to the blacklist (for logout)."""
     try:
-        # Decode without checking blacklist to get expiry
         payload = jwt.decode(token, get_secret_key(), algorithms=[ALGORITHM])
         exp = payload.get("exp", 0)
-
-        # Only blacklist if not already expired
         now = datetime.now(timezone.utc).timestamp()
         if exp > now:
             token_hash = _get_token_hash(token)
-            _token_blacklist[token_hash] = exp
-
-            # Periodic cleanup
-            _cleanup_blacklist()
-
+            TokenBlacklist.get_instance().blacklist(token_hash, exp, user_id=user_id)
         return True
     except PyJWTError:
         return False
 
 
 def is_token_blacklisted(token: str) -> bool:
-    """
-    Check if a token is blacklisted.
-
-    Args:
-        token: JWT token to check
-
-    Returns:
-        True if blacklisted, False otherwise
-    """
+    """Check if a token is blacklisted."""
     token_hash = _get_token_hash(token)
-    exp = _token_blacklist.get(token_hash)
-
-    if exp is None:
-        return False
-
-    # Check if blacklist entry has expired
-    now = datetime.now(timezone.utc).timestamp()
-    if exp < now:
-        # Clean up expired entry
-        _token_blacklist.pop(token_hash, None)
-        return False
-
-    return True
+    return TokenBlacklist.get_instance().is_blacklisted(token_hash)
 
 
 def get_blacklist_stats() -> dict:
     """Get statistics about the token blacklist."""
-    _cleanup_blacklist()
-    return {
-        "blacklisted_tokens": len(_token_blacklist),
-        "last_cleanup": datetime.fromtimestamp(_last_cleanup, tz=timezone.utc).isoformat() if _last_cleanup else None,
-    }
+    return TokenBlacklist.get_instance().get_stats()
 
 
 # =============================================================================
@@ -339,56 +418,49 @@ def verify_admin_credentials(email: str, password: str) -> Optional[AdminUser]:
 
 
 # =============================================================================
-# Database User Operations (to be implemented with actual DB)
+# Database User Operations
 # =============================================================================
 
 
-# In-memory user store for development (replace with database in production)
-_users_store: dict[str, dict] = {}
+async def get_user_by_email(email: str, db=None) -> Optional[dict]:
+    """Get user by email from database."""
+    if db is None:
+        db = DatabaseService.get_instance()
+    result = db.execute_one(
+        "SELECT external_id as id, email, name, password_hash, role, is_active, created_at "
+        "FROM auth.users WHERE email_lower = %(email)s",
+        {"email": email.lower()}
+    )
+    return result
 
 
-async def get_user_by_email(email: str) -> Optional[dict]:
-    """
-    Get user by email from database.
-
-    TODO: Replace with actual database query.
-    """
-    return _users_store.get(email.lower())
-
-
-async def get_user_by_id(user_id: str) -> Optional[dict]:
-    """
-    Get user by ID from database.
-
-    TODO: Replace with actual database query.
-    """
-    for user in _users_store.values():
-        if user.get("id") == user_id:
-            return user
-    return None
+async def get_user_by_id(user_id: str, db=None) -> Optional[dict]:
+    """Get user by external ID from database."""
+    if db is None:
+        db = DatabaseService.get_instance()
+    result = db.execute_one(
+        "SELECT external_id as id, email, name, password_hash, role, is_active, created_at "
+        "FROM auth.users WHERE external_id = %(user_id)s",
+        {"user_id": user_id}
+    )
+    return result
 
 
-async def create_user(user_data: UserCreate) -> dict:
-    """
-    Create a new user in the database.
-
-    TODO: Replace with actual database insert.
-    """
-    import uuid
-
-    user_id = str(uuid.uuid4())
-    user = {
-        "id": user_id,
-        "email": user_data.email.lower(),
-        "name": user_data.name,
-        "password_hash": get_password_hash(user_data.password),
-        "role": "user",
-        "is_active": True,
-        "created_at": datetime.now(timezone.utc),
-    }
-
-    _users_store[user_data.email.lower()] = user
-    return user
+async def create_user(user_data: UserCreate, db=None) -> dict:
+    """Create a new user in the database."""
+    if db is None:
+        db = DatabaseService.get_instance()
+    result = db.execute_one(
+        "INSERT INTO auth.users (email, name, password_hash, role, is_active) "
+        "VALUES (%(email)s, %(name)s, %(password_hash)s, 'user', TRUE) "
+        "RETURNING external_id as id, email, name, role, is_active, created_at",
+        {
+            "email": user_data.email,
+            "name": user_data.name,
+            "password_hash": get_password_hash(user_data.password),
+        }
+    )
+    return result
 
 
 # =============================================================================
@@ -473,38 +545,42 @@ async def require_admin(
 # =============================================================================
 
 
-async def authenticate_user(email: str, password: str) -> Optional[dict]:
+async def authenticate_user(email: str, password: str, db=None) -> Optional[dict]:
     """
     Authenticate a user by email and password.
     Checks admin credentials first, then database users.
+    Uses constant-time operations to prevent timing attacks.
 
     Returns:
         User dict with 'id', 'email', 'role' if valid, None otherwise
     """
-    # Check admin first
+    if db is None:
+        db = DatabaseService.get_instance()
+
+    # Check admin first (already constant-time)
     admin = verify_admin_credentials(email, password)
     if admin:
+        log_auth_event(db, "auth_success", user_id="admin", message=f"Admin login: {email}")
+        return {"id": admin.id, "email": admin.email, "name": admin.name, "role": admin.role}
+
+    # Always query database (even if we'll fail -- constant time)
+    user = await get_user_by_email(email, db)
+
+    # Always verify password (use dummy hash if user not found -- constant time)
+    dummy_hash = "$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/X4.VTtYWWQIe0u0S."
+    stored_hash = user.get("password_hash", "") if user else dummy_hash
+
+    password_valid = verify_password(password, stored_hash)
+
+    if user and password_valid and user.get("is_active", False):
+        log_auth_event(db, "auth_success", user_id=user["id"], message=f"User login: {email}")
         return {
-            "id": admin.id,
-            "email": admin.email,
-            "name": admin.name,
-            "role": admin.role,
+            "id": user["id"],
+            "email": user["email"],
+            "name": user.get("name", ""),
+            "role": user.get("role", "user"),
         }
 
-    # Check database users
-    user = await get_user_by_email(email)
-    if user is None:
-        return None
-
-    if not verify_password(password, user.get("password_hash", "")):
-        return None
-
-    if not user.get("is_active", False):
-        return None
-
-    return {
-        "id": user["id"],
-        "email": user["email"],
-        "name": user.get("name", ""),
-        "role": user.get("role", "user"),
-    }
+    # Log failure (don't reveal which part failed)
+    log_auth_event(db, "auth_failure", message=f"Failed login attempt for: {email}", severity="warning")
+    return None

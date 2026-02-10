@@ -6,7 +6,7 @@ Tests JWT token creation/validation, password hashing, and auth endpoints.
 import os
 import pytest
 from datetime import timedelta, datetime, timezone
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
 from fastapi.testclient import TestClient
 
@@ -17,9 +17,32 @@ from gathering.api.auth import (
     verify_password,
     verify_admin_credentials,
     authenticate_user,
+    TokenBlacklist,
     TokenData,
     ACCESS_TOKEN_EXPIRE_HOURS,
 )
+
+
+def _make_mock_db():
+    """Create a mock DatabaseService that silently accepts auth-related queries."""
+    mock_db = MagicMock()
+    mock_db.execute.return_value = []
+    mock_db.execute_one.return_value = None
+    return mock_db
+
+
+@pytest.fixture(autouse=True)
+def _reset_singletons():
+    """Reset auth singletons between tests to avoid cross-contamination."""
+    from gathering.api.dependencies import DatabaseService
+    old_instance = DatabaseService._instance
+    TokenBlacklist.reset_instance()
+    # Set a mock DB as the singleton so tests don't hit real DB
+    mock_db = _make_mock_db()
+    DatabaseService._instance = mock_db
+    yield
+    DatabaseService._instance = old_instance
+    TokenBlacklist.reset_instance()
 
 
 # =============================================================================
@@ -247,11 +270,12 @@ class TestAuthenticateUser:
         admin_password = "admin_password"
         admin_hash = get_password_hash(admin_password)
 
+        mock_db = _make_mock_db()
         with patch.dict(os.environ, {
             "ADMIN_EMAIL": admin_email,
             "ADMIN_PASSWORD_HASH": admin_hash,
         }):
-            result = await authenticate_user(admin_email, admin_password)
+            result = await authenticate_user(admin_email, admin_password, db=mock_db)
 
             assert result is not None
             assert result["id"] == "admin"
@@ -261,8 +285,9 @@ class TestAuthenticateUser:
     @pytest.mark.asyncio
     async def test_authenticate_invalid_credentials(self):
         """Test authentication fails with invalid credentials."""
+        mock_db = _make_mock_db()
         with patch.dict(os.environ, {}, clear=True):
-            result = await authenticate_user("nobody@test.com", "wrong")
+            result = await authenticate_user("nobody@test.com", "wrong", db=mock_db)
             assert result is None
 
 
@@ -275,9 +300,54 @@ class TestAuthEndpoints:
     """Tests for authentication API endpoints."""
 
     @pytest.fixture
-    def client(self):
-        """Create test client."""
+    def mock_db(self):
+        """Create a mock DB with user storage for endpoint tests."""
+        mock = _make_mock_db()
+        # Track registered users in-memory for endpoint test scenarios
+        users = {}
+
+        def mock_execute_one(sql, params=None):
+            params = params or {}
+            if "FROM auth.users WHERE email_lower" in sql:
+                email = params.get("email", "").lower()
+                return users.get(email)
+            if "FROM auth.users WHERE external_id" in sql:
+                user_id = params.get("user_id")
+                for u in users.values():
+                    if u.get("id") == user_id:
+                        return u
+                return None
+            if "INSERT INTO auth.users" in sql:
+                import uuid
+                email = params.get("email", "")
+                user_id = str(uuid.uuid4())
+                user = {
+                    "id": user_id,
+                    "email": email,
+                    "name": params.get("name", ""),
+                    "password_hash": params.get("password_hash", ""),
+                    "role": "user",
+                    "is_active": True,
+                    "created_at": datetime.now(timezone.utc),
+                }
+                users[email.lower()] = user
+                return user
+            if "audit.security_events" in sql:
+                return None
+            if "auth.token_blacklist" in sql:
+                return None
+            return None
+
+        mock.execute_one.side_effect = mock_execute_one
+        mock.execute.return_value = []
+        return mock
+
+    @pytest.fixture
+    def client(self, mock_db):
+        """Create test client with mocked DB."""
         from gathering.api.main import create_app
+        from gathering.api.dependencies import DatabaseService
+        DatabaseService._instance = mock_db
         app = create_app(enable_cors=False)
         return TestClient(app)
 

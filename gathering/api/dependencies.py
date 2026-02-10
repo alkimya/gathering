@@ -12,6 +12,8 @@ from gathering.agents import MemoryService, AgentWrapper
 # Import pycopg (local PostgreSQL wrapper)
 from pycopg import Database as PycopgDatabase, Config as PycopgConfig
 
+from gathering.utils.sql import safe_update_builder
+
 
 # =============================================================================
 # Database Connection
@@ -22,6 +24,13 @@ class DatabaseService:
     """Database service for API using pycopg."""
 
     _instance: Optional['DatabaseService'] = None
+
+    @classmethod
+    def get_instance(cls) -> 'DatabaseService':
+        """Get or create the singleton DatabaseService instance."""
+        if cls._instance is None:
+            cls._instance = cls()
+        return cls._instance
 
     def __init__(self):
         from dotenv import load_dotenv
@@ -399,29 +408,30 @@ class DatabaseService:
 
     def update_conversation(self, conv_id: int, data: dict) -> bool:
         """Update a conversation."""
-        updates = []
-        params = {'id': conv_id}
+        CONVERSATION_UPDATE_COLUMNS = {
+            "status", "turns_taken", "summary", "started_at", "completed_at",
+        }
 
-        if 'status' in data:
-            updates.append("status = %(status)s::conversation_status")
-            params['status'] = data['status']
-        if 'turns_taken' in data:
-            updates.append("turns_taken = %(turns_taken)s")
-            params['turns_taken'] = data['turns_taken']
-        if 'summary' in data:
-            updates.append("summary = %(summary)s")
-            params['summary'] = data['summary']
-        if 'started_at' in data:
-            updates.append("started_at = %(started_at)s")
-            params['started_at'] = data['started_at']
-        if 'completed_at' in data:
-            updates.append("completed_at = %(completed_at)s")
-            params['completed_at'] = data['completed_at']
+        update_dict = {}
+        for col in CONVERSATION_UPDATE_COLUMNS:
+            if col in data:
+                update_dict[col] = data[col]
 
-        if not updates:
+        if not update_dict:
             return False
 
-        sql = f"UPDATE communication.conversations SET {', '.join(updates)} WHERE id = %(id)s RETURNING id"
+        set_clause, params = safe_update_builder(
+            CONVERSATION_UPDATE_COLUMNS, update_dict,
+        )
+        params["id"] = conv_id
+
+        # Handle the conversation_status cast for status column
+        if "status" in update_dict:
+            set_clause = set_clause.replace(
+                "status = %(status)s", "status = %(status)s::conversation_status"
+            )
+
+        sql = f"UPDATE communication.conversations SET {set_clause} WHERE id = %(id)s RETURNING id"
         result = self.execute(sql, params)
         return len(result) > 0
 
