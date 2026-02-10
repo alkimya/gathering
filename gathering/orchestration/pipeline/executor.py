@@ -165,8 +165,14 @@ class PipelineExecutor:
                     continue
 
                 # 7b. Check if node should be skipped
+                # A node is skipped if: it was already marked by a false condition's
+                # downstream propagation, OR all its predecessors are skipped.
                 node_preds = predecessors.get(node_id, set())
-                if node_preds and all(p in skipped_nodes for p in node_preds):
+                should_skip = (
+                    node_id in skipped_nodes
+                    or (node_preds and all(p in skipped_nodes for p in node_preds))
+                )
+                if should_skip:
                     skipped_nodes.add(node_id)
                     await self._emit_event(
                         EventType.PIPELINE_NODE_SKIPPED,
@@ -424,19 +430,23 @@ class PipelineExecutor:
 
         A downstream node is skipped only if ALL its predecessors
         are either the false condition node or already in skipped_nodes.
+        The false condition node itself is treated as a "skip source"
+        but is NOT added to skipped_nodes (it executed successfully).
         """
+        # Include the condition node in the set of "skip sources" for checking
+        skip_sources = skipped_nodes | {condition_node_id}
         to_check = list(successors.get(condition_node_id, set()))
         while to_check:
             candidate = to_check.pop(0)
             if candidate in skipped_nodes:
                 continue
-            # Skip if all predecessors are skipped or are the false condition
+            # Skip if all predecessors are skip sources
             candidate_preds = predecessors.get(candidate, set())
             if candidate_preds and all(
-                p in skipped_nodes or p == condition_node_id
-                for p in candidate_preds
+                p in skip_sources for p in candidate_preds
             ):
                 skipped_nodes.add(candidate)
+                skip_sources.add(candidate)
                 # Also check this node's successors
                 to_check.extend(successors.get(candidate, set()))
 
