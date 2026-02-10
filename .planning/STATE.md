@@ -10,28 +10,28 @@ See: .planning/PROJECT.md (updated 2026-02-10)
 ## Current Position
 
 Phase: 1 of 5 (Auth + Security Foundation)
-Plan: 0 of 3 in current phase
-Status: Ready to plan
-Last activity: 2026-02-10 -- Roadmap created
+Plan: 1 of 3 in current phase
+Status: Executing phase
+Last activity: 2026-02-10 -- Completed 01-01 (Auth Foundation)
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [█░░░░░░░░░] 7%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 0
-- Average duration: -
-- Total execution time: 0 hours
+- Total plans completed: 1
+- Average duration: 4min
+- Total execution time: 0.07 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| - | - | - | - |
+| 01-auth-security-foundation | 1/3 | 4min | 4min |
 
 **Recent Trend:**
-- Last 5 plans: -
-- Trend: -
+- Last 5 plans: 01-01 (4min)
+- Trend: Starting
 
 *Updated after each plan completion*
 
@@ -46,6 +46,10 @@ Recent decisions affecting current work:
 - [Roadmap]: DB layer (pycopg) consolidated in Phase 1 since auth persistence depends on it
 - [Roadmap]: Tests accompany each phase rather than a separate testing phase
 - [Roadmap]: Performance optimization deferred until correctness established (Phases 1-3)
+- [01-01]: PyJWT[crypto] replaces python-jose (maintained, smaller, identical HS256 API)
+- [01-01]: Direct bcrypt replaces passlib CryptContext (eliminates wrapper dependency)
+- [01-01]: bcrypt upper bound unpinned to >=4.0.0 (passlib constraint no longer needed)
+- [01-01]: structlog JSON in production, console in debug; correlation ID middleware runs first
 
 ### Pending Todos
 
@@ -60,5 +64,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-10
-Stopped at: Roadmap created, ready for Phase 1 planning
-Resume file: None
+Stopped at: Completed 01-01-PLAN.md (Auth Foundation)
+Resume file: .planning/phases/01-auth-security-foundation/01-01-SUMMARY.md
