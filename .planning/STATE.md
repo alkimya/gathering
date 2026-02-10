@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-10)
 ## Current Position
 
 Phase: 3 of 5 (Schedule Execution & Tool Hardening)
-Plan: 2 of 3 in current phase
-Status: Executing phase 03
-Last activity: 2026-02-10 -- Completed 03-01 (Action Dispatchers & Crash Recovery)
+Plan: 3 of 3 in current phase (COMPLETE)
+Status: Phase 03 complete
+Last activity: 2026-02-10 -- Completed 03-03 (Scheduler Recovery & Tool Validation Tests)
 
-Progress: [████████░░] 67%
+Progress: [█████████░] 90%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 8
-- Average duration: 6.3min
-- Total execution time: 0.82 hours
+- Total plans completed: 9
+- Average duration: 6.0min
+- Total execution time: 0.92 hours
 
 **By Phase:**
 
@@ -29,10 +29,10 @@ Progress: [████████░░] 67%
 |-------|-------|-------|----------|
 | 01-auth-security-foundation | 3/3 | 24min | 8min |
 | 02-pipeline-execution-engine | 3/3 | 17min | 5.7min |
-| 03-schedule-execution-tool-hardening | 2/3 | 8min | 4min |
+| 03-schedule-execution-tool-hardening | 3/3 | 14min | 4.7min |
 
 **Recent Trend:**
-- Last 5 plans: 02-01 (4min), 02-02 (7min), 02-03 (6min), 03-02 (4min), 03-01 (4min)
+- Last 5 plans: 02-02 (7min), 02-03 (6min), 03-02 (4min), 03-01 (4min), 03-03 (6min)
 - Trend: Steady/Fast
 
 *Updated after each plan completion*
@@ -80,6 +80,9 @@ Recent decisions affecting current work:
 - [03-01]: action_config JSONB stores skill_config, tool_name, and tool_input for notification/API dispatchers
 - [03-01]: _insert_action SQL reconciled with actual DB schema columns (removed nonexistent columns)
 - [03-01]: goal field defaulted to empty string for backward compat with action_config-based actions
+- [03-03]: Lazy import patching: patch at source module path for deferred imports in dispatcher functions
+- [03-03]: MockSkill concrete subclass avoids loading real skill modules for SkillRegistry validation testing
+- [03-03]: Workspace path cache cleared per-test for isolation since module-level TTL dict persists between tests
 
 ### Pending Todos
 
@@ -94,5 +97,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-10
-Stopped at: Completed 03-01-PLAN.md
-Resume file: .planning/phases/03-schedule-execution-tool-hardening/03-01-SUMMARY.md
+Stopped at: Completed 03-03-PLAN.md (Phase 03 complete)
+Resume file: .planning/phases/03-schedule-execution-tool-hardening/03-03-SUMMARY.md
