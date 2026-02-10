@@ -46,12 +46,12 @@ Plans:
   2. A pipeline containing a cycle is rejected at validation time with a clear error before any node executes
   3. A failing node retries with exponential backoff up to a configured limit, then trips its circuit breaker -- subsequent calls to a broken node fail fast without retrying
   4. A running pipeline can be cancelled mid-execution and a pipeline exceeding its timeout is terminated -- neither leaves zombie tasks or locked resources
-**Plans**: TBD
+**Plans:** 3 plans
 
 Plans:
-- [ ] 02-01: TBD
-- [ ] 02-02: TBD
-- [ ] 02-03: TBD
+- [ ] 02-01-PLAN.md -- Pipeline validation: Pydantic models, DAG validator (graphlib.TopologicalSorter), pipeline EventTypes, DB migration for node-level tracking
+- [ ] 02-02-PLAN.md -- Pipeline executor: topological DAG traversal, node type dispatchers, circuit breaker, tenacity retry, API wiring
+- [ ] 02-03-PLAN.md -- Cancellation and timeout: PipelineRunManager, comprehensive validation and execution tests
 
 ### Phase 3: Schedule Execution + Tool Hardening
 **Goal**: Schedules dispatch real actions on their cron triggers, tools validate input before execution, and the scheduler survives crashes without running duplicates
