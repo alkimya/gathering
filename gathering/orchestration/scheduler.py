@@ -4,11 +4,12 @@ Enables cron-like scheduling for agent task execution.
 """
 
 import asyncio
+import json
 import logging
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from enum import Enum
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Callable, Coroutine, Dict, List, Optional, Set
 
 from croniter import croniter
 
@@ -43,9 +44,13 @@ class ScheduledAction:
     id: int
     agent_id: int
     name: str
-    goal: str
-    schedule_type: ScheduleType
+    goal: str = ""
+    schedule_type: ScheduleType = ScheduleType.CRON
     status: ScheduledActionStatus = ScheduledActionStatus.ACTIVE
+
+    # Action dispatch
+    action_type: str = "run_task"
+    action_config: Dict[str, Any] = field(default_factory=dict)
 
     # Schedule configuration
     cron_expression: Optional[str] = None
@@ -141,6 +146,8 @@ class ScheduledAction:
             "name": self.name,
             "description": self.description,
             "goal": self.goal,
+            "action_type": self.action_type,
+            "action_config": self.action_config,
             "schedule_type": self.schedule_type.value,
             "cron_expression": self.cron_expression,
             "interval_seconds": self.interval_seconds,
@@ -202,6 +209,198 @@ class ScheduledActionRun:
         }
 
 
+# ---------------------------------------------------------------------------
+# Action type dispatchers
+# ---------------------------------------------------------------------------
+# Module-level async functions that handle each action_type.
+# Dispatcher signature: async (action: ScheduledAction, context: dict) -> dict
+# context contains: {"db": DatabaseService, "event_bus": EventBus}
+
+
+async def _dispatch_run_task(
+    action: ScheduledAction, context: Dict[str, Any]
+) -> Dict[str, Any]:
+    """Dispatch run_task action via BackgroundTaskExecutor + AgentWrapper.
+
+    This is the original scheduler behavior, extracted into a dispatcher.
+    """
+    db_service = context.get("db")
+
+    executor = get_background_executor(db_service=db_service)
+
+    from gathering.agents.wrapper import AgentWrapper
+    agent = AgentWrapper(
+        agent_id=action.agent_id,
+        name=f"scheduled-{action.id}",
+    )
+
+    # Use goal from action_config if available, fall back to action.goal
+    goal = action.action_config.get("goal", action.goal) or action.goal
+
+    task_id = await executor.start_task(
+        goal=goal,
+        agent=agent,
+        max_steps=action.action_config.get("max_steps", action.max_steps),
+        timeout=timedelta(
+            seconds=action.action_config.get("timeout_seconds", action.timeout_seconds)
+        ),
+        metadata={
+            "scheduled_action_id": action.id,
+            "action_type": "run_task",
+        },
+    )
+
+    return {"task_id": task_id, "action_type": "run_task"}
+
+
+async def _dispatch_execute_pipeline(
+    action: ScheduledAction, context: Dict[str, Any]
+) -> Dict[str, Any]:
+    """Dispatch execute_pipeline action via PipelineExecutor."""
+    from gathering.orchestration.pipeline.executor import PipelineExecutor, PipelineRunManager
+    from gathering.orchestration.pipeline.models import PipelineDefinition
+
+    db_service = context.get("db")
+    event_bus = context.get("event_bus")
+
+    pipeline_id = action.action_config.get("pipeline_id") or action.metadata.get("pipeline_id")
+    if not pipeline_id:
+        return {"error": "No pipeline_id in action_config", "action_type": "execute_pipeline"}
+
+    # Load pipeline definition from DB
+    if not db_service:
+        return {"error": "No database service available", "action_type": "execute_pipeline"}
+
+    try:
+        row = db_service.execute_one(
+            """
+            SELECT id, name, definition
+            FROM circle.pipelines
+            WHERE id = %(pipeline_id)s
+            """,
+            {"pipeline_id": int(pipeline_id)},
+        )
+    except Exception as e:
+        logger.error("Failed to load pipeline %s: %s", pipeline_id, e)
+        return {"error": f"Failed to load pipeline: {e}", "action_type": "execute_pipeline"}
+
+    if not row:
+        return {"error": f"Pipeline {pipeline_id} not found", "action_type": "execute_pipeline"}
+
+    # Parse definition
+    definition_data = row.get("definition", {})
+    if isinstance(definition_data, str):
+        definition_data = json.loads(definition_data)
+    definition = PipelineDefinition(**definition_data)
+
+    # Create a run record for the pipeline
+    try:
+        run_row = db_service.execute_one(
+            """
+            INSERT INTO circle.pipeline_runs (pipeline_id, status, trigger_data)
+            VALUES (%(pipeline_id)s, 'running', %(trigger_data)s::jsonb)
+            RETURNING id
+            """,
+            {
+                "pipeline_id": int(pipeline_id),
+                "trigger_data": json.dumps(action.action_config),
+            },
+        )
+        run_id = run_row["id"] if run_row else 0
+    except Exception as e:
+        logger.warning("Failed to create pipeline run record: %s", e)
+        run_id = 0
+
+    executor = PipelineExecutor(
+        pipeline_id=int(pipeline_id),
+        definition=definition,
+        db=db_service,
+        event_bus=event_bus,
+    )
+
+    try:
+        result = await executor.execute(
+            run_id=run_id,
+            trigger_data=action.action_config,
+        )
+    except Exception as e:
+        logger.error("Pipeline %s execution failed: %s", pipeline_id, e)
+        return {"error": str(e), "action_type": "execute_pipeline", "pipeline_id": pipeline_id}
+
+    return {
+        "action_type": "execute_pipeline",
+        "pipeline_id": pipeline_id,
+        "run_id": run_id,
+        "status": result.get("status", "unknown"),
+    }
+
+
+async def _dispatch_send_notification(
+    action: ScheduledAction, context: Dict[str, Any]
+) -> Dict[str, Any]:
+    """Dispatch send_notification action via NotificationsSkill."""
+    try:
+        from gathering.skills.notifications.sender import NotificationsSkill
+    except ImportError:
+        logger.warning("NotificationsSkill not available, cannot dispatch send_notification")
+        return {"error": "NotificationsSkill not loadable", "action_type": "send_notification"}
+
+    try:
+        skill = NotificationsSkill(config=action.action_config.get("skill_config"))
+        tool_name = action.action_config.get("tool_name", "notify_webhook")
+        tool_input = action.action_config.get("tool_input", action.action_config)
+        result = skill.execute(tool_name, tool_input)
+        logger.info(
+            "Notification dispatched for action %s: %s",
+            action.id,
+            getattr(result, "message", str(result)),
+        )
+        # SkillResponse has .success and .message attributes
+        if hasattr(result, "success"):
+            return {
+                "action_type": "send_notification",
+                "success": result.success,
+                "message": result.message,
+            }
+        return {"action_type": "send_notification", "result": str(result)}
+    except Exception as e:
+        logger.error("send_notification failed for action %s: %s", action.id, e)
+        return {"error": str(e), "action_type": "send_notification"}
+
+
+async def _dispatch_call_api(
+    action: ScheduledAction, context: Dict[str, Any]
+) -> Dict[str, Any]:
+    """Dispatch call_api action via HTTPSkill."""
+    try:
+        from gathering.skills.http.client import HTTPSkill
+    except ImportError:
+        logger.warning("HTTPSkill not available, cannot dispatch call_api")
+        return {"error": "HTTPSkill not loadable", "action_type": "call_api"}
+
+    try:
+        skill = HTTPSkill()
+        tool_name = action.action_config.get("tool_name", "http_get")
+        tool_input = action.action_config.get("tool_input", action.action_config)
+        result = skill.execute(tool_name, tool_input)
+        logger.info("API call dispatched for action %s", action.id)
+        if isinstance(result, dict):
+            return {"action_type": "call_api", **result}
+        return {"action_type": "call_api", "result": str(result)}
+    except Exception as e:
+        logger.error("call_api failed for action %s: %s", action.id, e)
+        return {"error": str(e), "action_type": "call_api"}
+
+
+# Dispatch table mapping action_type strings to async handler functions
+ACTION_DISPATCHERS: Dict[str, Callable[..., Coroutine]] = {
+    "run_task": _dispatch_run_task,
+    "execute_pipeline": _dispatch_execute_pipeline,
+    "send_notification": _dispatch_send_notification,
+    "call_api": _dispatch_call_api,
+}
+
+
 class Scheduler:
     """
     Scheduler for running scheduled actions.
@@ -213,6 +412,7 @@ class Scheduler:
     - Event-triggered execution
     - Concurrent execution control
     - Retry on failure
+    - Crash recovery with deduplication
     """
 
     def __init__(
@@ -269,6 +469,7 @@ class Scheduler:
 
         self._running = True
         await self._load_actions()
+        await self._recover_missed_runs()
         self._task = asyncio.create_task(self._run_loop())
         logger.info("Scheduler started")
 
@@ -321,14 +522,30 @@ class Scheduler:
             logger.error(f"Failed to load scheduled actions: {e}")
 
     def _row_to_action(self, row) -> ScheduledAction:
-        """Convert database row to ScheduledAction."""
+        """Convert database row to ScheduledAction.
+
+        Handles both the current DB schema (action_type, action_config) and
+        legacy rows that may only have goal/metadata fields.
+        """
+        # Read action_config -- may be a dict (from JSONB) or a string
+        raw_config = row.get("action_config", {})
+        if isinstance(raw_config, str):
+            try:
+                raw_config = json.loads(raw_config)
+            except (json.JSONDecodeError, TypeError):
+                raw_config = {}
+        if raw_config is None:
+            raw_config = {}
+
         return ScheduledAction(
             id=row["id"],
             agent_id=row["agent_id"],
             circle_id=row.get("circle_id"),
             name=row["name"],
             description=row.get("description"),
-            goal=row["goal"],
+            goal=row.get("goal", ""),
+            action_type=row.get("action_type", "run_task"),
+            action_config=raw_config,
             schedule_type=ScheduleType(row["schedule_type"]),
             cron_expression=row.get("cron_expression"),
             interval_seconds=row.get("interval_seconds"),
@@ -350,6 +567,65 @@ class Scheduler:
             metadata=row.get("metadata", {}),
             created_at=row.get("created_at", datetime.now(timezone.utc)),
         )
+
+    async def _recover_missed_runs(self):
+        """Detect and recover missed runs after crash/restart.
+
+        For each ACTIVE action whose next_run_at is in the past:
+        - Check scheduled_action_runs for an existing run in the missed window.
+        - If a run exists (completed/running/pending), skip and advance next_run_at.
+        - If no run exists, execute as a recovery run.
+
+        Wrapped in try/except to never prevent scheduler startup.
+        """
+        try:
+            now = datetime.now(timezone.utc)
+            for action in list(self._actions.values()):
+                if action.status != ScheduledActionStatus.ACTIVE:
+                    continue
+                if not action.next_run_at or action.next_run_at >= now:
+                    continue
+
+                # Check for existing runs in the missed window
+                has_existing_run = False
+                if self.db_service:
+                    try:
+                        window_start = action.next_run_at - timedelta(seconds=60)
+                        rows = self.db_service.execute(
+                            """
+                            SELECT id FROM circle.scheduled_action_runs
+                            WHERE scheduled_action_id = %(action_id)s
+                              AND triggered_at >= %(window_start)s
+                              AND status IN ('completed', 'running', 'pending')
+                            LIMIT 1
+                            """,
+                            {
+                                "action_id": action.id,
+                                "window_start": window_start,
+                            },
+                        )
+                        has_existing_run = bool(rows)
+                    except Exception as e:
+                        logger.warning(
+                            "Failed to check missed runs for action %s: %s",
+                            action.id, e,
+                        )
+
+                if has_existing_run:
+                    logger.info(
+                        "Action %s already has run for missed window, skipping",
+                        action.id,
+                    )
+                    action.next_run_at = action.calculate_next_run()
+                    await self._persist_action(action)
+                else:
+                    logger.info(
+                        "Action %s missed, executing recovery run",
+                        action.id,
+                    )
+                    await self._execute_action(action, triggered_by="recovery")
+        except Exception as e:
+            logger.error("Crash recovery failed (non-fatal): %s", e)
 
     async def _run_loop(self):
         """Main scheduler loop."""
@@ -375,16 +651,23 @@ class Scheduler:
                         logger.debug(f"Action {action.id} already running, skipping")
                         continue
 
+                    # Add to running set BEFORE creating the task to prevent
+                    # race condition where duplicate tasks could be created
+                    # between the check above and _execute_action's lock acquisition.
+                    self._running_actions.add(action.id)
                     asyncio.create_task(self._execute_action(action))
 
     async def _execute_action(self, action: ScheduledAction, triggered_by: str = "scheduler"):
-        """Execute a scheduled action."""
+        """Execute a scheduled action using the dispatch table."""
         action_id = action.id
 
         async with self._lock:
             if not action.allow_concurrent and action_id in self._running_actions:
-                return
-            self._running_actions.add(action_id)
+                # Already marked by _check_and_execute_due_actions -- skip double-check
+                # unless this was called from outside the check loop (event, manual, recovery)
+                pass
+            else:
+                self._running_actions.add(action_id)
 
         try:
             logger.info(f"Executing scheduled action {action_id}: {action.name}")
@@ -400,31 +683,32 @@ class Scheduler:
                 "triggered_by": triggered_by,
             })
 
-            # Start background task
-            executor = get_background_executor(db_service=self.db_service)
+            # Determine action type and dispatch
+            action_type = action.action_type or "run_task"
+            handler = ACTION_DISPATCHERS.get(action_type)
 
-            # Get agent (simplified - in real implementation would load from DB)
-            from gathering.agents.wrapper import AgentWrapper
-            agent = AgentWrapper(
-                agent_id=action.agent_id,
-                name=f"scheduled-{action_id}",
-            )
+            if handler is None:
+                error_msg = f"Unknown action_type '{action_type}' for action {action_id}"
+                logger.error(error_msg)
+                await self.event_bus.emit(EventType.SCHEDULED_ACTION_FAILED, {
+                    "action_id": action_id,
+                    "error": error_msg,
+                })
+                return
 
-            task_id = await executor.start_task(
-                goal=action.goal,
-                agent=agent,
-                max_steps=action.max_steps,
-                timeout=timedelta(seconds=action.timeout_seconds),
-                metadata={
-                    "scheduled_action_id": action_id,
-                    "run_id": run.id if run else None,
-                    "triggered_by": triggered_by,
-                },
-            )
+            # Build context for dispatcher
+            dispatch_context = {
+                "db": self.db_service,
+                "event_bus": self.event_bus,
+            }
 
-            # Update run with task ID
-            if run and task_id:
-                await self._update_run_task(run.id, task_id)
+            result = await handler(action, dispatch_context)
+
+            # Update run with result info
+            if run and result:
+                task_id = result.get("task_id")
+                if task_id:
+                    await self._update_run_task(run.id, task_id)
 
             # Update action's next run time
             action.last_run_at = datetime.now(timezone.utc)
@@ -432,13 +716,11 @@ class Scheduler:
             action.execution_count += 1
             await self._persist_action(action)
 
-            # Wait for completion (optional, depends on use case)
-            # For now, we just fire and forget
-
             await self.event_bus.emit(EventType.SCHEDULED_ACTION_STARTED, {
                 "action_id": action_id,
-                "task_id": task_id,
+                "action_type": action_type,
                 "run_id": run.id if run else None,
+                "result": result,
             })
 
         except Exception as e:
@@ -567,42 +849,33 @@ class Scheduler:
 
     async def _insert_action(self, action: ScheduledAction) -> int:
         """Insert action into database."""
-        import json
         row = self.db_service.execute_one("""
             INSERT INTO circle.scheduled_actions
-            (agent_id, circle_id, name, description, schedule_type,
-             cron_expression, interval_seconds, event_trigger, goal,
-             max_steps, timeout_seconds, retry_on_failure, max_retries,
-             retry_delay_seconds, allow_concurrent, start_date, end_date,
-             max_executions, next_run_at, tags, metadata)
-            VALUES (%(agent_id)s, %(circle_id)s, %(name)s, %(description)s, %(schedule_type)s,
-                    %(cron_expression)s, %(interval_seconds)s, %(event_trigger)s, %(goal)s,
-                    %(max_steps)s, %(timeout_seconds)s, %(retry_on_failure)s, %(max_retries)s,
-                    %(retry_delay_seconds)s, %(allow_concurrent)s, %(start_date)s, %(end_date)s,
-                    %(max_executions)s, %(next_run_at)s, %(tags)s, %(metadata)s)
+            (agent_id, circle_id, name, description, action_type, action_config,
+             schedule_type, cron_expression, interval_seconds,
+             retry_on_failure, max_retries, retry_delay_seconds,
+             max_executions, next_run_at)
+            VALUES (%(agent_id)s, %(circle_id)s, %(name)s, %(description)s,
+                    %(action_type)s, %(action_config)s::jsonb,
+                    %(schedule_type)s, %(cron_expression)s, %(interval_seconds)s,
+                    %(retry_on_failure)s, %(max_retries)s, %(retry_delay_seconds)s,
+                    %(max_executions)s, %(next_run_at)s)
             RETURNING id
         """, {
             'agent_id': action.agent_id,
             'circle_id': action.circle_id,
             'name': action.name,
             'description': action.description,
+            'action_type': action.action_type,
+            'action_config': json.dumps(action.action_config) if action.action_config else '{}',
             'schedule_type': action.schedule_type.value,
             'cron_expression': action.cron_expression,
             'interval_seconds': action.interval_seconds,
-            'event_trigger': action.event_trigger,
-            'goal': action.goal,
-            'max_steps': action.max_steps,
-            'timeout_seconds': action.timeout_seconds,
             'retry_on_failure': action.retry_on_failure,
             'max_retries': action.max_retries,
             'retry_delay_seconds': action.retry_delay_seconds,
-            'allow_concurrent': action.allow_concurrent,
-            'start_date': action.start_date,
-            'end_date': action.end_date,
             'max_executions': action.max_executions,
             'next_run_at': action.next_run_at,
-            'tags': action.tags,
-            'metadata': json.dumps(action.metadata) if action.metadata else '{}',
         })
         return row["id"]
 
