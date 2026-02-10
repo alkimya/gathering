@@ -30,12 +30,12 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. No SQL query in the codebase constructs WHERE/SET clauses using f-strings with user-supplied values -- all user input flows through parameterized statements
   4. Auth endpoints respond in constant time regardless of whether the email exists -- timing attacks cannot enumerate accounts
   5. File-serving endpoints reject encoded path traversal attempts (../, %2e%2e/, symlink escape) and return 403, not file contents
-**Plans**: TBD
+**Plans:** 3 plans
 
 Plans:
-- [ ] 01-01: TBD
-- [ ] 01-02: TBD
-- [ ] 01-03: TBD
+- [ ] 01-01-PLAN.md -- Foundation: library swaps (PyJWT, bcrypt), exception classes, structlog config, auth migration SQL
+- [ ] 01-02-PLAN.md -- Auth persistence: DB-backed users and token blacklist, constant-time auth, audit event logging
+- [ ] 01-03-PLAN.md -- Security hardening: safe_update_builder, path traversal defense, bare exception fixes, comprehensive tests
 
 ### Phase 2: Pipeline Execution Engine
 **Goal**: Pipelines execute real work -- DAG traversal runs agent tasks, conditions gate execution, errors recover or fail cleanly, and runs are cancellable
@@ -106,7 +106,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Auth + Security Foundation | 0/3 | Not started | - |
+| 1. Auth + Security Foundation | 0/3 | Planned | - |
 | 2. Pipeline Execution Engine | 0/3 | Not started | - |
 | 3. Schedule Execution + Tool Hardening | 0/3 | Not started | - |
 | 4. Performance Optimization | 0/3 | Not started | - |
