@@ -5,33 +5,34 @@
 See: .planning/PROJECT.md (updated 2026-02-10)
 
 **Core value:** Every existing feature works for real -- auth persists, pipelines execute, schedules run, security is solid -- so GatheRing can be deployed to production with confidence.
-**Current focus:** Phase 1 - Auth + Security Foundation
+**Current focus:** Phase 2 - Pipeline Execution Engine
 
 ## Current Position
 
-Phase: 1 of 5 (Auth + Security Foundation)
-Plan: 3 of 3 in current phase
-Status: Phase 1 complete
-Last activity: 2026-02-10 -- Completed 01-03 (Security Hardening)
+Phase: 2 of 5 (Pipeline Execution Engine)
+Plan: 1 of 3 in current phase
+Status: Plan 02-01 complete
+Last activity: 2026-02-10 -- Completed 02-01 (Pipeline Validation + Data Models)
 
-Progress: [██░░░░░░░░] 20%
+Progress: [███░░░░░░░] 27%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 3
-- Average duration: 8min
-- Total execution time: 0.40 hours
+- Total plans completed: 4
+- Average duration: 7min
+- Total execution time: 0.47 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-auth-security-foundation | 3/3 | 24min | 8min |
+| 02-pipeline-execution-engine | 1/3 | 4min | 4min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (4min), 01-02 (8min), 01-03 (12min)
-- Trend: Ramping up
+- Last 5 plans: 01-01 (4min), 01-02 (8min), 01-03 (12min), 02-01 (4min)
+- Trend: Steady
 
 *Updated after each plan completion*
 
@@ -57,6 +58,10 @@ Recent decisions affecting current work:
 - [01-03]: safe_update_builder validates column names against allowlist before constructing SET clause
 - [01-03]: validate_file_path double-decodes URLs to catch double-encoding path traversal attacks
 - [01-03]: Bare exceptions in security paths split into specific catch + generic logger.exception fallback
+- [02-01]: graphlib.TopologicalSorter (stdlib) for cycle detection -- zero-dependency, CycleError provides cycle path info
+- [02-01]: PipelineEdge uses Field(alias="from") with populate_by_name=True for JSON reserved words
+- [02-01]: Node config stored as generic dict; type-specific config models available for targeted validation
+- [02-01]: Orphan nodes logged as warnings, not validation errors
 
 ### Pending Todos
 
@@ -71,5 +76,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-10
-Stopped at: Completed 01-03-PLAN.md (Security Hardening) -- Phase 1 complete
-Resume file: .planning/phases/01-auth-security-foundation/01-03-SUMMARY.md
+Stopped at: Completed 02-01-PLAN.md (Pipeline Validation + Data Models)
+Resume file: .planning/phases/02-pipeline-execution-engine/02-01-SUMMARY.md
