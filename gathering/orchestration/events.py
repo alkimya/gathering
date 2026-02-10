@@ -85,6 +85,18 @@ class EventType(Enum):
     SCHEDULED_ACTION_SCHEDULER_STARTED = "scheduled_action.scheduler_started"
     SCHEDULED_ACTION_SCHEDULER_STOPPED = "scheduled_action.scheduler_stopped"
 
+    # Pipeline execution events
+    PIPELINE_RUN_STARTED = "pipeline_run.started"
+    PIPELINE_RUN_COMPLETED = "pipeline_run.completed"
+    PIPELINE_RUN_FAILED = "pipeline_run.failed"
+    PIPELINE_RUN_CANCELLED = "pipeline_run.cancelled"
+    PIPELINE_RUN_TIMEOUT = "pipeline_run.timeout"
+    PIPELINE_NODE_STARTED = "pipeline_node.started"
+    PIPELINE_NODE_COMPLETED = "pipeline_node.completed"
+    PIPELINE_NODE_FAILED = "pipeline_node.failed"
+    PIPELINE_NODE_SKIPPED = "pipeline_node.skipped"
+    PIPELINE_NODE_RETRYING = "pipeline_node.retrying"
+
 
 @dataclass
 class Event:
