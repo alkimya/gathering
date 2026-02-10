@@ -1,7 +1,7 @@
 # Requirements: GatheRing Consolidation
 
 **Defined:** 2026-02-10
-**Core Value:** Every existing feature works for real — auth persists, pipelines execute, schedules run, security is solid — so GatheRing can be deployed to production with confidence.
+**Core Value:** Every existing feature works for real -- auth persists, pipelines execute, schedules run, security is solid -- so GatheRing can be deployed to production with confidence.
 
 ## v1 Requirements
 
@@ -11,7 +11,7 @@ Requirements for production-ready deployment. Each maps to roadmap phases.
 
 - [ ] **SEC-01**: User accounts persist in PostgreSQL via pycopg, surviving server restarts
 - [ ] **SEC-02**: Token blacklist persists in database, preventing reuse of revoked tokens after restart
-- [ ] **SEC-03**: All SQL queries use parameterized statements — no f-string SQL construction with user input
+- [ ] **SEC-03**: All SQL queries use parameterized statements -- no f-string SQL construction with user input
 - [ ] **SEC-04**: All auth comparisons use constant-time operations (timing-safe), preventing account enumeration
 - [ ] **SEC-05**: File serving validates paths against traversal attacks (encoded paths, symlinks)
 - [ ] **SEC-06**: Auth events (login, logout, token creation, failed attempts) are logged to audit table
@@ -46,7 +46,7 @@ Requirements for production-ready deployment. Each maps to roadmap phases.
 ### Database Layer
 
 - [ ] **DBLR-01**: Database layer uses pycopg (high-level PostgreSQL wrapper) as the single DB driver for both sync and async
-- [ ] **DBLR-02**: asyncpg and psycopg2-binary dependencies are removed — pycopg handles all PostgreSQL access
+- [ ] **DBLR-02**: asyncpg and psycopg2-binary dependencies are removed -- pycopg handles all PostgreSQL access
 
 ### Test Coverage
 
@@ -83,7 +83,7 @@ Explicitly excluded. Documented to prevent scope creep.
 | Feature | Reason |
 |---------|--------|
 | New LLM provider integrations | Existing providers (Anthropic, OpenAI, DeepSeek, Ollama) are sufficient |
-| New skills or capabilities | Consolidation only — fix what exists |
+| New skills or capabilities | Consolidation only -- fix what exists |
 | Mobile app | Web-first, mobile is v2+ |
 | Frontend refactoring | Dashboard works, leave it |
 | Kafka/RabbitMQ event bus | Over-engineering for current scale, PostgreSQL LISTEN/NOTIFY suffices |
@@ -96,43 +96,43 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SEC-01 | Phase ? | Pending |
-| SEC-02 | Phase ? | Pending |
-| SEC-03 | Phase ? | Pending |
-| SEC-04 | Phase ? | Pending |
-| SEC-05 | Phase ? | Pending |
-| SEC-06 | Phase ? | Pending |
-| SEC-07 | Phase ? | Pending |
-| FEAT-01 | Phase ? | Pending |
-| FEAT-02 | Phase ? | Pending |
-| FEAT-03 | Phase ? | Pending |
-| FEAT-04 | Phase ? | Pending |
-| FEAT-05 | Phase ? | Pending |
-| FEAT-06 | Phase ? | Pending |
-| FEAT-07 | Phase ? | Pending |
-| FEAT-08 | Phase ? | Pending |
-| PERF-01 | Phase ? | Pending |
-| PERF-02 | Phase ? | Pending |
-| PERF-03 | Phase ? | Pending |
-| PERF-04 | Phase ? | Pending |
-| PERF-05 | Phase ? | Pending |
-| RLBL-01 | Phase ? | Pending |
-| RLBL-02 | Phase ? | Pending |
-| RLBL-03 | Phase ? | Pending |
-| RLBL-04 | Phase ? | Pending |
-| DBLR-01 | Phase ? | Pending |
-| DBLR-02 | Phase ? | Pending |
-| TEST-01 | Phase ? | Pending |
-| TEST-02 | Phase ? | Pending |
-| TEST-03 | Phase ? | Pending |
-| TEST-04 | Phase ? | Pending |
-| TEST-05 | Phase ? | Pending |
+| DBLR-01 | Phase 1 | Pending |
+| DBLR-02 | Phase 1 | Pending |
+| SEC-01 | Phase 1 | Pending |
+| SEC-02 | Phase 1 | Pending |
+| SEC-03 | Phase 1 | Pending |
+| SEC-04 | Phase 1 | Pending |
+| SEC-05 | Phase 1 | Pending |
+| SEC-06 | Phase 1 | Pending |
+| RLBL-01 | Phase 1 | Pending |
+| RLBL-02 | Phase 1 | Pending |
+| TEST-01 | Phase 1 | Pending |
+| TEST-03 | Phase 1 | Pending |
+| FEAT-01 | Phase 2 | Pending |
+| FEAT-02 | Phase 2 | Pending |
+| FEAT-03 | Phase 2 | Pending |
+| FEAT-04 | Phase 2 | Pending |
+| TEST-02 | Phase 2 | Pending |
+| FEAT-05 | Phase 3 | Pending |
+| FEAT-06 | Phase 3 | Pending |
+| FEAT-07 | Phase 3 | Pending |
+| FEAT-08 | Phase 3 | Pending |
+| RLBL-04 | Phase 3 | Pending |
+| TEST-05 | Phase 3 | Pending |
+| PERF-01 | Phase 4 | Pending |
+| PERF-02 | Phase 4 | Pending |
+| PERF-03 | Phase 4 | Pending |
+| PERF-04 | Phase 4 | Pending |
+| PERF-05 | Phase 4 | Pending |
+| TEST-04 | Phase 4 | Pending |
+| RLBL-03 | Phase 5 | Pending |
+| SEC-07 | Phase 5 | Pending |
 
 **Coverage:**
 - v1 requirements: 31 total
-- Mapped to phases: 0
-- Unmapped: 31
+- Mapped to phases: 31
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-10*
-*Last updated: 2026-02-10 after initial definition*
+*Last updated: 2026-02-10 after roadmap creation*
