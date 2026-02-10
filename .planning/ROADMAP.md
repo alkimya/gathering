@@ -13,7 +13,7 @@ GatheRing has a sound architecture with 1071 tests but critical production gaps:
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Auth + Security Foundation** - Persistent auth, SQL injection elimination, security hardening, DB layer consolidation
-- [ ] **Phase 2: Pipeline Execution Engine** - DAG traversal, node execution, validation, error recovery, cancellation
+- [x] **Phase 2: Pipeline Execution Engine** - DAG traversal, node execution, validation, error recovery, cancellation
 - [ ] **Phase 3: Schedule Execution + Tool Hardening** - Action dispatch, crash recovery, tool validation, async tools, workspace paths
 - [ ] **Phase 4: Performance Optimization** - Async DB, N+1 elimination, rate limiting, event batching, cache bounds
 - [ ] **Phase 5: Multi-Instance + Production Hardening** - Distributed coordination, graceful shutdown
@@ -49,9 +49,9 @@ Plans:
 **Plans:** 3 plans
 
 Plans:
-- [ ] 02-01-PLAN.md -- Pipeline validation: Pydantic models, DAG validator (graphlib.TopologicalSorter), pipeline EventTypes, DB migration for node-level tracking
-- [ ] 02-02-PLAN.md -- Pipeline executor: topological DAG traversal, node type dispatchers, circuit breaker, tenacity retry, API wiring
-- [ ] 02-03-PLAN.md -- Cancellation and timeout: PipelineRunManager, comprehensive validation and execution tests
+- [x] 02-01-PLAN.md -- Pipeline validation: Pydantic models, DAG validator (graphlib.TopologicalSorter), pipeline EventTypes, DB migration for node-level tracking
+- [x] 02-02-PLAN.md -- Pipeline executor: topological DAG traversal, node type dispatchers, circuit breaker, tenacity retry, API wiring
+- [x] 02-03-PLAN.md -- Cancellation and timeout: PipelineRunManager, comprehensive validation and execution tests
 
 ### Phase 3: Schedule Execution + Tool Hardening
 **Goal**: Schedules dispatch real actions on their cron triggers, tools validate input before execution, and the scheduler survives crashes without running duplicates
@@ -107,7 +107,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Auth + Security Foundation | 3/3 | ✓ Complete | 2026-02-10 |
-| 2. Pipeline Execution Engine | 0/3 | Not started | - |
+| 2. Pipeline Execution Engine | 3/3 | ✓ Complete | 2026-02-10 |
 | 3. Schedule Execution + Tool Hardening | 0/3 | Not started | - |
 | 4. Performance Optimization | 0/3 | Not started | - |
 | 5. Multi-Instance + Production Hardening | 0/1 | Not started | - |
