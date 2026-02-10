@@ -2,10 +2,16 @@
 Pipeline execution package.
 
 Provides pipeline DAG validation, Pydantic models for pipeline definition,
-and utilities for parsing and validating pipeline configurations.
+execution engine, node dispatchers, and circuit breaker.
 
 Usage:
     from gathering.orchestration.pipeline import (
+        PipelineExecutor,
+        CircuitBreaker,
+        CircuitState,
+        NodeExecutionError,
+        NodeConfigError,
+        dispatch_node,
         validate_pipeline_dag,
         get_execution_order,
         parse_pipeline_definition,
@@ -16,11 +22,21 @@ Usage:
     )
 """
 
+from gathering.orchestration.pipeline.circuit_breaker import (
+    CircuitBreaker,
+    CircuitState,
+)
+from gathering.orchestration.pipeline.executor import PipelineExecutor
 from gathering.orchestration.pipeline.models import (
     NodeExecutionResult,
     PipelineDefinition,
     PipelineEdge,
     PipelineNode,
+)
+from gathering.orchestration.pipeline.nodes import (
+    NodeConfigError,
+    NodeExecutionError,
+    dispatch_node,
 )
 from gathering.orchestration.pipeline.validator import (
     get_execution_order,
@@ -29,6 +45,12 @@ from gathering.orchestration.pipeline.validator import (
 )
 
 __all__ = [
+    "PipelineExecutor",
+    "CircuitBreaker",
+    "CircuitState",
+    "NodeExecutionError",
+    "NodeConfigError",
+    "dispatch_node",
     "validate_pipeline_dag",
     "get_execution_order",
     "parse_pipeline_definition",
