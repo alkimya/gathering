@@ -12,16 +12,16 @@ See: .planning/PROJECT.md (updated 2026-02-10)
 Phase: 3 of 5 (Schedule Execution & Tool Hardening)
 Plan: 2 of 3 in current phase
 Status: Executing phase 03
-Last activity: 2026-02-10 -- Completed 03-02 (Tool Registry Hardening)
+Last activity: 2026-02-10 -- Completed 03-01 (Action Dispatchers & Crash Recovery)
 
-Progress: [████████░░] 60%
+Progress: [████████░░] 67%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 7
-- Average duration: 6.6min
-- Total execution time: 0.75 hours
+- Total plans completed: 8
+- Average duration: 6.3min
+- Total execution time: 0.82 hours
 
 **By Phase:**
 
@@ -29,10 +29,10 @@ Progress: [████████░░] 60%
 |-------|-------|-------|----------|
 | 01-auth-security-foundation | 3/3 | 24min | 8min |
 | 02-pipeline-execution-engine | 3/3 | 17min | 5.7min |
-| 03-schedule-execution-tool-hardening | 1/3 | 4min | 4min |
+| 03-schedule-execution-tool-hardening | 2/3 | 8min | 4min |
 
 **Recent Trend:**
-- Last 5 plans: 02-01 (4min), 02-02 (7min), 02-03 (6min), 03-02 (4min)
+- Last 5 plans: 02-01 (4min), 02-02 (7min), 02-03 (6min), 03-02 (4min), 03-01 (4min)
 - Trend: Steady/Fast
 
 *Updated after each plan completion*
@@ -75,6 +75,11 @@ Recent decisions affecting current work:
 - [03-02]: ToolRegistry.execute() raises RuntimeError for async tools -- sync callers must not silently block
 - [03-02]: Workspace path uses project.projects.repository_path (actual DB column) -- no migration needed
 - [03-02]: Workspace cache uses monotonic clock TTL dict (5min) instead of functools.lru_cache
+- [03-01]: Dispatcher functions are module-level async, not Scheduler methods, keeping dispatch table clean and testable
+- [03-01]: Pipeline action nodes use lightweight local dispatch instead of importing scheduler dispatchers to avoid coupling
+- [03-01]: action_config JSONB stores skill_config, tool_name, and tool_input for notification/API dispatchers
+- [03-01]: _insert_action SQL reconciled with actual DB schema columns (removed nonexistent columns)
+- [03-01]: goal field defaulted to empty string for backward compat with action_config-based actions
 
 ### Pending Todos
 
@@ -89,5 +94,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-10
-Stopped at: Completed 03-02-PLAN.md
-Resume file: .planning/phases/03-schedule-execution-tool-hardening/03-02-SUMMARY.md
+Stopped at: Completed 03-01-PLAN.md
+Resume file: .planning/phases/03-schedule-execution-tool-hardening/03-01-SUMMARY.md
