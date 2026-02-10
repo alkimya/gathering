@@ -7,6 +7,7 @@ retrying failures with exponential backoff via tenacity, and tripping
 circuit breakers after retry exhaustion.
 """
 
+import asyncio
 import json
 import logging
 import time
@@ -525,3 +526,108 @@ class PipelineExecutor:
             logger.warning(
                 "Failed to emit event %s: %s", event_type.value, e
             )
+
+
+class PipelineRunManager:
+    """Manages active pipeline runs with cancellation and timeout enforcement.
+
+    Tracks running pipelines so they can be cancelled by run_id.
+    Enforces per-pipeline timeout using asyncio.timeout.
+    Cleans up resources on cancellation/timeout.
+    """
+
+    def __init__(self) -> None:
+        self._running: dict[int, asyncio.Task] = {}  # run_id -> asyncio.Task
+        self._executors: dict[int, PipelineExecutor] = {}  # run_id -> executor
+
+    @property
+    def active_runs(self) -> list[int]:
+        """Return IDs of currently running pipelines."""
+        return [rid for rid, task in self._running.items() if not task.done()]
+
+    async def start_run(
+        self,
+        run_id: int,
+        executor: PipelineExecutor,
+        timeout_seconds: int = 3600,
+        trigger_data: Optional[dict] = None,
+        max_retries: int = 3,
+        backoff_base: float = 1.0,
+        backoff_max: float = 60.0,
+    ) -> asyncio.Task:
+        """Start a pipeline run with timeout enforcement."""
+        self._executors[run_id] = executor
+
+        async def _run_with_timeout():
+            try:
+                async with asyncio.timeout(timeout_seconds):
+                    result = await executor.execute(
+                        run_id=run_id,
+                        trigger_data=trigger_data,
+                        max_retries=max_retries,
+                        backoff_base=backoff_base,
+                        backoff_max=backoff_max,
+                    )
+                    return result
+            except TimeoutError:
+                executor.request_cancel()  # Cooperative cancel
+                result = {
+                    "status": "timeout",
+                    "error": f"Pipeline exceeded {timeout_seconds}s timeout",
+                }
+                # Emit timeout event
+                await executor._emit_event(
+                    EventType.PIPELINE_RUN_TIMEOUT,
+                    {
+                        "run_id": run_id,
+                        "pipeline_id": executor.pipeline_id,
+                        "timeout_seconds": timeout_seconds,
+                    },
+                )
+                return result
+            except asyncio.CancelledError:
+                executor.request_cancel()
+                return {"status": "cancelled", "error": "Pipeline run was cancelled"}
+            finally:
+                self._running.pop(run_id, None)
+                self._executors.pop(run_id, None)
+
+        task = asyncio.create_task(_run_with_timeout())
+        self._running[run_id] = task
+        return task
+
+    async def cancel_run(self, run_id: int) -> bool:
+        """Cancel a running pipeline. Returns True if cancellation was initiated."""
+        executor = self._executors.get(run_id)
+        if executor:
+            executor.request_cancel()  # Cooperative first
+
+        task = self._running.get(run_id)
+        if task and not task.done():
+            task.cancel()  # Force cancellation
+            return True
+        return False
+
+    async def cancel_all(self) -> int:
+        """Cancel all running pipelines. Returns count of cancelled runs."""
+        cancelled = 0
+        for run_id in list(self._running.keys()):
+            if await self.cancel_run(run_id):
+                cancelled += 1
+        return cancelled
+
+    def is_running(self, run_id: int) -> bool:
+        """Check if a pipeline run is still active."""
+        task = self._running.get(run_id)
+        return task is not None and not task.done()
+
+
+_run_manager: Optional[PipelineRunManager] = None
+
+
+def get_run_manager() -> PipelineRunManager:
+    """Get or create the singleton PipelineRunManager."""
+    global _run_manager
+    if _run_manager is None:
+        _run_manager = PipelineRunManager()
+    return _run_manager

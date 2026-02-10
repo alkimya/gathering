@@ -26,7 +26,11 @@ from gathering.orchestration.pipeline.circuit_breaker import (
     CircuitBreaker,
     CircuitState,
 )
-from gathering.orchestration.pipeline.executor import PipelineExecutor
+from gathering.orchestration.pipeline.executor import (
+    PipelineExecutor,
+    PipelineRunManager,
+    get_run_manager,
+)
 from gathering.orchestration.pipeline.models import (
     NodeExecutionResult,
     PipelineDefinition,
@@ -46,6 +50,8 @@ from gathering.orchestration.pipeline.validator import (
 
 __all__ = [
     "PipelineExecutor",
+    "PipelineRunManager",
+    "get_run_manager",
     "CircuitBreaker",
     "CircuitState",
     "NodeExecutionError",

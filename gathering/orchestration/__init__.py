@@ -105,6 +105,19 @@ from gathering.orchestration.scheduler import (
     get_scheduler,
 )
 
+from gathering.orchestration.pipeline import (
+    PipelineExecutor,
+    PipelineRunManager,
+    PipelineDefinition,
+    PipelineNode,
+    PipelineEdge,
+    CircuitBreaker,
+    validate_pipeline_dag,
+    get_execution_order,
+    parse_pipeline_definition,
+    get_run_manager,
+)
+
 __all__ = [
     # Main orchestrator
     "GatheringCircle",
@@ -143,4 +156,15 @@ __all__ = [
     "ScheduleType",
     "ScheduledActionStatus",
     "get_scheduler",
+    # Pipeline
+    "PipelineExecutor",
+    "PipelineRunManager",
+    "PipelineDefinition",
+    "PipelineNode",
+    "PipelineEdge",
+    "CircuitBreaker",
+    "validate_pipeline_dag",
+    "get_execution_order",
+    "parse_pipeline_definition",
+    "get_run_manager",
 ]
