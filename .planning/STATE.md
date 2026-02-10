@@ -10,28 +10,28 @@ See: .planning/PROJECT.md (updated 2026-02-10)
 ## Current Position
 
 Phase: 2 of 5 (Pipeline Execution Engine)
-Plan: 1 of 3 in current phase
-Status: Plan 02-01 complete
-Last activity: 2026-02-10 -- Completed 02-01 (Pipeline Validation + Data Models)
+Plan: 2 of 3 in current phase
+Status: Plan 02-02 complete
+Last activity: 2026-02-10 -- Completed 02-02 (Pipeline Execution Engine)
 
-Progress: [███░░░░░░░] 27%
+Progress: [████░░░░░░] 33%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4
+- Total plans completed: 5
 - Average duration: 7min
-- Total execution time: 0.47 hours
+- Total execution time: 0.58 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-auth-security-foundation | 3/3 | 24min | 8min |
-| 02-pipeline-execution-engine | 1/3 | 4min | 4min |
+| 02-pipeline-execution-engine | 2/3 | 11min | 5.5min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (4min), 01-02 (8min), 01-03 (12min), 02-01 (4min)
+- Last 5 plans: 01-02 (8min), 01-03 (12min), 02-01 (4min), 02-02 (7min)
 - Trend: Steady
 
 *Updated after each plan completion*
@@ -62,6 +62,11 @@ Recent decisions affecting current work:
 - [02-01]: PipelineEdge uses Field(alias="from") with populate_by_name=True for JSON reserved words
 - [02-01]: Node config stored as generic dict; type-specific config models available for targeted validation
 - [02-01]: Orphan nodes logged as warnings, not validation errors
+- [02-02]: tenacity retry wraps node execution with configurable exponential backoff; only retries NodeExecutionError
+- [02-02]: Agent nodes degrade gracefully when no agent_registry -- return simulated result
+- [02-02]: Condition evaluation avoids eval() -- supports literals and safe input.key lookups
+- [02-02]: Event emission and node run persistence wrapped in try/except to never block pipeline execution
+- [02-02]: CircuitBreaker is per-node with configurable failure_threshold via node config
 
 ### Pending Todos
 
@@ -76,5 +81,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-10
-Stopped at: Completed 02-01-PLAN.md (Pipeline Validation + Data Models)
-Resume file: .planning/phases/02-pipeline-execution-engine/02-01-SUMMARY.md
+Stopped at: Completed 02-02-PLAN.md (Pipeline Execution Engine)
+Resume file: .planning/phases/02-pipeline-execution-engine/02-02-SUMMARY.md
