@@ -80,12 +80,14 @@ Plans:
   3. API endpoints enforce per-endpoint rate limits -- exceeding the limit returns 429 Too Many Requests with a Retry-After header
   4. Rapid-fire event emissions (100+ events/second) are batched and deduplicated -- the event bus processes them without spawning unbounded tasks or exhausting memory
   5. In-memory caches (token blacklist, file tree, event history) have configurable size bounds and evict least-recently-used entries when full
-**Plans:** 3 plans
+**Plans:** 5 plans
 
 Plans:
-- [ ] 04-01-PLAN.md -- Async database service (AsyncPooledDatabase lifecycle) and N+1 elimination in circle member retrieval (JOIN optimization)
-- [ ] 04-02-PLAN.md -- slowapi per-endpoint rate limiting replacing hand-rolled middleware, BoundedLRUDict utility for all unbounded in-memory caches
-- [ ] 04-03-PLAN.md -- Event bus deduplication, semaphore backpressure, and comprehensive concurrency tests
+- [x] 04-01-PLAN.md -- Async database service (AsyncPooledDatabase lifecycle) and N+1 elimination in circle member retrieval (JOIN optimization)
+- [x] 04-02-PLAN.md -- slowapi per-endpoint rate limiting replacing hand-rolled middleware, BoundedLRUDict utility for all unbounded in-memory caches
+- [x] 04-03-PLAN.md -- Event bus deduplication, semaphore backpressure, and comprehensive concurrency tests
+- [ ] 04-04-PLAN.md -- Gap closure: migrate representative route handlers to AsyncDatabaseService
+- [ ] 04-05-PLAN.md -- Gap closure: apply per-endpoint rate limit tier decorators to all route handlers
 
 ### Phase 5: Multi-Instance + Production Hardening
 **Goal**: Multiple server instances coordinate without duplicate task execution, and the server shuts down gracefully without dropping in-flight requests
@@ -109,5 +111,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 | 1. Auth + Security Foundation | 3/3 | ✓ Complete | 2026-02-10 |
 | 2. Pipeline Execution Engine | 3/3 | ✓ Complete | 2026-02-10 |
 | 3. Schedule Execution + Tool Hardening | 3/3 | ✓ Complete | 2026-02-10 |
-| 4. Performance Optimization | 0/3 | Not started | - |
+| 4. Performance Optimization | 3/5 | Gap closure | - |
 | 5. Multi-Instance + Production Hardening | 0/1 | Not started | - |
