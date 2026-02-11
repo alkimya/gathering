@@ -9,19 +9,19 @@ See: .planning/PROJECT.md (updated 2026-02-10)
 
 ## Current Position
 
-Phase: 4 of 5 (Performance Optimization)
-Plan: 4 of 5 in current phase
-Status: Executing gap closure plans
-Last activity: 2026-02-11 -- Completed 04-04 (Async DB Route Migration)
+Phase: 4 of 5 (Performance Optimization) -- COMPLETE
+Plan: 5 of 5 in current phase
+Status: Phase 4 complete -- all 5 plans executed
+Last activity: 2026-02-11 -- Completed 04-05 (Rate Limit Tier Enforcement)
 
-Progress: [█████████░] 97%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 13
-- Average duration: 5.8min
-- Total execution time: 1.24 hours
+- Total plans completed: 14
+- Average duration: 5.9min
+- Total execution time: 1.44 hours
 
 **By Phase:**
 
@@ -30,10 +30,10 @@ Progress: [█████████░] 97%
 | 01-auth-security-foundation | 3/3 | 24min | 8min |
 | 02-pipeline-execution-engine | 3/3 | 17min | 5.7min |
 | 03-schedule-execution-tool-hardening | 3/3 | 14min | 4.7min |
-| 04-performance-optimization | 4/5 | 23min | 5.8min |
+| 04-performance-optimization | 5/5 | 35min | 7min |
 
 **Recent Trend:**
-- Last 5 plans: 03-03 (6min), 04-01 (4min), 04-03 (4min), 04-02 (8min), 04-04 (7min)
+- Last 5 plans: 04-01 (4min), 04-03 (4min), 04-02 (8min), 04-04 (7min), 04-05 (12min)
 - Trend: Steady/Fast
 
 *Updated after each plan completion*
@@ -99,6 +99,9 @@ Recent decisions affecting current work:
 - [04-04]: Migrate 5 representative handlers (not all ~100+) to prove async DB pattern works at scale
 - [04-04]: AsyncDatabaseService handlers use direct SQL (no convenience methods like get_providers)
 - [04-04]: Concurrency test uses asyncio.gather + wall-clock timing to prove non-blocking execution
+- [04-05]: Custom _rate_limit_handler replaces slowapi default to inject Retry-After + X-RateLimit-* headers on 429
+- [04-05]: SlowAPIMiddleware not used (conflicts with decorator-based header injection); exception handler approach sufficient
+- [04-05]: headers_enabled left False on Limiter; headers only injected on 429 via custom handler to avoid decorator crash
 
 ### Pending Todos
 
@@ -113,5 +116,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-11
-Stopped at: Completed 04-04-PLAN.md
-Resume file: .planning/phases/04-performance-optimization/04-04-SUMMARY.md
+Stopped at: Completed 04-05-PLAN.md (Phase 4 complete)
+Resume file: .planning/phases/04-performance-optimization/04-05-SUMMARY.md
