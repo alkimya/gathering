@@ -12,15 +12,21 @@ GatheRing is a highly customizable and modular framework for creating and managi
 - **Gathering Circles**: Team orchestration with task routing, reviews, and conflict detection
 - **Agent Persistence**: Personas, memory, sessions with automatic context injection
 - **Agent Conversations**: Direct inter-agent collaboration with turn strategies
-- **REST API**: Full FastAPI backend with WebSocket support
+- **Pipeline Execution**: DAG-based workflow engine with topological traversal, retry + circuit breakers, cancellation and timeout
+- **Schedule System**: Cron-based action dispatch (run_task, execute_pipeline, send_notification, call_api) with crash recovery
+- **REST API**: Full FastAPI backend with 206 rate-limited endpoints and WebSocket support
 - **React Dashboard**: Modern Web3 dark theme UI for agents, circles, tasks, and conversations
 - **RAG Support**: PostgreSQL + pgvector for semantic memory search
 - **Knowledge Base**: Semantic search across documentation and best practices
-- **Skills System**: 18+ skills (filesystem, git, code, shell, database, http, etc.) with per-agent configuration
+- **Skills System**: 18+ skills (filesystem, git, code, shell, database, http, etc.) with JSON Schema validation and async execution
 - **Agent Autonomy**: Background tasks, scheduled actions, goal management
 - **Settings UI**: Configure API keys and application parameters via dashboard
-- **Authentication**: JWT-based auth with token revocation and OWASP security headers
-- **Fully Tested**: 1071 tests with TDD approach
+- **Security**: JWT auth with DB-persisted token blacklist, constant-time comparisons, SQL injection prevention, path traversal defense, audit logging
+- **Rate Limiting**: Per-endpoint rate limits with 4 tiers (strict/standard/relaxed/bulk) via slowapi
+- **Multi-Instance**: PostgreSQL advisory locks for distributed task coordination, graceful shutdown with request draining
+- **Observability**: Structured logging (structlog) with JSON output, request correlation IDs, OpenTelemetry instrumentation
+- **Async Database**: pycopg async driver for non-blocking DB access in async handlers
+- **Fully Tested**: 1200+ tests covering auth lifecycle, pipeline execution, scheduler recovery, event concurrency, and more
 
 ## Quick Start
 
@@ -61,12 +67,12 @@ npm run dev
 gathering/
 ├── core/           # Core abstractions and config
 ├── agents/         # Agent persistence (persona, memory, session)
-├── orchestration/  # Circles, Facilitator, Events
+├── orchestration/  # Circles, Facilitator, Events, Pipelines
 ├── llm/            # LLM providers (Anthropic, OpenAI, DeepSeek, Ollama)
-├── skills/         # Tools (Git, Test, etc.)
-├── api/            # FastAPI REST API + WebSocket
+├── skills/         # Tools (Git, Test, etc.) with JSON Schema validation
+├── api/            # FastAPI REST API + WebSocket + Rate Limiting
 ├── rag/            # RAG services (embeddings, vector store, memory)
-└── db/             # Database models (PostgreSQL + pgvector)
+└── db/             # Database models (PostgreSQL + pgvector + pycopg)
 
 dashboard/          # React + TypeScript + Tailwind (Web3 Dark Theme)
 ├── src/
@@ -90,9 +96,12 @@ dashboard/          # React + TypeScript + Tailwind (Web3 Dark Theme)
 | Backend | Python 3.11+, FastAPI, Pydantic |
 | Frontend | React 19, TypeScript, Tailwind CSS, Vite |
 | Database | PostgreSQL 16 + pgvector |
-| DB Layer | [pycopg](https://pypi.org/project/pycopg/) - High-level PostgreSQL API (asyncpg + psycopg) |
+| DB Layer | [pycopg](https://pypi.org/project/pycopg/) - High-level PostgreSQL API (sync + async) |
 | LLM | Anthropic, OpenAI, DeepSeek, Mistral, Google, Ollama |
 | Embeddings | OpenAI text-embedding-3-small (1536 dims) |
+| Auth | PyJWT + bcrypt with DB-persisted token blacklist |
+| Rate Limiting | slowapi with per-endpoint tiers |
+| Logging | structlog with JSON output + correlation IDs |
 
 ## Environment Variables
 
@@ -118,7 +127,7 @@ ADMIN_PASSWORD_HASH=$2b$12$...           # Bcrypt hash of admin password
 ## API Overview
 
 ```text
-GET  /health                       # Health check
+GET  /health                       # Health + readiness check
 GET  /agents                       # List agents
 POST /agents                       # Create agent
 POST /agents/{id}/chat             # Chat with agent
