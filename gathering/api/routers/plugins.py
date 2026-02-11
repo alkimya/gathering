@@ -298,11 +298,11 @@ async def load_plugin(request: Request, load_request: PluginLoadRequest):
     The plugin must be registered (either manually or via discovery).
     """
     try:
-        plugin_manager.load_plugin(load_create_request.plugin_id, config=load_create_request.config)
+        plugin_manager.load_plugin(load_request.plugin_id, config=load_request.config)
         return PluginActionResponse(
             success=True,
-            message=f"Plugin '{load_create_request.plugin_id}' loaded successfully",
-            plugin_id=load_create_request.plugin_id,
+            message=f"Plugin '{load_request.plugin_id}' loaded successfully",
+            plugin_id=load_request.plugin_id,
         )
     except ValueError as e:
         raise HTTPException(
@@ -468,14 +468,14 @@ async def create_dynamic_plugin(request: Request, create_request: CreateDynamicP
 
         # Create the plugin
         plugin = plugin_manager.create_dynamic_plugin(
-            plugin_id=load_create_request.plugin_id,
+            plugin_id=create_request.plugin_id,
             name=create_request.name,
             description=create_request.description,
             version=create_request.version,
             author=create_request.author,
             tools=tools,
             competencies=competencies,
-            config=load_create_request.config,
+            config=create_request.config,
         )
 
         return PluginInfo(**plugin.get_info())

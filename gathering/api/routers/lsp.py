@@ -125,10 +125,10 @@ async def get_completions(
         server = LSPManager.get_server(project_id, language)
 
         completions = await server.get_completions(
-            file_path=lsp_lsp_lsp_lsp_request.file_path,
-            line=lsp_lsp_lsp_request.line,
-            character=lsp_lsp_lsp_request.character,
-            content=lsp_lsp_lsp_lsp_request.content
+            file_path=lsp_request.file_path,
+            line=lsp_request.line,
+            character=lsp_request.character,
+            content=lsp_request.content
         )
 
         return {
@@ -164,8 +164,8 @@ async def get_diagnostics(
         server = LSPManager.get_server(project_id, language)
 
         diagnostics = await server.get_diagnostics(
-            file_path=lsp_lsp_lsp_lsp_request.file_path,
-            content=lsp_lsp_lsp_lsp_request.content
+            file_path=lsp_request.file_path,
+            content=lsp_request.content
         )
 
         return {
@@ -201,10 +201,10 @@ async def get_hover(
         server = LSPManager.get_server(project_id, language)
 
         hover = await server.get_hover(
-            file_path=lsp_lsp_lsp_lsp_request.file_path,
-            line=lsp_lsp_lsp_request.line,
-            character=lsp_lsp_lsp_request.character,
-            content=lsp_lsp_lsp_lsp_request.content
+            file_path=lsp_request.file_path,
+            line=lsp_request.line,
+            character=lsp_request.character,
+            content=lsp_request.content
         )
 
         return hover if hover else {"contents": None}
@@ -237,10 +237,10 @@ async def get_definition(
         server = LSPManager.get_server(project_id, language)
 
         definition = await server.get_definition(
-            file_path=lsp_lsp_lsp_lsp_request.file_path,
-            line=lsp_lsp_lsp_request.line,
-            character=lsp_lsp_lsp_request.character,
-            content=lsp_lsp_lsp_lsp_request.content
+            file_path=lsp_request.file_path,
+            line=lsp_request.line,
+            character=lsp_request.character,
+            content=lsp_request.content
         )
 
         return definition if definition else {"uri": None}

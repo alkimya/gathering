@@ -195,7 +195,7 @@ async def remember(
 async def recall(
     request: Request,
     agent_id: int,
-    recall_recall_request: RecallRequest,
+    recall_request: RecallRequest,
 ):
     """
     Recall relevant memories for an agent.
@@ -207,11 +207,11 @@ async def recall(
 
         results = await manager.recall(
             agent_id=agent_id,
-            query=recall_recall_search_request.query,
-            memory_type=recall_recall_request.memory_type,
-            tags=recall_recall_request.tags,
-            limit=recall_recall_search_request.limit,
-            threshold=recall_recall_search_request.threshold,
+            query=recall_request.query,
+            memory_type=recall_request.memory_type,
+            tags=recall_request.tags,
+            limit=recall_request.limit,
+            threshold=recall_request.threshold,
         )
 
         memories = [
@@ -227,7 +227,7 @@ async def recall(
         ]
 
         return RecallResponse(
-            query=recall_recall_search_request.query,
+            query=recall_request.query,
             memories=memories,
             total=len(memories),
         )
@@ -328,7 +328,7 @@ async def add_knowledge(
 @limiter.limit(TIER_WRITE)
 async def search_knowledge(
     request: Request,
-    search_search_request: KnowledgeSearchRequest,
+    search_request: KnowledgeSearchRequest,
 ):
     """
     Search knowledge base using semantic similarity.
@@ -337,13 +337,13 @@ async def search_knowledge(
         manager = get_memory_manager()
 
         results = await manager.search_knowledge(
-            query=search_recall_search_request.query,
-            project_id=search_search_request.project_id,
-            circle_id=search_search_request.circle_id,
-            category=search_search_request.category,
-            include_global=search_search_request.include_global,
-            limit=search_recall_search_request.limit,
-            threshold=search_recall_search_request.threshold,
+            query=search_request.query,
+            project_id=search_request.project_id,
+            circle_id=search_request.circle_id,
+            category=search_request.category,
+            include_global=search_request.include_global,
+            limit=search_request.limit,
+            threshold=search_request.threshold,
         )
 
         knowledge_results = [
@@ -359,7 +359,7 @@ async def search_knowledge(
         ]
 
         return KnowledgeSearchResponse(
-            query=search_recall_search_request.query,
+            query=search_request.query,
             results=knowledge_results,
             total=len(knowledge_results),
         )

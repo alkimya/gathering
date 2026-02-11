@@ -234,13 +234,13 @@ async def toggle_agent_tool(
         VALUES (%(agent_id)s, %(skill_id)s, %(is_enabled)s)
         ON CONFLICT (agent_id, skill_id)
         DO UPDATE SET is_enabled = %(is_enabled)s, updated_at = NOW()
-    """, {'agent_id': agent_id, 'skill_id': skill["id"], 'is_enabled': toggle_bulk_request.is_enabled})
+    """, {'agent_id': agent_id, 'skill_id': skill["id"], 'is_enabled': toggle_request.is_enabled})
 
     return {
         "agent_id": agent_id,
         "skill_name": skill_name,
-        "is_enabled": toggle_bulk_request.is_enabled,
-        "message": f"Tool '{skill_name}' {'enabled' if toggle_bulk_request.is_enabled else 'disabled'} for agent {agent_id}",
+        "is_enabled": toggle_request.is_enabled,
+        "message": f"Tool '{skill_name}' {'enabled' if toggle_request.is_enabled else 'disabled'} for agent {agent_id}",
     }
 
 
@@ -273,14 +273,14 @@ async def bulk_toggle_tools(
                 VALUES (%(agent_id)s, %(skill_id)s, %(is_enabled)s)
                 ON CONFLICT (agent_id, skill_id)
                 DO UPDATE SET is_enabled = %(is_enabled)s, updated_at = NOW()
-            """, {'agent_id': agent_id, 'skill_id': skill["id"], 'is_enabled': toggle_bulk_request.is_enabled})
+            """, {'agent_id': agent_id, 'skill_id': skill["id"], 'is_enabled': bulk_request.is_enabled})
             updated += 1
 
     return {
         "agent_id": agent_id,
         "updated_count": updated,
-        "is_enabled": toggle_bulk_request.is_enabled,
-        "message": f"{updated} tools {'enabled' if toggle_bulk_request.is_enabled else 'disabled'}",
+        "is_enabled": bulk_request.is_enabled,
+        "message": f"{updated} tools {'enabled' if bulk_request.is_enabled else 'disabled'}",
     }
 
 
