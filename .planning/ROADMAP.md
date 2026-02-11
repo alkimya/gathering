@@ -96,10 +96,11 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. Two server instances processing the same task queue never execute the same task simultaneously -- PostgreSQL advisory locks prevent duplicate execution
   2. During shutdown, the server stops accepting new requests, waits for in-flight requests to complete (up to a timeout), and then exits cleanly -- no 502s during rolling deploys
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 05-01: TBD
+- [ ] 05-01-PLAN.md -- Advisory lock coordination for multi-instance scheduler (pg_try_advisory_xact_lock prevents duplicate execution)
+- [ ] 05-02-PLAN.md -- Graceful shutdown with ordered teardown and shutdown-aware readiness probe
 
 ## Progress
 
@@ -112,4 +113,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 | 2. Pipeline Execution Engine | 3/3 | ✓ Complete | 2026-02-10 |
 | 3. Schedule Execution + Tool Hardening | 3/3 | ✓ Complete | 2026-02-10 |
 | 4. Performance Optimization | 5/5 | ✓ Complete | 2026-02-11 |
-| 5. Multi-Instance + Production Hardening | 0/1 | Not started | - |
+| 5. Multi-Instance + Production Hardening | 0/2 | Not started | - |
