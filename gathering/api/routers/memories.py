@@ -7,6 +7,9 @@ Provides endpoints for agent memory operations and knowledge base management.
 from typing import List, Optional
 
 from fastapi import APIRouter, HTTPException, Query, UploadFile, File, Form
+from starlette.requests import Request
+
+from gathering.api.rate_limit import limiter, TIER_READ, TIER_WRITE
 from pydantic import BaseModel, Field
 
 from gathering.utils.document_extractor import DocumentExtractor, chunk_text
@@ -152,7 +155,9 @@ def get_memory_manager():
 
 
 @router.post("/agents/{agent_id}/remember", response_model=MemoryResponse)
+@limiter.limit(TIER_WRITE)
 async def remember(
+    request: Request,
     agent_id: int,
     memory: MemoryCreate,
 ):
@@ -186,9 +191,11 @@ async def remember(
 
 
 @router.post("/agents/{agent_id}/recall", response_model=RecallResponse)
+@limiter.limit(TIER_WRITE)
 async def recall(
+    request: Request,
     agent_id: int,
-    request: RecallRequest,
+    recall_recall_request: RecallRequest,
 ):
     """
     Recall relevant memories for an agent.
@@ -200,11 +207,11 @@ async def recall(
 
         results = await manager.recall(
             agent_id=agent_id,
-            query=request.query,
-            memory_type=request.memory_type,
-            tags=request.tags,
-            limit=request.limit,
-            threshold=request.threshold,
+            query=recall_recall_search_request.query,
+            memory_type=recall_recall_request.memory_type,
+            tags=recall_recall_request.tags,
+            limit=recall_recall_search_request.limit,
+            threshold=recall_recall_search_request.threshold,
         )
 
         memories = [
@@ -220,7 +227,7 @@ async def recall(
         ]
 
         return RecallResponse(
-            query=request.query,
+            query=recall_recall_search_request.query,
             memories=memories,
             total=len(memories),
         )
@@ -230,7 +237,9 @@ async def recall(
 
 
 @router.delete("/agents/{agent_id}/memories/{memory_id}")
+@limiter.limit(TIER_WRITE)
 async def forget(
+    request: Request,
     agent_id: int,
     memory_id: int,
 ):
@@ -247,7 +256,9 @@ async def forget(
 
 
 @router.get("/agents/{agent_id}/stats", response_model=MemoryStats)
+@limiter.limit(TIER_READ)
 async def get_agent_memory_stats(
+    request: Request,
     agent_id: int,
 ):
     """
@@ -275,7 +286,9 @@ async def get_agent_memory_stats(
 
 
 @router.post("/knowledge", response_model=KnowledgeResponse)
+@limiter.limit(TIER_WRITE)
 async def add_knowledge(
+    request: Request,
     knowledge: KnowledgeCreate,
     author_agent_id: Optional[int] = Query(None, description="Author agent ID"),
 ):
@@ -312,8 +325,10 @@ async def add_knowledge(
 
 
 @router.post("/knowledge/search", response_model=KnowledgeSearchResponse)
+@limiter.limit(TIER_WRITE)
 async def search_knowledge(
-    request: KnowledgeSearchRequest,
+    request: Request,
+    search_search_request: KnowledgeSearchRequest,
 ):
     """
     Search knowledge base using semantic similarity.
@@ -322,13 +337,13 @@ async def search_knowledge(
         manager = get_memory_manager()
 
         results = await manager.search_knowledge(
-            query=request.query,
-            project_id=request.project_id,
-            circle_id=request.circle_id,
-            category=request.category,
-            include_global=request.include_global,
-            limit=request.limit,
-            threshold=request.threshold,
+            query=search_recall_search_request.query,
+            project_id=search_search_request.project_id,
+            circle_id=search_search_request.circle_id,
+            category=search_search_request.category,
+            include_global=search_search_request.include_global,
+            limit=search_recall_search_request.limit,
+            threshold=search_recall_search_request.threshold,
         )
 
         knowledge_results = [
@@ -344,7 +359,7 @@ async def search_knowledge(
         ]
 
         return KnowledgeSearchResponse(
-            query=request.query,
+            query=search_recall_search_request.query,
             results=knowledge_results,
             total=len(knowledge_results),
         )
@@ -354,7 +369,9 @@ async def search_knowledge(
 
 
 @router.get("/knowledge", response_model=KnowledgeListResponse)
+@limiter.limit(TIER_READ)
 async def list_knowledge(
+    request: Request,
     category: Optional[str] = Query(None, description="Filter by category"),
     page: int = Query(1, ge=1, description="Page number"),
     page_size: int = Query(20, ge=1, le=100, description="Items per page"),
@@ -395,7 +412,8 @@ async def list_knowledge(
 
 
 @router.get("/knowledge/stats", response_model=KnowledgeStats)
-async def get_knowledge_stats():
+@limiter.limit(TIER_READ)
+async def get_knowledge_stats(request: Request):
     """
     Get knowledge base statistics.
     """
@@ -440,9 +458,11 @@ class BatchMemoryResponse(BaseModel):
 
 
 @router.post("/agents/{agent_id}/remember/batch", response_model=BatchMemoryResponse)
+@limiter.limit(TIER_WRITE)
 async def remember_batch(
+    request: Request,
     agent_id: int,
-    request: BatchMemoryCreate,
+    batch_request: BatchMemoryCreate,
 ):
     """
     Store multiple memories at once.
@@ -460,7 +480,7 @@ async def remember_batch(
                 "tags": m.tags,
                 "importance": m.importance,
             }
-            for m in request.memories
+            for m in batch_request.memories
         ]
 
         ids = await manager.remember_batch(agent_id=agent_id, memories=memories)
@@ -480,7 +500,9 @@ async def remember_batch(
 
 
 @router.post("/knowledge/upload", response_model=DocumentUploadResponse)
+@limiter.limit(TIER_WRITE)
 async def upload_document(
+    request: Request,
     file: UploadFile = File(..., description="Document file (MD, CSV, PDF, TXT)"),
     title: Optional[str] = Form(None, description="Document title (defaults to filename)"),
     category: Optional[str] = Form(None, description="Category: docs, best_practice, decision, faq"),

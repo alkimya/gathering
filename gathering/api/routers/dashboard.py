@@ -7,6 +7,9 @@ Uses USE_DEMO_DATA toggle to switch between demo and real database data.
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from starlette.requests import Request
+
+from gathering.api.rate_limit import limiter, TIER_READ
 
 from gathering.api.dependencies import get_data_service, DataService, use_demo_data
 
@@ -15,7 +18,8 @@ router = APIRouter(prefix="/dashboard", tags=["dashboard"])
 
 
 @router.get("/config")
-async def get_dashboard_config() -> dict:
+@limiter.limit(TIER_READ)
+async def get_dashboard_config(request: Request) -> dict:
     """Get dashboard configuration including data source mode."""
     return {
         "demo_mode": use_demo_data(),
@@ -30,7 +34,9 @@ async def get_dashboard_config() -> dict:
 
 
 @router.get("/agents")
+@limiter.limit(TIER_READ)
 async def list_dashboard_agents(
+    request: Request,
     data: DataService = Depends(get_data_service),
 ) -> dict:
     """List agents for dashboard display."""
@@ -43,7 +49,9 @@ async def list_dashboard_agents(
 
 
 @router.get("/agents/{agent_id}")
+@limiter.limit(TIER_READ)
 async def get_dashboard_agent(
+    request: Request,
     agent_id: int,
     data: DataService = Depends(get_data_service),
 ) -> dict:
@@ -61,7 +69,9 @@ async def get_dashboard_agent(
 
 
 @router.get("/providers")
+@limiter.limit(TIER_READ)
 async def list_dashboard_providers(
+    request: Request,
     data: DataService = Depends(get_data_service),
 ) -> dict:
     """List LLM providers for dashboard display."""
@@ -74,7 +84,9 @@ async def list_dashboard_providers(
 
 
 @router.get("/providers/{provider_id}")
+@limiter.limit(TIER_READ)
 async def get_dashboard_provider(
+    request: Request,
     provider_id: int,
     data: DataService = Depends(get_data_service),
 ) -> dict:
@@ -92,7 +104,9 @@ async def get_dashboard_provider(
 
 
 @router.get("/models")
+@limiter.limit(TIER_READ)
 async def list_dashboard_models(
+    request: Request,
     provider_id: Optional[int] = None,
     data: DataService = Depends(get_data_service),
 ) -> dict:
@@ -107,7 +121,9 @@ async def list_dashboard_models(
 
 
 @router.get("/models/{model_id}")
+@limiter.limit(TIER_READ)
 async def get_dashboard_model(
+    request: Request,
     model_id: int,
     data: DataService = Depends(get_data_service),
 ) -> dict:
@@ -125,7 +141,9 @@ async def get_dashboard_model(
 
 
 @router.get("/stats")
+@limiter.limit(TIER_READ)
 async def get_dashboard_stats(
+    request: Request,
     data: DataService = Depends(get_data_service),
 ) -> dict:
     """Get aggregated stats for dashboard."""
@@ -170,7 +188,9 @@ async def get_dashboard_stats(
 
 
 @router.get("/circles")
+@limiter.limit(TIER_READ)
 async def list_dashboard_circles(
+    request: Request,
     is_active: Optional[bool] = None,
     data: DataService = Depends(get_data_service),
 ) -> dict:
@@ -184,7 +204,9 @@ async def list_dashboard_circles(
 
 
 @router.get("/circles/{circle_id}")
+@limiter.limit(TIER_READ)
 async def get_dashboard_circle(
+    request: Request,
     circle_id: int,
     data: DataService = Depends(get_data_service),
 ) -> dict:
@@ -202,7 +224,9 @@ async def get_dashboard_circle(
 
 
 @router.get("/circles/{circle_id}/members")
+@limiter.limit(TIER_READ)
 async def list_circle_members(
+    request: Request,
     circle_id: int,
     data: DataService = Depends(get_data_service),
 ) -> dict:
@@ -225,7 +249,9 @@ async def list_circle_members(
 
 
 @router.get("/circles/{circle_id}/tasks")
+@limiter.limit(TIER_READ)
 async def list_circle_tasks(
+    request: Request,
     circle_id: int,
     status: Optional[str] = None,
     data: DataService = Depends(get_data_service),
