@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: Pipeline Execution Engine** - DAG traversal, node execution, validation, error recovery, cancellation
 - [x] **Phase 3: Schedule Execution + Tool Hardening** - Action dispatch, crash recovery, tool validation, async tools, workspace paths
 - [x] **Phase 4: Performance Optimization** - Async DB, N+1 elimination, rate limiting, event batching, cache bounds
-- [ ] **Phase 5: Multi-Instance + Production Hardening** - Distributed coordination, graceful shutdown
+- [x] **Phase 5: Multi-Instance + Production Hardening** - Distributed coordination, graceful shutdown
 
 ## Phase Details
 
@@ -99,8 +99,8 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 05-01-PLAN.md -- Advisory lock coordination for multi-instance scheduler (pg_try_advisory_xact_lock prevents duplicate execution)
-- [ ] 05-02-PLAN.md -- Graceful shutdown with ordered teardown and shutdown-aware readiness probe
+- [x] 05-01-PLAN.md -- Advisory lock coordination for multi-instance scheduler (pg_try_advisory_xact_lock prevents duplicate execution)
+- [x] 05-02-PLAN.md -- Graceful shutdown with ordered teardown and shutdown-aware readiness probe
 
 ## Progress
 
@@ -113,4 +113,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 | 2. Pipeline Execution Engine | 3/3 | ✓ Complete | 2026-02-10 |
 | 3. Schedule Execution + Tool Hardening | 3/3 | ✓ Complete | 2026-02-10 |
 | 4. Performance Optimization | 5/5 | ✓ Complete | 2026-02-11 |
-| 5. Multi-Instance + Production Hardening | 0/2 | Not started | - |
+| 5. Multi-Instance + Production Hardening | 2/2 | ✓ Complete | 2026-02-11 |
