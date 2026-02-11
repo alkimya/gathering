@@ -8,6 +8,7 @@ from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends
 from starlette.requests import Request
+from starlette.responses import JSONResponse
 
 from gathering.api.rate_limit import limiter, TIER_HEALTH
 from gathering.api.schemas import (
@@ -32,6 +33,25 @@ router = APIRouter(prefix="/health", tags=["health"])
 
 # Track startup time
 _startup_time = datetime.now(timezone.utc)
+
+# Shutdown state for readiness probe
+_shutting_down = False
+
+
+def set_shutting_down():
+    """Signal that the server is shutting down.
+
+    Called from lifespan shutdown. Once set, /health/ready returns 503
+    so load balancers stop routing new traffic.
+    """
+    global _shutting_down
+    _shutting_down = True
+
+
+def reset_shutting_down():
+    """Reset shutdown flag (for test isolation only)."""
+    global _shutting_down
+    _shutting_down = False
 
 
 @router.get("", response_model=HealthResponse)
@@ -250,7 +270,16 @@ async def get_health_checks(
 @router.get("/ready")
 @limiter.limit(TIER_HEALTH)
 async def readiness_check(request: Request):
-    """Readiness probe for Kubernetes."""
+    """Readiness probe for Kubernetes.
+
+    Returns 200 during normal operation.
+    Returns 503 during shutdown so load balancers stop routing traffic.
+    """
+    if _shutting_down:
+        return JSONResponse(
+            status_code=503,
+            content={"ready": False, "reason": "shutting_down"},
+        )
     return {"ready": True}
 
 

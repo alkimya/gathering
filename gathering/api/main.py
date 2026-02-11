@@ -2,6 +2,7 @@
 Main FastAPI application for GatheRing.
 """
 
+import asyncio
 from contextlib import asynccontextmanager
 from typing import Optional
 
@@ -86,39 +87,43 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         print(f"Warning: Could not recover background tasks: {e}")
 
-    # Initialize and start the scheduler
-    try:
-        db = get_database_service()
-        scheduler = get_scheduler(db_service=db)
-        await scheduler.start()
-        print("Scheduler started")
-    except Exception as e:
-        print(f"Warning: Could not start scheduler: {e}")
-
-    # Initialize async database pool
+    # Initialize async database pool (must be before scheduler for advisory locks)
+    async_db_instance = None
     try:
         from gathering.api.async_db import AsyncDatabaseService
         async_db = AsyncDatabaseService.get_instance()
         await async_db.startup()
+        async_db_instance = async_db
         print("Async database pool opened")
     except Exception as e:
         print(f"Warning: Could not initialize async database pool: {e}")
+
+    # Initialize and start the scheduler
+    try:
+        db = get_database_service()
+        scheduler = get_scheduler(db_service=db, async_db=async_db_instance)
+        await scheduler.start()
+        print("Scheduler started")
+    except Exception as e:
+        print(f"Warning: Could not start scheduler: {e}")
 
     yield
 
     # Shutdown
     print("GatheRing API shutting down...")
 
-    # Close async database pool
-    try:
-        from gathering.api.async_db import AsyncDatabaseService
-        if AsyncDatabaseService._instance is not None:
-            await AsyncDatabaseService.get_instance().shutdown()
-            print("Async database pool closed")
-    except Exception as e:
-        print(f"Warning: Error during async database pool shutdown: {e}")
+    # 1. Signal health probes that we're shutting down
+    #    Load balancer will stop routing new traffic
+    from gathering.api.routers.health import set_shutting_down
+    set_shutting_down()
 
-    # Stop the scheduler
+    # 2. Brief pause to let load balancer detect unhealthy state
+    await asyncio.sleep(3)
+
+    # 3. Stop the scheduler FIRST (prevent new task creation)
+    #    Note: scheduler.stop() cancels the main loop task, but in-flight
+    #    _execute_action calls spawned via asyncio.create_task() may still
+    #    be running advisory lock queries against the async DB pool.
     try:
         scheduler = get_scheduler()
         await scheduler.stop(timeout=10)
@@ -126,13 +131,29 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         print(f"Warning: Error during scheduler shutdown: {e}")
 
-    # Gracefully shutdown background task executor
+    # 4. Brief drain for in-flight scheduler _execute_action tasks
+    #    scheduler.stop() cancels the loop but fire-and-forget tasks from
+    #    asyncio.create_task(_execute_action(...)) may still hold advisory
+    #    lock queries. Give them time to complete before closing the DB pool.
+    await asyncio.sleep(2)
+
+    # 5. Gracefully shutdown background task executor (pause running tasks)
     try:
         executor = get_background_executor()
         await executor.shutdown(timeout=30)
         print("Background task executor shutdown complete")
     except Exception as e:
         print(f"Warning: Error during background executor shutdown: {e}")
+
+    # 6. Close async database pool LAST
+    #    In-flight requests may still need DB access during drain period
+    try:
+        from gathering.api.async_db import AsyncDatabaseService
+        if AsyncDatabaseService._instance is not None:
+            await AsyncDatabaseService.get_instance().shutdown()
+            print("Async database pool closed")
+    except Exception as e:
+        print(f"Warning: Error during async database pool shutdown: {e}")
 
 
 def _rate_limit_handler(request, exc: RateLimitExceeded):
