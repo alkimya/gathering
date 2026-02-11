@@ -21,6 +21,10 @@ from gathering.orchestration.background import (
 
 logger = logging.getLogger(__name__)
 
+# Advisory lock namespace to prevent collision with other advisory lock users.
+# pg_try_advisory_xact_lock(namespace, key) uses two int4 values.
+SCHEDULER_LOCK_NAMESPACE = 1
+
 
 class ScheduleType(Enum):
     """Type of schedule."""
@@ -420,6 +424,7 @@ class Scheduler:
         db_service: Any = None,
         event_bus: Optional[EventBus] = None,
         check_interval: int = 60,
+        async_db: Optional[Any] = None,
     ):
         """
         Initialize the scheduler.
@@ -428,10 +433,15 @@ class Scheduler:
             db_service: Database service for persistence
             event_bus: Event bus for publishing events
             check_interval: How often to check for due actions (seconds)
+            async_db: Optional AsyncDatabaseService for advisory lock coordination.
+                      When provided, enables multi-instance coordination via
+                      PostgreSQL advisory locks. When None (default), single-instance
+                      mode -- all locks are implicitly acquired.
         """
         self.db_service = db_service
         self.event_bus = event_bus or EventBus()
         self.check_interval = check_interval
+        self._async_db = async_db
 
         self._running = False
         self._task: Optional[asyncio.Task] = None
@@ -657,9 +667,61 @@ class Scheduler:
                     self._running_actions.add(action.id)
                     asyncio.create_task(self._execute_action(action))
 
+    async def _try_acquire_action_lock(self, action_id: int) -> bool:
+        """Try to acquire a transaction-scoped advisory lock for a scheduled action.
+
+        Uses pg_try_advisory_xact_lock(namespace, action_id) which:
+        - Returns True if lock acquired, False if another session holds it
+        - Auto-releases on transaction COMMIT/ROLLBACK (no leaked locks)
+        - Is non-blocking (returns immediately, never waits)
+
+        Returns True (proceed) if:
+        - Lock acquired successfully
+        - No async_db available (single-instance mode, always proceed)
+
+        Returns False (skip) if:
+        - Another instance holds the lock
+        - DB error during lock attempt (fail-closed for safety)
+        """
+        if self._async_db is None:
+            return True
+
+        try:
+            async with self._async_db._pool.connection() as conn:
+                async with conn.transaction():
+                    cur = await conn.execute(
+                        "SELECT pg_try_advisory_xact_lock(%s, %s) AS acquired",
+                        [SCHEDULER_LOCK_NAMESPACE, action_id],
+                    )
+                    row = await cur.fetchone()
+                    if row is None:
+                        logger.warning(
+                            "Advisory lock query returned no rows for action %s, skipping",
+                            action_id,
+                        )
+                        return False
+                    return row[0]
+        except Exception:
+            logger.warning(
+                "Failed to acquire advisory lock for action %s, skipping (fail-closed)",
+                action_id,
+                exc_info=True,
+            )
+            return False
+
     async def _execute_action(self, action: ScheduledAction, triggered_by: str = "scheduler"):
         """Execute a scheduled action using the dispatch table."""
         action_id = action.id
+
+        # Advisory lock gate: in multi-instance mode, only one instance
+        # should execute each action. Check before any other logic.
+        lock_acquired = await self._try_acquire_action_lock(action_id)
+        if not lock_acquired:
+            logger.debug("Action %s locked by another instance, skipping", action_id)
+            # Remove from _running_actions since we won't execute
+            async with self._lock:
+                self._running_actions.discard(action_id)
+            return
 
         async with self._lock:
             if not action.allow_concurrent and action_id in self._running_actions:
@@ -1038,6 +1100,7 @@ def get_scheduler(
     db_service: Any = None,
     event_bus: Optional[EventBus] = None,
     check_interval: int = 60,
+    async_db: Optional[Any] = None,
 ) -> Scheduler:
     """Get the global scheduler instance."""
     global _scheduler
@@ -1046,5 +1109,6 @@ def get_scheduler(
             db_service=db_service,
             event_bus=event_bus,
             check_interval=check_interval,
+            async_db=async_db,
         )
     return _scheduler
