@@ -30,7 +30,7 @@ from gathering.api.routers import (
     tools_router,
 )
 from slowapi.errors import RateLimitExceeded
-from slowapi import _rate_limit_exceeded_handler
+from starlette.responses import JSONResponse
 
 from gathering.api.middleware import (
     AuthenticationMiddleware,
@@ -135,6 +135,31 @@ async def lifespan(app: FastAPI):
         print(f"Warning: Error during background executor shutdown: {e}")
 
 
+def _rate_limit_handler(request, exc: RateLimitExceeded):
+    """Custom rate limit exceeded handler with Retry-After header."""
+    import time
+    response = JSONResponse(
+        {"error": f"Rate limit exceeded: {exc.detail}"},
+        status_code=429,
+    )
+    # Extract reset time from the rate limit state
+    try:
+        view_rate_limit = request.state.view_rate_limit
+        if view_rate_limit:
+            window_stats = request.app.state.limiter.limiter.get_window_stats(
+                view_rate_limit[0], *view_rate_limit[1]
+            )
+            retry_after = max(1, int(window_stats[0] - time.time()) + 1)
+            response.headers["Retry-After"] = str(retry_after)
+            response.headers["X-RateLimit-Limit"] = str(view_rate_limit[0].amount)
+            response.headers["X-RateLimit-Remaining"] = str(window_stats[1])
+            response.headers["X-RateLimit-Reset"] = str(int(window_stats[0]) + 1)
+    except Exception:
+        # Fallback: use a default Retry-After of 60 seconds
+        response.headers["Retry-After"] = "60"
+    return response
+
+
 def create_app(
     title: str = "GatheRing API",
     description: str = "Multi-agent collaboration framework REST API",
@@ -210,7 +235,7 @@ def create_app(
     if enable_rate_limit:
         from gathering.api.rate_limit import limiter
         app.state.limiter = limiter
-        app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+        app.add_exception_handler(RateLimitExceeded, _rate_limit_handler)
 
     # Authentication (protects all non-public endpoints)
     if enable_auth:
