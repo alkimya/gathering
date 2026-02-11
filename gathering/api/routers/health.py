@@ -7,7 +7,9 @@ import psutil
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends
+from starlette.requests import Request
 
+from gathering.api.rate_limit import limiter, TIER_HEALTH
 from gathering.api.schemas import (
     HealthResponse,
     SystemMetricsResponse,
@@ -21,11 +23,10 @@ from gathering.api.schemas import (
 from gathering.api.dependencies import (
     get_agent_registry,
     get_circle_registry,
-    get_database_service,
     AgentRegistry,
     CircleRegistry,
-    DatabaseService,
 )
+from gathering.api.async_db import AsyncDatabaseService, get_async_db
 
 router = APIRouter(prefix="/health", tags=["health"])
 
@@ -34,7 +35,9 @@ _startup_time = datetime.now(timezone.utc)
 
 
 @router.get("", response_model=HealthResponse)
+@limiter.limit(TIER_HEALTH)
 async def health_check(
+    request: Request,
     agent_registry: AgentRegistry = Depends(get_agent_registry),
     circle_registry: CircleRegistry = Depends(get_circle_registry),
 ) -> HealthResponse:
@@ -68,7 +71,8 @@ async def health_check(
 
 
 @router.get("/system", response_model=SystemMetricsResponse)
-async def get_system_metrics() -> SystemMetricsResponse:
+@limiter.limit(TIER_HEALTH)
+async def get_system_metrics(request: Request) -> SystemMetricsResponse:
     """
     Get system metrics (CPU, memory, disk, load).
 
@@ -127,13 +131,17 @@ async def get_system_metrics() -> SystemMetricsResponse:
 
 
 @router.get("/checks", response_model=HealthChecksResponse)
+@limiter.limit(TIER_HEALTH)
 async def get_health_checks(
+    request: Request,
     agent_registry: AgentRegistry = Depends(get_agent_registry),
     circle_registry: CircleRegistry = Depends(get_circle_registry),
-    db_service: DatabaseService = Depends(get_database_service),
+    db_service: AsyncDatabaseService = Depends(get_async_db),
 ) -> HealthChecksResponse:
     """
     Get detailed health checks for all services.
+
+    Uses AsyncDatabaseService for non-blocking DB health check.
 
     Checks:
     - API Server
@@ -152,12 +160,11 @@ async def get_health_checks(
         last_check=now,
     ))
 
-    # Database check
+    # Database check (async -- does not block event loop)
     db_status = "healthy"
-    db_message = "PostgreSQL connected"
+    db_message = "PostgreSQL connected (async)"
     try:
-        # Use sync query for health check
-        result = db_service.fetch_one("SELECT 1 as ok")
+        result = await db_service.fetch_one("SELECT 1 as ok")
         if not result:
             db_status = "warning"
             db_message = "Query returned no result"
@@ -241,12 +248,14 @@ async def get_health_checks(
 
 
 @router.get("/ready")
-async def readiness_check():
+@limiter.limit(TIER_HEALTH)
+async def readiness_check(request: Request):
     """Readiness probe for Kubernetes."""
     return {"ready": True}
 
 
 @router.get("/live")
-async def liveness_check():
+@limiter.limit(TIER_HEALTH)
+async def liveness_check(request: Request):
     """Liveness probe for Kubernetes."""
     return {"alive": True}

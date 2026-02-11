@@ -8,7 +8,9 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
+from starlette.requests import Request
 
+from gathering.api.rate_limit import limiter, TIER_AUTH, TIER_WRITE, TIER_READ
 from gathering.api.auth import (
     Token,
     TokenData,
@@ -34,7 +36,8 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 
 @router.post("/login", response_model=Token)
-async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
+@limiter.limit(TIER_AUTH)
+async def login(request: Request, form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
     """
     Authenticate user and return JWT token.
 
@@ -72,7 +75,8 @@ async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
 
 
 @router.post("/login/json", response_model=Token)
-async def login_json(credentials: UserLogin):
+@limiter.limit(TIER_AUTH)
+async def login_json(request: Request, credentials: UserLogin):
     """
     Authenticate user with JSON body and return JWT token.
 
@@ -109,7 +113,8 @@ async def login_json(credentials: UserLogin):
 
 
 @router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
-async def register(user_data: UserCreate):
+@limiter.limit(TIER_AUTH)
+async def register(request: Request, user_data: UserCreate):
     """
     Register a new user.
 
@@ -146,7 +151,9 @@ async def register(user_data: UserCreate):
 
 
 @router.get("/me", response_model=UserResponse)
+@limiter.limit(TIER_READ)
 async def get_current_user_info(
+    request: Request,
     current_user: Annotated[TokenData, Depends(get_current_active_user)]
 ):
     """
@@ -186,7 +193,9 @@ async def get_current_user_info(
 
 
 @router.post("/verify")
+@limiter.limit(TIER_WRITE)
 async def verify_token(
+    request: Request,
     current_user: Annotated[TokenData, Depends(get_current_active_user)]
 ):
     """
@@ -204,7 +213,9 @@ async def verify_token(
 
 
 @router.post("/logout")
+@limiter.limit(TIER_WRITE)
 async def logout(
+    request: Request,
     token: Annotated[str, Depends(oauth2_scheme_required)],
     current_user: Annotated[TokenData, Depends(get_current_active_user)]
 ):
@@ -231,7 +242,9 @@ async def logout(
 
 
 @router.get("/blacklist/stats")
+@limiter.limit(TIER_READ)
 async def get_token_blacklist_stats(
+    request: Request,
     current_user: Annotated[TokenData, Depends(require_admin)]
 ):
     """

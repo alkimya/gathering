@@ -8,7 +8,9 @@ from datetime import datetime, timezone
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from starlette.requests import Request
 
+from gathering.api.rate_limit import limiter, TIER_READ, TIER_WRITE
 from gathering.api.schemas import (
     AgentCreate,
     AgentUpdate,
@@ -30,6 +32,7 @@ from gathering.api.dependencies import (
     AgentRegistry,
     DatabaseService,
 )
+from gathering.api.async_db import AsyncDatabaseService, get_async_db
 from gathering.agents import (
     AgentWrapper,
     AgentPersona,
@@ -125,7 +128,9 @@ def _agent_to_detail(agent: AgentWrapper) -> AgentDetailResponse:
 
 
 @router.get("", response_model=AgentListResponse)
+@limiter.limit(TIER_READ)
 async def list_agents(
+    request: Request,
     registry: AgentRegistry = Depends(get_agent_registry),
 ) -> AgentListResponse:
     """List all agents."""
@@ -137,7 +142,9 @@ async def list_agents(
 
 
 @router.post("", response_model=AgentDetailResponse, status_code=status.HTTP_201_CREATED)
+@limiter.limit(TIER_WRITE)
 async def create_agent(
+    request: Request,
     data: AgentCreate,
     registry: AgentRegistry = Depends(get_agent_registry),
     memory: MemoryService = Depends(get_memory_service),
@@ -211,7 +218,9 @@ async def create_agent(
 
 
 @router.get("/{agent_id}", response_model=AgentDetailResponse)
+@limiter.limit(TIER_READ)
 async def get_agent(
+    request: Request,
     agent_id: int,
     registry: AgentRegistry = Depends(get_agent_registry),
 ) -> AgentDetailResponse:
@@ -226,7 +235,9 @@ async def get_agent(
 
 
 @router.patch("/{agent_id}", response_model=AgentDetailResponse)
+@limiter.limit(TIER_WRITE)
 async def update_agent(
+    request: Request,
     agent_id: int,
     data: AgentUpdate,
     registry: AgentRegistry = Depends(get_agent_registry),
@@ -283,12 +294,13 @@ async def get_agent_history(
     agent_id: int,
     limit: int = 50,
     registry: AgentRegistry = Depends(get_agent_registry),
-    db: DatabaseService = Depends(get_database_service),
+    db: AsyncDatabaseService = Depends(get_async_db),
 ) -> dict:
     """
     Get chat history for an agent.
 
     Returns the recent messages from the database.
+    Uses AsyncDatabaseService for non-blocking DB access.
     """
     agent = registry.get(agent_id)
     if not agent:
@@ -297,10 +309,10 @@ async def get_agent_history(
             detail=f"Agent {agent_id} not found",
         )
 
-    # Get messages from database
+    # Get messages from database (async -- does not block event loop)
     messages = []
     try:
-        rows = db.execute(
+        rows = await db.execute(
             """
             SELECT id, role, content, created_at
             FROM communication.chat_history
@@ -340,13 +352,14 @@ async def chat_with_agent(
     agent_id: int,
     data: ChatRequest,
     registry: AgentRegistry = Depends(get_agent_registry),
-    db: DatabaseService = Depends(get_database_service),
+    db: AsyncDatabaseService = Depends(get_async_db),
 ) -> ChatResponse:
     """
     Chat with an agent.
 
     Sends a message to the agent and returns its response.
     The agent's persona, project context, and memories are automatically injected.
+    Uses AsyncDatabaseService for non-blocking DB writes.
     """
     agent = registry.get(agent_id)
     if not agent:
@@ -362,10 +375,10 @@ async def chat_with_agent(
             allow_tools=data.allow_tools,
         )
 
-        # Save to database
+        # Save to database (async -- does not block event loop)
         try:
             # Save user message
-            db._db.execute(
+            await db.execute(
                 """
                 INSERT INTO communication.chat_history
                 (agent_id, role, content, created_at)
@@ -374,7 +387,7 @@ async def chat_with_agent(
                 {"agent_id": agent_id, "content": data.message},
             )
             # Save assistant response
-            db._db.execute(
+            await db.execute(
                 """
                 INSERT INTO communication.chat_history
                 (agent_id, role, content, model_used, tokens_output, created_at)

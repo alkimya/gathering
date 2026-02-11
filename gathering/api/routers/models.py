@@ -8,6 +8,7 @@ from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, Field
 
 from gathering.api.dependencies import get_database_service, DatabaseService
+from gathering.api.async_db import AsyncDatabaseService, get_async_db
 
 
 # =============================================================================
@@ -143,17 +144,33 @@ def _serialize_row(row: dict) -> dict:
 # =============================================================================
 
 @router.get("/providers", response_model=dict)
-async def list_providers(db: DatabaseService = Depends(get_database_service)):
-    """List all providers from database."""
-    providers = db.get_providers()
+async def list_providers(db: AsyncDatabaseService = Depends(get_async_db)):
+    """List all providers from database.
+
+    Uses AsyncDatabaseService for non-blocking DB access.
+    """
+    providers = await db.fetch_all("""
+        SELECT p.*,
+               COUNT(m.id) as model_count
+        FROM agent.providers p
+        LEFT JOIN agent.models m ON m.provider_id = p.id
+        GROUP BY p.id
+        ORDER BY p.id
+    """)
     providers = [_serialize_row(p) for p in providers]
     return {"providers": providers, "total": len(providers)}
 
 
 @router.get("/providers/{provider_id}", response_model=dict)
-async def get_provider(provider_id: int, db: DatabaseService = Depends(get_database_service)):
-    """Get a specific provider."""
-    provider = db.get_provider(provider_id)
+async def get_provider(provider_id: int, db: AsyncDatabaseService = Depends(get_async_db)):
+    """Get a specific provider.
+
+    Uses AsyncDatabaseService for non-blocking DB access.
+    """
+    provider = await db.fetch_one(
+        "SELECT * FROM agent.providers WHERE id = %(id)s",
+        {'id': provider_id}
+    )
     if not provider:
         raise HTTPException(status_code=404, detail="Provider not found")
     return _serialize_row(provider)
