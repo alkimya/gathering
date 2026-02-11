@@ -4,24 +4,50 @@ GatheRing uses pytest for testing with a focus on test-driven development (TDD).
 
 ## Test Structure
 
-```
+```text
 tests/
-├── unit/                 # Unit tests
+├── unit/                          # Unit tests
 │   ├── test_agents.py
 │   ├── test_circles.py
 │   ├── test_memory.py
 │   └── test_tools.py
-├── integration/          # Integration tests
+├── integration/                   # Integration tests
 │   ├── test_api.py
 │   ├── test_database.py
 │   └── test_websocket.py
-├── e2e/                  # End-to-end tests
+├── e2e/                           # End-to-end tests
 │   └── test_workflows.py
-├── conftest.py           # Shared fixtures
-└── fixtures/             # Test data
+├── test_auth_persistence.py       # Auth lifecycle (v1.0)
+├── test_sql_security.py           # SQL injection prevention (v1.0)
+├── test_path_traversal.py         # Path traversal defense (v1.0)
+├── test_pipeline_validation.py    # DAG validation, cycle rejection (v1.0)
+├── test_pipeline_execution.py     # Node execution, retry, circuit breaker (v1.0)
+├── test_pipeline_cancellation.py  # Cancellation, timeout (v1.0)
+├── test_scheduler_recovery.py     # Crash recovery, deduplication (v1.0)
+├── test_tool_validation.py        # JSON Schema validation (v1.0)
+├── test_event_bus_concurrency.py  # Parallel handling, dedup, ordering (v1.0)
+├── test_async_database.py         # Async DB concurrency (v1.0)
+├── test_rate_limit_tiers.py       # Per-endpoint rate limiting (v1.0)
+├── test_advisory_locks.py         # Multi-instance coordination (v1.0)
+├── test_graceful_shutdown.py      # Shutdown draining (v1.0)
+├── conftest.py                    # Shared fixtures
+└── fixtures/                      # Test data
     ├── agents.json
     └── conversations.json
 ```
+
+### v1.0 Test Categories
+
+| Category | Tests | What They Prove |
+|----------|-------|----------------|
+| Auth lifecycle | ~50 | Token creation, expiry, blacklist persistence, constant-time auth |
+| Pipeline execution | ~41 | DAG traversal, node dispatch, retry, circuit breaker, cancellation, timeout |
+| Scheduler recovery | ~28 | Action dispatch, crash recovery, dedup, race conditions |
+| Tool validation | ~15 | JSON Schema validation, async execution, workspace paths |
+| Event concurrency | ~7 | Parallel handling, dedup, ordering, backpressure |
+| Rate limiting | ~5 | Per-endpoint tiers, 429 response, Retry-After headers |
+| Advisory locks | ~5 | Multi-instance coordination, fail-closed behavior |
+| Graceful shutdown | ~5 | Ordered teardown, readiness probe, request draining |
 
 ## Running Tests
 

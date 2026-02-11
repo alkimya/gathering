@@ -26,7 +26,7 @@ The dashboard provides a visual interface to:
 - **Track Tasks**: Kanban-style task management
 - **View Conversations**: Inter-agent collaboration history
 - **Manage Goals**: Hierarchical goal tracking
-- **Schedule Actions**: Automated agent tasks
+- **Schedule Actions**: Automated agent tasks with crash recovery
 - **Browse Knowledge**: Search the semantic knowledge base
 - **Configure Settings**: API keys and system parameters
 
@@ -294,55 +294,6 @@ Configure API keys and system parameters.
 - **Providers**: API keys for Anthropic, OpenAI, DeepSeek, etc.
 - **Application**: Default model, temperature, max tokens
 - **Database**: Connection parameters
-
-## Screenshots Guide
-
-To capture screenshots for this documentation:
-
-### Recommended Setup
-
-1. Use a browser window at 1920x1080 resolution
-2. Use the dark theme (default)
-3. Ensure sample data is visible
-
-### Screenshot Locations
-
-Save screenshots to `docs/_static/dashboard/`:
-
-```bash
-docs/_static/dashboard/
-├── agents-list.png
-├── agent-chat.png
-├── agent-dashboard.png
-├── skills-panel.png
-├── skill-tools.png
-├── circles.png
-├── task-board.png
-├── conversations.png
-├── goals.png
-├── knowledge.png
-├── workspace.png
-├── git-view.png
-└── settings.png
-```
-
-### Capture Tools
-
-- **macOS**: Cmd+Shift+4 (selection) or Cmd+Shift+5 (options)
-- **Linux**: gnome-screenshot, flameshot, or scrot
-- **Windows**: Win+Shift+S or Snipping Tool
-
-### Image Optimization
-
-Optimize images before committing:
-
-```bash
-# Install optipng
-sudo apt install optipng
-
-# Optimize all PNGs
-find docs/_static/dashboard -name "*.png" -exec optipng -o5 {} \;
-```
 
 ## Keyboard Shortcuts
 

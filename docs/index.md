@@ -10,15 +10,20 @@ GatheRing is a highly customizable and modular framework for creating and managi
 - **Gathering Circles**: Team orchestration with task routing, reviews, and conflict detection
 - **Agent Persistence**: Personas, memory, sessions with automatic context injection
 - **Agent Conversations**: Direct inter-agent collaboration with turn strategies
-- **REST API**: Full FastAPI backend with WebSocket support
+- **Pipeline Execution**: DAG-based workflow engine with topological traversal, retry + circuit breakers, cancellation and timeout
+- **Schedule System**: Cron-based action dispatch (run_task, execute_pipeline, send_notification, call_api) with crash recovery
+- **REST API**: Full FastAPI backend with 206 rate-limited endpoints and WebSocket support
 - **React Dashboard**: Modern Web3 dark theme UI for agents, circles, tasks, and conversations
 - **RAG Support**: PostgreSQL + pgvector for semantic memory search
 - **Knowledge Base**: Semantic search across documentation and best practices
-- **Skills System**: 18+ skills (filesystem, git, code, shell, database, http, etc.) with per-agent configuration
+- **Skills System**: 18+ skills with JSON Schema validation and async execution
 - **Agent Autonomy**: Background tasks, scheduled actions, goal management
 - **Integrated Workspace**: Full-featured IDE with file explorer, code editor, terminal, and git integration
-- **Authentication**: JWT-based auth with token revocation and OWASP security headers
-- **Fully Tested**: 1060+ tests with TDD approach
+- **Security**: JWT auth with DB-persisted token blacklist, constant-time comparisons, SQL injection prevention, path traversal defense, audit logging
+- **Rate Limiting**: Per-endpoint rate limits with 4 tiers (strict/standard/relaxed/bulk) via slowapi
+- **Multi-Instance**: PostgreSQL advisory locks for distributed task coordination, graceful shutdown with request draining
+- **Observability**: Structured logging (structlog) with JSON output and request correlation IDs
+- **Fully Tested**: 1200+ tests covering auth lifecycle, pipeline execution, scheduler recovery, event concurrency
 
 ## Quick Links
 
@@ -93,7 +98,7 @@ api/models
 
 ## Project Status
 
-- **Version**: 0.5.0
+- **Version**: 1.0.0
 - **License**: MIT
 - **Python**: 3.11+
 - **Repository**: [GitHub](https://github.com/alkimya/gathering)

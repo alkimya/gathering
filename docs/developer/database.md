@@ -35,13 +35,60 @@ migrator.migrate()
 
 See [pycopg README](../../pycopg/README.md) for full API documentation.
 
+## Async Database Service (v1.0)
+
+For async route handlers, GatheRing provides `AsyncDatabaseService` with connection pooling:
+
+```python
+from gathering.db.async_database import AsyncDatabaseService
+
+# Created during FastAPI lifespan startup
+async_db = AsyncDatabaseService(database_url)
+await async_db.initialize()  # Creates pool (min_size=4, max_size=20)
+
+# Usage in route handlers
+async with async_db.connection() as conn:
+    result = await conn.execute(
+        "SELECT * FROM agent.agents WHERE id = %s", [agent_id]
+    )
+
+# Shutdown (last in lifespan teardown)
+await async_db.shutdown()
+```
+
+The sync `DatabaseService` is preserved for CLI tools and migrations. Async route handlers should use `AsyncDatabaseService` for non-blocking DB access.
+
+### Lifespan Ordering
+
+```text
+Startup:  configure_logging -> async DB pool -> scheduler(async_db) -> rate limiter
+Shutdown: set_shutting_down -> LB drain (3s) -> scheduler.stop -> task drain (2s)
+          -> executor.shutdown -> async_db.shutdown (LAST)
+```
+
+## Advisory Locks (v1.0)
+
+Multi-instance task coordination uses PostgreSQL advisory locks:
+
+```python
+# Prevent duplicate task execution across instances
+async with async_db.connection() as conn:
+    result = await conn.execute(
+        "SELECT pg_try_advisory_xact_lock(%s, %s)",
+        [namespace, action_id]
+    )
+    acquired = result[0][0]  # True if lock acquired
+```
+
+Lock semantics: transaction-scoped, fail-closed on DB error (skip execution rather than risk duplicate).
+
 ## Low-Level Drivers
 
 Under the hood, pycopg uses:
 
 | Driver     | Type  | Usage                                       |
 |------------|-------|---------------------------------------------|
-| `asyncpg`  | Async | Main database operations (API, queries)     |
+| `asyncpg`  | Async | Route handlers via AsyncDatabaseService     |
 | `psycopg2` | Sync  | Migrations, CLI tools, blocking operations  |
 
 ## Database Diagram
@@ -58,11 +105,13 @@ The database is organized into schemas:
 |--------|---------|
 | `public` | Common types, functions, extensions |
 | `agent` | Agent definitions and sessions |
+| `auth` | Users, token blacklist, audit events (v1.0) |
 | `circle` | Circle management |
 | `conversation` | Conversations and messages |
 | `memory` | Long-term memory and RAG |
+| `pipeline` | Pipeline definitions, runs, node runs (v1.0) |
 | `project` | Project and task management |
-| `schedule` | Scheduled actions |
+| `schedule` | Scheduled actions with execution history (v1.0) |
 
 ## Setup
 

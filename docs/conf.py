@@ -19,8 +19,8 @@ copyright = f"{datetime.now().year}, Loc Cosnier"
 author = "Loc Cosnier"
 
 # The version info
-version = "0.5.0"
-release = "0.5.0"
+version = "1.0.0"
+release = "1.0.0"
 
 # -- General configuration ---------------------------------------------------
 

@@ -1,6 +1,10 @@
 # GatheRing User Guide
 
-Welcome to GatheRing, a collaborative multi-agent AI framework that enables you to create and manage intelligent agents with unique personalities, skills, and tools.
+Welcome to GatheRing v1.0, a collaborative multi-agent AI framework that enables you to create and manage intelligent agents with unique personalities, skills, and tools.
+
+```{note}
+**v1.0 Production Readiness** -- Auth persists across restarts, pipelines execute real DAG traversal, schedules dispatch actions with crash recovery, all endpoints are rate-limited, and multi-instance deployment is supported via advisory locks.
+```
 
 ## Table of Contents
 

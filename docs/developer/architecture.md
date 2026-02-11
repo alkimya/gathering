@@ -16,7 +16,7 @@ This document describes the architecture of GatheRing.
 │                        FastAPI Backend                           │
 │   ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐           │
 │   │   API    │ │ WebSocket│ │ Event Bus│ │  Skills  │           │
-│   │ Routers  │ │  Server  │ │  (Redis) │ │  System  │           │
+│   │ Routers  │ │  Server  │ │ (In-Mem) │ │  System  │           │
 │   └──────────┘ └──────────┘ └──────────┘ └──────────┘           │
 └─────────────────────────┬───────────────────────────────────────┘
                           │
@@ -31,8 +31,9 @@ This document describes the architecture of GatheRing.
 ┌─────────────────────────┴───────────────────────────────────────┐
 │                       Data Layer                                 │
 │   ┌────────────────┐ ┌────────────────┐ ┌────────────────┐      │
-│   │   PostgreSQL   │ │     Redis      │ │  File System   │      │
-│   │   + pgvector   │ │    (Cache)     │ │  (Workspace)   │      │
+│   │   PostgreSQL   │ │  Redis (opt.)  │ │  File System   │      │
+│   │ + pgvector     │ │ Rate limit bk  │ │  (Workspace)   │      │
+│   │ + adv. locks   │ │                │ │                │      │
 │   └────────────────┘ └────────────────┘ └────────────────┘      │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -136,9 +137,42 @@ Memory scopes:
 - `agent`: Private to an agent
 - `conversation`: Specific to a conversation
 
+### Pipeline Engine
+
+DAG-based workflow execution with topological traversal:
+
+```
+┌─────────┐     ┌─────────┐     ┌─────────┐
+│  Start  │────>│ Agent A │────>│  End    │
+└─────────┘     └────┬────┘     └─────────┘
+                     │               ▲
+                     ▼               │
+                ┌─────────┐    ┌─────────┐
+                │Condition│───>│ Agent B │
+                └─────────┘    └─────────┘
+```
+
+Key components:
+
+- **PipelineExecutor**: Traverses DAG in topological order via `graphlib.TopologicalSorter`
+- **Node dispatchers**: 6 types -- agent, condition, action, transform, filter, merge
+- **CircuitBreaker**: Per-node with configurable failure threshold
+- **Retry**: Exponential backoff via `tenacity`, only retries `NodeExecutionError`
+- **PipelineRunManager**: Tracks active runs, enforces timeout (`asyncio.timeout`), handles cancellation (cooperative then forced)
+- **Validation**: Rejects cyclic graphs, enforces node schema before execution
+
+### Scheduler
+
+Cron-based action dispatch with crash recovery:
+
+- **Action types**: `run_task`, `execute_pipeline`, `send_notification`, `call_api`
+- **Crash recovery**: Detects missed runs on startup, deduplicates via execution history
+- **Advisory locks**: Multi-instance coordination via `pg_try_advisory_xact_lock`
+- **Dispatcher functions**: Module-level async functions, not methods, for clean testability
+
 ### Event System
 
-Publish-subscribe event bus using Redis:
+Publish-subscribe event bus (in-memory with backpressure):
 
 ```python
 # Publishing events
@@ -277,35 +311,54 @@ src/
 
 ## Security
 
+### Authentication
+
+- **JWT tokens**: PyJWT with HS256, DB-persisted token blacklist (write-through LRU cache + PostgreSQL)
+- **Password hashing**: Direct bcrypt (>= 4.0.0), constant-time comparisons to prevent timing attacks
+- **Audit logging**: Auth events (login, logout, token creation, failed attempts) logged to audit table
+- **Token lifecycle**: Creation, expiry, blacklist cleanup, concurrent use, refresh -- all tested
+
 ### API Security
 
 - Input validation with Pydantic
-- SQL injection prevention (SQLAlchemy ORM)
-- Rate limiting (configurable)
+- SQL injection prevention -- all queries use parameterized statements via `safe_update_builder`
+- Path traversal defense -- `validate_file_path` double-decodes URLs, blocks `../`, `%2e%2e/`, symlink escape
+- Rate limiting -- per-endpoint tiers (strict/standard/relaxed/bulk) via slowapi with 429 + Retry-After headers
 - CORS configuration
+- Structured logging (structlog) with JSON output and request correlation IDs
 
 ### Agent Security
 
 - Tool permission system
+- JSON Schema validation on all tool parameters before execution
 - Filesystem sandboxing
 - Code execution isolation
 - Memory scope isolation
 
 ## Scalability
 
+### Multi-Instance Support
+
+- **Advisory locks**: `pg_try_advisory_xact_lock(namespace, action_id)` prevents duplicate task execution across instances
+- **Fail-closed**: DB errors return False (skip execution) rather than risk duplicates
+- **Graceful shutdown**: Ordered teardown -- stop accepting requests, drain in-flight, stop scheduler, close DB pool last
+- **Readiness probe**: `/health/ready` returns 503 during shutdown for load balancer integration
+
 ### Horizontal Scaling
 
-- Stateless API servers
-- Redis for session sharing
-- PostgreSQL connection pooling
-- Load balancer compatible
+- Stateless API servers with PostgreSQL advisory lock coordination
+- Redis optional (rate limiting backend, not required)
+- pycopg async connection pooling (min 4, max 20)
+- Load balancer compatible with graceful shutdown
 
 ### Performance Optimizations
 
+- **Async DB**: pycopg `AsyncPooledDatabase` for non-blocking queries in async handlers
+- **N+1 elimination**: `get_circle_members_full()` single JOIN replaces 2N+1 queries
+- **Bounded caches**: `BoundedLRUDict` with configurable max size and LRU eviction
+- **Event bus backpressure**: Semaphore-limited concurrent handlers, time-windowed deduplication
 - Embedding caching
-- Query result caching
 - Connection pooling
-- Async I/O throughout
 
 ## Configuration
 

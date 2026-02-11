@@ -15,7 +15,7 @@ Check API health status with system overview.
 ```json
 {
   "status": "healthy",
-  "version": "0.4.0",
+  "version": "1.0.0",
   "uptime_seconds": 3600.5,
   "agents_count": 5,
   "circles_count": 2,
@@ -119,13 +119,22 @@ Get detailed health checks for all services.
 
 ### GET /health/ready
 
-Kubernetes readiness probe.
+Kubernetes readiness probe. Returns 503 during graceful shutdown to allow load balancers to drain connections.
 
-**Response:**
+**Response (healthy):**
 
 ```json
 {
   "ready": true
+}
+```
+
+**Response (shutting down):** `503 Service Unavailable`
+
+```json
+{
+  "ready": false,
+  "reason": "shutting_down"
 }
 ```
 
@@ -945,6 +954,27 @@ Get list of enabled skill names for an agent.
   "agent_id": 1,
   "enabled_skills": ["git", "test", "filesystem", "code"]
 }
+```
+
+## Rate Limiting
+
+All endpoints enforce per-endpoint rate limits via slowapi. Rate limit tiers:
+
+| Tier | Limit | Endpoints |
+|------|-------|-----------|
+| `strict` | 10/minute | `/auth/login`, `/auth/register` |
+| `standard` | 60/minute | Most CRUD endpoints |
+| `relaxed` | 200/minute | Read-heavy endpoints (`GET /agents`, `GET /circles`) |
+| `bulk` | 30/minute | Bulk operations, imports |
+
+When rate limited, the response includes:
+
+```text
+HTTP/1.1 429 Too Many Requests
+Retry-After: 45
+X-RateLimit-Limit: 60
+X-RateLimit-Remaining: 0
+X-RateLimit-Reset: 1707616800
 ```
 
 ## Error Responses
