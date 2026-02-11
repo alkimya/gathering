@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Auth + Security Foundation** - Persistent auth, SQL injection elimination, security hardening, DB layer consolidation
 - [x] **Phase 2: Pipeline Execution Engine** - DAG traversal, node execution, validation, error recovery, cancellation
 - [x] **Phase 3: Schedule Execution + Tool Hardening** - Action dispatch, crash recovery, tool validation, async tools, workspace paths
-- [ ] **Phase 4: Performance Optimization** - Async DB, N+1 elimination, rate limiting, event batching, cache bounds
+- [x] **Phase 4: Performance Optimization** - Async DB, N+1 elimination, rate limiting, event batching, cache bounds
 - [ ] **Phase 5: Multi-Instance + Production Hardening** - Distributed coordination, graceful shutdown
 
 ## Phase Details
@@ -86,8 +86,8 @@ Plans:
 - [x] 04-01-PLAN.md -- Async database service (AsyncPooledDatabase lifecycle) and N+1 elimination in circle member retrieval (JOIN optimization)
 - [x] 04-02-PLAN.md -- slowapi per-endpoint rate limiting replacing hand-rolled middleware, BoundedLRUDict utility for all unbounded in-memory caches
 - [x] 04-03-PLAN.md -- Event bus deduplication, semaphore backpressure, and comprehensive concurrency tests
-- [ ] 04-04-PLAN.md -- Gap closure: migrate representative route handlers to AsyncDatabaseService
-- [ ] 04-05-PLAN.md -- Gap closure: apply per-endpoint rate limit tier decorators to all route handlers
+- [x] 04-04-PLAN.md -- Gap closure: migrate representative route handlers to AsyncDatabaseService
+- [x] 04-05-PLAN.md -- Gap closure: apply per-endpoint rate limit tier decorators to all route handlers
 
 ### Phase 5: Multi-Instance + Production Hardening
 **Goal**: Multiple server instances coordinate without duplicate task execution, and the server shuts down gracefully without dropping in-flight requests
@@ -111,5 +111,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 | 1. Auth + Security Foundation | 3/3 | ✓ Complete | 2026-02-10 |
 | 2. Pipeline Execution Engine | 3/3 | ✓ Complete | 2026-02-10 |
 | 3. Schedule Execution + Tool Hardening | 3/3 | ✓ Complete | 2026-02-10 |
-| 4. Performance Optimization | 3/5 | Gap closure | - |
+| 4. Performance Optimization | 5/5 | ✓ Complete | 2026-02-11 |
 | 5. Multi-Instance + Production Hardening | 0/1 | Not started | - |
