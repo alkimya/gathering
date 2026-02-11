@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-10)
 
 **Core value:** Every existing feature works for real -- auth persists, pipelines execute, schedules run, security is solid -- so GatheRing can be deployed to production with confidence.
-**Current focus:** Phase 4 - Performance Optimization
+**Current focus:** Phase 5 - Multi-Instance Production Hardening
 
 ## Current Position
 
-Phase: 4 of 5 (Performance Optimization) -- COMPLETE
-Plan: 5 of 5 in current phase
-Status: Phase 4 complete -- all 5 plans executed
-Last activity: 2026-02-11 -- Completed 04-05 (Rate Limit Tier Enforcement)
+Phase: 5 of 5 (Multi-Instance Production Hardening)
+Plan: 1 of 2 in current phase -- COMPLETE
+Status: Executing Phase 5
+Last activity: 2026-02-11 -- Completed 05-01 (Advisory Lock Coordination)
 
-Progress: [██████████] 100%
+Progress: [████████░░] 80%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 14
-- Average duration: 5.9min
-- Total execution time: 1.44 hours
+- Total plans completed: 15
+- Average duration: 5.7min
+- Total execution time: 1.49 hours
 
 **By Phase:**
 
@@ -31,9 +31,10 @@ Progress: [██████████] 100%
 | 02-pipeline-execution-engine | 3/3 | 17min | 5.7min |
 | 03-schedule-execution-tool-hardening | 3/3 | 14min | 4.7min |
 | 04-performance-optimization | 5/5 | 35min | 7min |
+| 05-multi-instance-production-hardening | 1/2 | 3min | 3min |
 
 **Recent Trend:**
-- Last 5 plans: 04-01 (4min), 04-03 (4min), 04-02 (8min), 04-04 (7min), 04-05 (12min)
+- Last 5 plans: 04-03 (4min), 04-02 (8min), 04-04 (7min), 04-05 (12min), 05-01 (3min)
 - Trend: Steady/Fast
 
 *Updated after each plan completion*
@@ -102,6 +103,10 @@ Recent decisions affecting current work:
 - [04-05]: Custom _rate_limit_handler replaces slowapi default to inject Retry-After + X-RateLimit-* headers on 429
 - [04-05]: SlowAPIMiddleware not used (conflicts with decorator-based header injection); exception handler approach sufficient
 - [04-05]: headers_enabled left False on Limiter; headers only injected on 429 via custom handler to avoid decorator crash
+- [05-01]: Advisory lock uses two-integer form pg_try_advisory_xact_lock(namespace, action_id) to avoid collision with other lock users
+- [05-01]: Fail-closed on DB error: returns False (skip execution) rather than risk duplicate
+- [05-01]: async_db is optional -- single-instance mode (None) always returns True for backward compatibility
+- [05-01]: Lock check is first gate in _execute_action, before existing concurrency check
 
 ### Pending Todos
 
@@ -116,5 +121,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-11
-Stopped at: Completed 04-05-PLAN.md (Phase 4 complete)
-Resume file: .planning/phases/04-performance-optimization/04-05-SUMMARY.md
+Stopped at: Completed 05-01-PLAN.md
+Resume file: .planning/phases/05-multi-instance-production-hardening/05-01-SUMMARY.md
