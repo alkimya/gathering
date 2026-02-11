@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-10)
 
 **Core value:** Every existing feature works for real -- auth persists, pipelines execute, schedules run, security is solid -- so GatheRing can be deployed to production with confidence.
-**Current focus:** Phase 5 - Multi-Instance Production Hardening
+**Current focus:** Phase 5 - Multi-Instance Production Hardening -- COMPLETE
 
 ## Current Position
 
-Phase: 5 of 5 (Multi-Instance Production Hardening)
-Plan: 1 of 2 in current phase -- COMPLETE
-Status: Executing Phase 5
-Last activity: 2026-02-11 -- Completed 05-01 (Advisory Lock Coordination)
+Phase: 5 of 5 (Multi-Instance Production Hardening) -- COMPLETE
+Plan: 2 of 2 in current phase -- COMPLETE
+Status: All phases complete -- all 16 plans executed
+Last activity: 2026-02-11 -- Completed 05-02 (Graceful Shutdown)
 
-Progress: [████████░░] 80%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 15
-- Average duration: 5.7min
-- Total execution time: 1.49 hours
+- Total plans completed: 16
+- Average duration: 5.6min
+- Total execution time: 1.56 hours
 
 **By Phase:**
 
@@ -31,10 +31,10 @@ Progress: [████████░░] 80%
 | 02-pipeline-execution-engine | 3/3 | 17min | 5.7min |
 | 03-schedule-execution-tool-hardening | 3/3 | 14min | 4.7min |
 | 04-performance-optimization | 5/5 | 35min | 7min |
-| 05-multi-instance-production-hardening | 1/2 | 3min | 3min |
+| 05-multi-instance-production-hardening | 2/2 | 7min | 3.5min |
 
 **Recent Trend:**
-- Last 5 plans: 04-03 (4min), 04-02 (8min), 04-04 (7min), 04-05 (12min), 05-01 (3min)
+- Last 5 plans: 04-02 (8min), 04-04 (7min), 04-05 (12min), 05-01 (3min), 05-02 (4min)
 - Trend: Steady/Fast
 
 *Updated after each plan completion*
@@ -107,6 +107,9 @@ Recent decisions affecting current work:
 - [05-01]: Fail-closed on DB error: returns False (skip execution) rather than risk duplicate
 - [05-01]: async_db is optional -- single-instance mode (None) always returns True for backward compatibility
 - [05-01]: Lock check is first gate in _execute_action, before existing concurrency check
+- [05-02]: Startup reorder: async DB pool init before scheduler start so advisory lock wiring is available
+- [05-02]: Shutdown order: set_shutting_down -> sleep(3) LB drain -> scheduler stop -> sleep(2) task drain -> executor shutdown -> async DB pool close LAST
+- [05-02]: sleep(2) drain after scheduler.stop() for in-flight _execute_action tasks holding advisory lock queries
 
 ### Pending Todos
 
@@ -121,5 +124,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-11
-Stopped at: Completed 05-01-PLAN.md
-Resume file: .planning/phases/05-multi-instance-production-hardening/05-01-SUMMARY.md
+Stopped at: Completed 05-02-PLAN.md (Phase 5 complete -- all phases complete)
+Resume file: .planning/phases/05-multi-instance-production-hardening/05-02-SUMMARY.md
