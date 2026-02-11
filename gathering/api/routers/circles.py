@@ -6,6 +6,9 @@ from datetime import datetime, timezone
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from starlette.requests import Request
+
+from gathering.api.rate_limit import limiter, TIER_READ, TIER_WRITE
 
 from gathering.api.schemas import (
     CircleCreate,
@@ -160,7 +163,9 @@ def _task_to_response(task: CircleTask, circle: GatheringCircle) -> TaskResponse
 
 
 @router.get("", response_model=CircleListResponse)
+@limiter.limit(TIER_READ)
 async def list_circles(
+    request: Request,
     registry: CircleRegistry = Depends(get_circle_registry),
 ) -> CircleListResponse:
     """List all circles."""
@@ -181,7 +186,9 @@ async def list_circles(
 
 
 @router.post("", response_model=CircleDetailResponse, status_code=status.HTTP_201_CREATED)
+@limiter.limit(TIER_WRITE)
 async def create_circle(
+    request: Request,
     data: CircleCreate,
     registry: CircleRegistry = Depends(get_circle_registry),
 ) -> CircleDetailResponse:
@@ -203,7 +210,9 @@ async def create_circle(
 
 
 @router.get("/{name}", response_model=CircleDetailResponse)
+@limiter.limit(TIER_READ)
 async def get_circle(
+    request: Request,
     name: str,
     registry: CircleRegistry = Depends(get_circle_registry),
 ) -> CircleDetailResponse:
@@ -218,7 +227,9 @@ async def get_circle(
 
 
 @router.delete("/{name}", status_code=status.HTTP_204_NO_CONTENT)
+@limiter.limit(TIER_WRITE)
 async def delete_circle(
+    request: Request,
     name: str,
     registry: CircleRegistry = Depends(get_circle_registry),
 ):
@@ -242,7 +253,9 @@ async def delete_circle(
 
 
 @router.post("/{name}/start")
+@limiter.limit(TIER_WRITE)
 async def start_circle(
+    request: Request,
     name: str,
     registry: CircleRegistry = Depends(get_circle_registry),
 ):
@@ -263,7 +276,9 @@ async def start_circle(
 
 
 @router.post("/{name}/stop")
+@limiter.limit(TIER_WRITE)
 async def stop_circle(
+    request: Request,
     name: str,
     registry: CircleRegistry = Depends(get_circle_registry),
 ):
@@ -289,7 +304,9 @@ async def stop_circle(
 
 
 @router.post("/{name}/agents")
+@limiter.limit(TIER_WRITE)
 async def add_agent_to_circle(
+    request: Request,
     name: str,
     agent_id: int,
     agent_name: str,
@@ -418,7 +435,9 @@ Tu peux aussi te référer à tes conversations et tâches passées dans ta mém
 
 
 @router.delete("/{name}/agents/{agent_id}")
+@limiter.limit(TIER_WRITE)
 async def remove_agent_from_circle(
+    request: Request,
     name: str,
     agent_id: int,
     registry: CircleRegistry = Depends(get_circle_registry),
@@ -451,7 +470,9 @@ async def remove_agent_from_circle(
 
 
 @router.get("/{name}/tasks", response_model=TaskListResponse)
+@limiter.limit(TIER_READ)
 async def list_tasks(
+    request: Request,
     name: str,
     status_filter: Optional[str] = None,
     registry: CircleRegistry = Depends(get_circle_registry),
@@ -476,7 +497,9 @@ async def list_tasks(
 
 
 @router.post("/{name}/tasks", response_model=TaskResponse, status_code=status.HTTP_201_CREATED)
+@limiter.limit(TIER_WRITE)
 async def create_task(
+    request: Request,
     name: str,
     data: TaskCreate,
     registry: CircleRegistry = Depends(get_circle_registry),
@@ -507,7 +530,9 @@ async def create_task(
 
 
 @router.get("/{name}/tasks/{task_id}", response_model=TaskResponse)
+@limiter.limit(TIER_READ)
 async def get_task(
+    request: Request,
     name: str,
     task_id: int,
     registry: CircleRegistry = Depends(get_circle_registry),
@@ -531,7 +556,9 @@ async def get_task(
 
 
 @router.post("/{name}/tasks/{task_id}/submit", response_model=TaskResponse)
+@limiter.limit(TIER_WRITE)
 async def submit_task_result(
+    request: Request,
     name: str,
     task_id: int,
     data: TaskResultSubmit,
@@ -569,7 +596,9 @@ async def submit_task_result(
 
 
 @router.post("/{name}/tasks/{task_id}/approve")
+@limiter.limit(TIER_WRITE)
 async def approve_task(
+    request: Request,
     name: str,
     task_id: int,
     reviewer_id: int,
@@ -607,7 +636,9 @@ async def approve_task(
 
 
 @router.post("/{name}/tasks/{task_id}/reject")
+@limiter.limit(TIER_WRITE)
 async def reject_task(
+    request: Request,
     name: str,
     task_id: int,
     reviewer_id: int,
@@ -650,7 +681,9 @@ async def reject_task(
 
 
 @router.get("/{name}/conflicts")
+@limiter.limit(TIER_READ)
 async def get_conflicts(
+    request: Request,
     name: str,
     registry: CircleRegistry = Depends(get_circle_registry),
 ):
@@ -677,7 +710,9 @@ async def get_conflicts(
 
 
 @router.get("/{name}/metrics")
+@limiter.limit(TIER_READ)
 async def get_circle_metrics(
+    request: Request,
     name: str,
     registry: CircleRegistry = Depends(get_circle_registry),
 ):

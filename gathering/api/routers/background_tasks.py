@@ -5,6 +5,9 @@ Manages long-running autonomous agent tasks.
 
 from typing import Optional
 from fastapi import APIRouter, HTTPException, Depends
+from starlette.requests import Request
+
+from gathering.api.rate_limit import limiter, TIER_READ, TIER_WRITE
 from pydantic import BaseModel, Field
 
 from gathering.api.dependencies import (
@@ -93,7 +96,9 @@ def _serialize_row(row: dict) -> dict:
 
 
 @router.get("", response_model=dict)
+@limiter.limit(TIER_READ)
 async def list_background_tasks(
+    request: Request,
     status: Optional[str] = None,
     agent_id: Optional[int] = None,
     limit: int = 50,
@@ -134,7 +139,9 @@ async def list_background_tasks(
 
 
 @router.get("/{task_id}", response_model=dict)
+@limiter.limit(TIER_READ)
 async def get_background_task(
+    request: Request,
     task_id: int,
     db: DatabaseService = Depends(get_database_service),
 ):
@@ -151,7 +158,9 @@ async def get_background_task(
 
 
 @router.post("", response_model=dict, status_code=201)
+@limiter.limit(TIER_WRITE)
 async def create_background_task(
+    request: Request,
     data: BackgroundTaskCreate,
     db: DatabaseService = Depends(get_database_service),
     agent_registry: AgentRegistry = Depends(get_agent_registry),
@@ -189,7 +198,9 @@ async def create_background_task(
 
 
 @router.post("/{task_id}/pause", response_model=dict)
+@limiter.limit(TIER_WRITE)
 async def pause_background_task(
+    request: Request,
     task_id: int,
     db: DatabaseService = Depends(get_database_service),
 ):
@@ -204,7 +215,9 @@ async def pause_background_task(
 
 
 @router.post("/{task_id}/resume", response_model=dict)
+@limiter.limit(TIER_WRITE)
 async def resume_background_task(
+    request: Request,
     task_id: int,
     db: DatabaseService = Depends(get_database_service),
     agent_registry: AgentRegistry = Depends(get_agent_registry),
@@ -236,7 +249,9 @@ async def resume_background_task(
 
 
 @router.post("/{task_id}/cancel", response_model=dict)
+@limiter.limit(TIER_WRITE)
 async def cancel_background_task(
+    request: Request,
     task_id: int,
     db: DatabaseService = Depends(get_database_service),
 ):
@@ -251,7 +266,9 @@ async def cancel_background_task(
 
 
 @router.get("/{task_id}/steps", response_model=dict)
+@limiter.limit(TIER_READ)
 async def get_task_steps(
+    request: Request,
     task_id: int,
     limit: int = 100,
     offset: int = 0,
@@ -290,7 +307,9 @@ async def get_task_steps(
 
 
 @router.delete("/{task_id}", status_code=204)
+@limiter.limit(TIER_WRITE)
 async def delete_background_task(
+    request: Request,
     task_id: int,
     db: DatabaseService = Depends(get_database_service),
 ):

@@ -6,6 +6,9 @@ from datetime import datetime, timezone
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from starlette.requests import Request
+
+from gathering.api.rate_limit import limiter, TIER_READ, TIER_WRITE
 
 from gathering.api.schemas import (
     ConversationCreate,
@@ -89,7 +92,9 @@ def _conv_to_detail(conv_data: dict) -> ConversationDetailResponse:
 
 
 @router.get("", response_model=ConversationListResponse)
+@limiter.limit(TIER_READ)
 async def list_conversations(
+    request: Request,
     registry: ConversationRegistry = Depends(get_conversation_registry),
 ) -> ConversationListResponse:
     """List all conversations."""
@@ -101,7 +106,9 @@ async def list_conversations(
 
 
 @router.post("", response_model=ConversationDetailResponse, status_code=status.HTTP_201_CREATED)
+@limiter.limit(TIER_WRITE)
 async def create_conversation(
+    request: Request,
     data: ConversationCreate,
     circle_name: str = "default",
     circle_registry: CircleRegistry = Depends(get_circle_registry),
@@ -159,7 +166,9 @@ async def create_conversation(
 
 
 @router.get("/{conv_id}", response_model=ConversationDetailResponse)
+@limiter.limit(TIER_READ)
 async def get_conversation(
+    request: Request,
     conv_id: str,
     registry: ConversationRegistry = Depends(get_conversation_registry),
 ) -> ConversationDetailResponse:
@@ -174,7 +183,9 @@ async def get_conversation(
 
 
 @router.post("/{conv_id}/start", response_model=ConversationDetailResponse)
+@limiter.limit(TIER_WRITE)
 async def start_conversation(
+    request: Request,
     conv_id: str,
     circle_registry: CircleRegistry = Depends(get_circle_registry),
     conv_registry: ConversationRegistry = Depends(get_conversation_registry),
@@ -288,7 +299,9 @@ async def start_conversation(
 
 
 @router.post("/{conv_id}/cancel")
+@limiter.limit(TIER_WRITE)
 async def cancel_conversation(
+    request: Request,
     conv_id: str,
     registry: ConversationRegistry = Depends(get_conversation_registry),
 ):
@@ -312,7 +325,9 @@ async def cancel_conversation(
 
 
 @router.delete("/{conv_id}", status_code=status.HTTP_204_NO_CONTENT)
+@limiter.limit(TIER_WRITE)
 async def delete_conversation(
+    request: Request,
     conv_id: str,
     registry: ConversationRegistry = Depends(get_conversation_registry),
 ):
@@ -325,7 +340,9 @@ async def delete_conversation(
 
 
 @router.get("/{conv_id}/transcript")
+@limiter.limit(TIER_READ)
 async def get_transcript(
+    request: Request,
     conv_id: str,
     registry: ConversationRegistry = Depends(get_conversation_registry),
 ):
@@ -345,7 +362,9 @@ async def get_transcript(
 
 
 @router.get("/{conv_id}/messages")
+@limiter.limit(TIER_READ)
 async def get_messages(
+    request: Request,
     conv_id: str,
     registry: ConversationRegistry = Depends(get_conversation_registry),
 ):
@@ -370,7 +389,9 @@ async def get_messages(
 
 
 @router.post("/{conv_id}/advance")
+@limiter.limit(TIER_WRITE)
 async def advance_conversation(
+    request: Request,
     conv_id: str,
     data: Optional[dict] = None,
     circle_registry: CircleRegistry = Depends(get_circle_registry),
@@ -492,7 +513,9 @@ async def advance_conversation(
 
 
 @router.post("/quick", response_model=ConversationDetailResponse)
+@limiter.limit(TIER_WRITE)
 async def quick_collaborate(
+    request: Request,
     data: ConversationCreate,
     circle_name: str = "default",
     circle_registry: CircleRegistry = Depends(get_circle_registry),

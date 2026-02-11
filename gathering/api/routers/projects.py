@@ -10,6 +10,9 @@ from pathlib import Path
 from typing import List, Optional, Dict, Any
 
 from fastapi import APIRouter, Depends, HTTPException, status, Query
+from starlette.requests import Request
+
+from gathering.api.rate_limit import limiter, TIER_READ, TIER_WRITE
 from pydantic import BaseModel, Field
 
 from gathering.api.dependencies import get_database_service, DatabaseService
@@ -179,7 +182,9 @@ def _project_from_row(row: Dict[str, Any]) -> ProjectResponse:
 
 
 @router.get("", response_model=ProjectListResponse)
+@limiter.limit(TIER_READ)
 async def list_projects(
+    request: Request,
     status_filter: Optional[str] = Query(None, alias="status"),
     db: DatabaseService = Depends(get_database_service),
 ) -> ProjectListResponse:
@@ -205,7 +210,9 @@ async def list_projects(
 
 
 @router.post("", response_model=ProjectResponse, status_code=status.HTTP_201_CREATED)
+@limiter.limit(TIER_WRITE)
 async def create_project(
+    request: Request,
     data: ProjectCreate,
     db: DatabaseService = Depends(get_database_service),
 ) -> ProjectResponse:
@@ -319,7 +326,9 @@ async def create_project(
 
 
 @router.get("/{project_id}", response_model=ProjectResponse)
+@limiter.limit(TIER_READ)
 async def get_project(
+    request: Request,
     project_id: int,
     db: DatabaseService = Depends(get_database_service),
 ) -> ProjectResponse:
@@ -343,7 +352,9 @@ async def get_project(
 
 
 @router.patch("/{project_id}", response_model=ProjectResponse)
+@limiter.limit(TIER_WRITE)
 async def update_project(
+    request: Request,
     project_id: int,
     data: ProjectUpdate,
     db: DatabaseService = Depends(get_database_service),
@@ -405,7 +416,9 @@ async def update_project(
 
 
 @router.delete("/{project_id}", status_code=status.HTTP_204_NO_CONTENT)
+@limiter.limit(TIER_WRITE)
 async def delete_project(
+    request: Request,
     project_id: int,
     db: DatabaseService = Depends(get_database_service),
 ):
@@ -427,7 +440,9 @@ async def delete_project(
 
 
 @router.get("/browse/folders", response_model=FolderBrowseResponse)
+@limiter.limit(TIER_READ)
 async def browse_folders(
+    request: Request,
     path: Optional[str] = Query(None, description="Path to browse (default: home directory)"),
     show_hidden: bool = Query(False, description="Show hidden files/folders"),
 ) -> FolderBrowseResponse:
@@ -512,7 +527,9 @@ async def browse_folders(
 
 
 @router.post("/{project_id}/circles/{circle_id}", status_code=status.HTTP_201_CREATED)
+@limiter.limit(TIER_WRITE)
 async def link_circle_to_project(
+    request: Request,
     project_id: int,
     circle_id: int,
     is_primary: bool = False,
@@ -550,7 +567,9 @@ async def link_circle_to_project(
 
 
 @router.delete("/{project_id}/circles/{circle_id}", status_code=status.HTTP_204_NO_CONTENT)
+@limiter.limit(TIER_WRITE)
 async def unlink_circle_from_project(
+    request: Request,
     project_id: int,
     circle_id: int,
     db: DatabaseService = Depends(get_database_service),
@@ -570,7 +589,9 @@ async def unlink_circle_from_project(
 
 
 @router.get("/{project_id}/circles")
+@limiter.limit(TIER_READ)
 async def list_project_circles(
+    request: Request,
     project_id: int,
     db: DatabaseService = Depends(get_database_service),
 ) -> dict:
@@ -615,7 +636,9 @@ async def list_project_circles(
 
 
 @router.post("/{project_id}/refresh", response_model=ProjectResponse)
+@limiter.limit(TIER_WRITE)
 async def refresh_project(
+    request: Request,
     project_id: int,
     db: DatabaseService = Depends(get_database_service),
 ) -> ProjectResponse:
@@ -677,7 +700,9 @@ async def refresh_project(
 
 
 @router.get("/{project_id}/context")
+@limiter.limit(TIER_READ)
 async def get_project_context(
+    request: Request,
     project_id: int,
     db: DatabaseService = Depends(get_database_service),
 ) -> dict:

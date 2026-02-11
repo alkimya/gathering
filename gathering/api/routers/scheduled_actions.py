@@ -7,6 +7,9 @@ from datetime import datetime, timezone, timedelta
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from starlette.requests import Request
+
+from gathering.api.rate_limit import limiter, TIER_READ, TIER_WRITE
 from pydantic import BaseModel, Field
 
 from gathering.api.dependencies import get_database_service, DatabaseService
@@ -158,7 +161,9 @@ def _row_to_response(row: dict) -> ScheduledActionResponse:
 # Endpoints
 
 @router.get("", response_model=List[ScheduledActionResponse])
+@limiter.limit(TIER_READ)
 async def list_scheduled_actions(
+    request: Request,
     status: Optional[str] = Query(None, description="Filter by status"),
     agent_id: Optional[int] = Query(None, description="Filter by agent"),
     db: DatabaseService = Depends(get_database_service),
@@ -187,7 +192,9 @@ async def list_scheduled_actions(
 
 
 @router.get("/{action_id}", response_model=ScheduledActionResponse)
+@limiter.limit(TIER_READ)
 async def get_scheduled_action(
+    request: Request,
     action_id: int,
     db: DatabaseService = Depends(get_database_service),
 ):
@@ -209,7 +216,9 @@ async def get_scheduled_action(
 
 
 @router.post("", response_model=ScheduledActionResponse)
+@limiter.limit(TIER_WRITE)
 async def create_scheduled_action(
+    request: Request,
     data: ScheduledActionCreate,
     db: DatabaseService = Depends(get_database_service),
 ):
@@ -336,7 +345,9 @@ async def create_scheduled_action(
 
 
 @router.patch("/{action_id}", response_model=ScheduledActionResponse)
+@limiter.limit(TIER_WRITE)
 async def update_scheduled_action(
+    request: Request,
     action_id: int,
     data: ScheduledActionUpdate,
     db: DatabaseService = Depends(get_database_service),
@@ -373,7 +384,9 @@ async def update_scheduled_action(
 
 
 @router.post("/{action_id}/pause")
+@limiter.limit(TIER_WRITE)
 async def pause_scheduled_action(
+    request: Request,
     action_id: int,
     db: DatabaseService = Depends(get_database_service),
 ):
@@ -403,7 +416,9 @@ async def pause_scheduled_action(
 
 
 @router.post("/{action_id}/resume")
+@limiter.limit(TIER_WRITE)
 async def resume_scheduled_action(
+    request: Request,
     action_id: int,
     db: DatabaseService = Depends(get_database_service),
 ):
@@ -433,7 +448,9 @@ async def resume_scheduled_action(
 
 
 @router.post("/{action_id}/trigger")
+@limiter.limit(TIER_WRITE)
 async def trigger_scheduled_action(
+    request: Request,
     action_id: int,
     db: DatabaseService = Depends(get_database_service),
 ):
@@ -453,7 +470,9 @@ async def trigger_scheduled_action(
 
 
 @router.delete("/{action_id}")
+@limiter.limit(TIER_WRITE)
 async def delete_scheduled_action(
+    request: Request,
     action_id: int,
     db: DatabaseService = Depends(get_database_service),
 ):
@@ -483,7 +502,9 @@ async def delete_scheduled_action(
 
 
 @router.get("/{action_id}/runs", response_model=List[ScheduledActionRunResponse])
+@limiter.limit(TIER_READ)
 async def get_scheduled_action_runs(
+    request: Request,
     action_id: int,
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),

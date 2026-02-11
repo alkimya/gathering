@@ -272,7 +272,9 @@ async def update_agent(
 
 
 @router.delete("/{agent_id}", status_code=status.HTTP_204_NO_CONTENT)
+@limiter.limit(TIER_WRITE)
 async def delete_agent(
+    request: Request,
     agent_id: int,
     registry: AgentRegistry = Depends(get_agent_registry),
 ):
@@ -290,7 +292,9 @@ async def delete_agent(
 
 
 @router.get("/{agent_id}/history")
+@limiter.limit(TIER_READ)
 async def get_agent_history(
+    request: Request,
     agent_id: int,
     limit: int = 50,
     registry: AgentRegistry = Depends(get_agent_registry),
@@ -348,7 +352,9 @@ async def get_agent_history(
 
 
 @router.post("/{agent_id}/chat", response_model=ChatResponse)
+@limiter.limit(TIER_WRITE)
 async def chat_with_agent(
+    request: Request,
     agent_id: int,
     data: ChatRequest,
     registry: AgentRegistry = Depends(get_agent_registry),
@@ -416,7 +422,9 @@ async def chat_with_agent(
 
 
 @router.get("/{agent_id}/status")
+@limiter.limit(TIER_READ)
 async def get_agent_status(
+    request: Request,
     agent_id: int,
     registry: AgentRegistry = Depends(get_agent_registry),
 ) -> dict:
@@ -436,7 +444,9 @@ async def get_agent_status(
 
 
 @router.post("/{agent_id}/memories", response_model=MemoryResponse, status_code=status.HTTP_201_CREATED)
+@limiter.limit(TIER_WRITE)
 async def create_memory(
+    request: Request,
     agent_id: int,
     data: MemoryCreate,
     registry: AgentRegistry = Depends(get_agent_registry),
@@ -463,7 +473,9 @@ async def create_memory(
 
 
 @router.post("/{agent_id}/memories/recall", response_model=RecallResponse)
+@limiter.limit(TIER_WRITE)
 async def recall_memories(
+    request: Request,
     agent_id: int,
     data: RecallRequest,
     registry: AgentRegistry = Depends(get_agent_registry),
@@ -493,7 +505,9 @@ async def recall_memories(
 
 
 @router.post("/{agent_id}/session/track-file")
+@limiter.limit(TIER_WRITE)
 async def track_file(
+    request: Request,
     agent_id: int,
     file_path: str,
     registry: AgentRegistry = Depends(get_agent_registry),
@@ -511,7 +525,9 @@ async def track_file(
 
 
 @router.post("/{agent_id}/session/set-task")
+@limiter.limit(TIER_WRITE)
 async def set_current_task(
+    request: Request,
     agent_id: int,
     task_id: int,
     title: str,
@@ -531,7 +547,9 @@ async def set_current_task(
 
 
 @router.delete("/{agent_id}/session/task")
+@limiter.limit(TIER_WRITE)
 async def clear_current_task(
+    request: Request,
     agent_id: int,
     registry: AgentRegistry = Depends(get_agent_registry),
 ):
@@ -553,7 +571,9 @@ async def clear_current_task(
 
 
 @router.get("/{agent_id}/skills")
+@limiter.limit(TIER_READ)
 async def get_agent_skills(
+    request: Request,
     agent_id: int,
     registry: AgentRegistry = Depends(get_agent_registry),
     db: DatabaseService = Depends(get_database_service),
@@ -611,7 +631,9 @@ async def get_agent_skills(
 
 
 @router.put("/{agent_id}/skills")
+@limiter.limit(TIER_WRITE)
 async def update_agent_skills(
+    request: Request,
     agent_id: int,
     skills: List[str],
     registry: AgentRegistry = Depends(get_agent_registry),
@@ -687,7 +709,9 @@ async def update_agent_skills(
 
 
 @router.post("/{agent_id}/skills/{skill_name}")
+@limiter.limit(TIER_WRITE)
 async def add_agent_skill(
+    request: Request,
     agent_id: int,
     skill_name: str,
     registry: AgentRegistry = Depends(get_agent_registry),
@@ -755,7 +779,9 @@ async def add_agent_skill(
 
 
 @router.delete("/{agent_id}/skills/{skill_name}")
+@limiter.limit(TIER_WRITE)
 async def remove_agent_skill(
+    request: Request,
     agent_id: int,
     skill_name: str,
     registry: AgentRegistry = Depends(get_agent_registry),

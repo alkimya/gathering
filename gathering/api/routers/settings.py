@@ -7,6 +7,9 @@ import os
 from typing import Optional, List, Dict
 from pathlib import Path
 from fastapi import APIRouter, HTTPException, Depends
+from starlette.requests import Request
+
+from gathering.api.rate_limit import limiter, TIER_READ, TIER_WRITE
 from pydantic import BaseModel, Field
 
 from gathering.api.dependencies import get_database_service, DatabaseService
@@ -197,7 +200,8 @@ def get_pg_extensions(db: DatabaseService) -> List[str]:
 
 
 @router.get("", response_model=AllSettings)
-async def get_settings(db: DatabaseService = Depends(get_database_service)):
+@limiter.limit(TIER_READ)
+async def get_settings(request: Request, db: DatabaseService = Depends(get_database_service)):
     """Get all application settings."""
     # Read env file to ensure it's valid (used for validation)
     _ = read_env_file()
@@ -261,7 +265,9 @@ async def get_settings(db: DatabaseService = Depends(get_database_service)):
 
 
 @router.patch("/providers/{provider}", response_model=ProviderSettings)
+@limiter.limit(TIER_WRITE)
 async def update_provider(
+    request: Request,
     provider: str,
     data: ProviderUpdate,
     db: DatabaseService = Depends(get_database_service)
@@ -301,7 +307,8 @@ async def update_provider(
 
 
 @router.patch("/application", response_model=ApplicationSettings)
-async def update_application(data: ApplicationUpdate):
+@limiter.limit(TIER_WRITE)
+async def update_application(request: Request, data: ApplicationUpdate):
     """Update application settings."""
     updates = {}
 
@@ -324,7 +331,9 @@ async def update_application(data: ApplicationUpdate):
 
 
 @router.patch("/database", response_model=DatabaseSettings)
+@limiter.limit(TIER_WRITE)
 async def update_database(
+    request: Request,
     data: DatabaseUpdate,
     db: DatabaseService = Depends(get_database_service)
 ):
@@ -356,7 +365,8 @@ async def update_database(
 
 
 @router.post("/providers/{provider}/test")
-async def test_provider(provider: str):
+@limiter.limit(TIER_WRITE)
+async def test_provider(request: Request, provider: str):
     """Test connection to a provider."""
     valid_providers = ["anthropic", "openai", "deepseek", "mistral", "google", "ollama"]
     if provider not in valid_providers:

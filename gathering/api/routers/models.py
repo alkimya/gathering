@@ -5,6 +5,9 @@ Uses PostgreSQL database via DatabaseService.
 
 from typing import Optional, List
 from fastapi import APIRouter, HTTPException, Depends
+from starlette.requests import Request
+
+from gathering.api.rate_limit import limiter, TIER_READ, TIER_WRITE
 from pydantic import BaseModel, Field
 
 from gathering.api.dependencies import get_database_service, DatabaseService
@@ -144,7 +147,8 @@ def _serialize_row(row: dict) -> dict:
 # =============================================================================
 
 @router.get("/providers", response_model=dict)
-async def list_providers(db: AsyncDatabaseService = Depends(get_async_db)):
+@limiter.limit(TIER_READ)
+async def list_providers(request: Request, db: AsyncDatabaseService = Depends(get_async_db)):
     """List all providers from database.
 
     Uses AsyncDatabaseService for non-blocking DB access.
@@ -162,7 +166,8 @@ async def list_providers(db: AsyncDatabaseService = Depends(get_async_db)):
 
 
 @router.get("/providers/{provider_id}", response_model=dict)
-async def get_provider(provider_id: int, db: AsyncDatabaseService = Depends(get_async_db)):
+@limiter.limit(TIER_READ)
+async def get_provider(request: Request, provider_id: int, db: AsyncDatabaseService = Depends(get_async_db)):
     """Get a specific provider.
 
     Uses AsyncDatabaseService for non-blocking DB access.
@@ -177,7 +182,8 @@ async def get_provider(provider_id: int, db: AsyncDatabaseService = Depends(get_
 
 
 @router.post("/providers", response_model=dict, status_code=201)
-async def create_provider(data: ProviderCreate, db: DatabaseService = Depends(get_database_service)):
+@limiter.limit(TIER_WRITE)
+async def create_provider(request: Request, data: ProviderCreate, db: DatabaseService = Depends(get_database_service)):
     """Create a new provider."""
     # Check for duplicate name
     existing = db.execute_one(
@@ -201,7 +207,8 @@ async def create_provider(data: ProviderCreate, db: DatabaseService = Depends(ge
 
 
 @router.delete("/providers/{provider_id}", status_code=204)
-async def delete_provider(provider_id: int, db: DatabaseService = Depends(get_database_service)):
+@limiter.limit(TIER_WRITE)
+async def delete_provider(request: Request, provider_id: int, db: DatabaseService = Depends(get_database_service)):
     """Delete a provider."""
     db.execute(
         "DELETE FROM agent.providers WHERE id = %(id)s",
@@ -214,7 +221,9 @@ async def delete_provider(provider_id: int, db: DatabaseService = Depends(get_da
 # =============================================================================
 
 @router.get("/models", response_model=dict)
+@limiter.limit(TIER_READ)
 async def list_models(
+    request: Request,
     provider_id: Optional[int] = None,
     include_deprecated: bool = False,
     db: DatabaseService = Depends(get_database_service),
@@ -226,7 +235,8 @@ async def list_models(
 
 
 @router.get("/models/{model_id}", response_model=dict)
-async def get_model(model_id: int, db: DatabaseService = Depends(get_database_service)):
+@limiter.limit(TIER_READ)
+async def get_model(request: Request, model_id: int, db: DatabaseService = Depends(get_database_service)):
     """Get a specific model."""
     model = db.get_model(model_id)
     if not model:
@@ -235,7 +245,8 @@ async def get_model(model_id: int, db: DatabaseService = Depends(get_database_se
 
 
 @router.post("/models", response_model=dict, status_code=201)
-async def create_model(data: ModelCreate, db: DatabaseService = Depends(get_database_service)):
+@limiter.limit(TIER_WRITE)
+async def create_model(request: Request, data: ModelCreate, db: DatabaseService = Depends(get_database_service)):
     """Create a new model."""
     # Check provider exists
     provider = db.get_provider(data.provider_id)
@@ -277,7 +288,8 @@ async def create_model(data: ModelCreate, db: DatabaseService = Depends(get_data
 
 
 @router.patch("/models/{model_id}", response_model=dict)
-async def update_model(model_id: int, data: ModelUpdate, db: DatabaseService = Depends(get_database_service)):
+@limiter.limit(TIER_WRITE)
+async def update_model(request: Request, model_id: int, data: ModelUpdate, db: DatabaseService = Depends(get_database_service)):
     """Update a model."""
     # Build SET clause dynamically
     updates = []
@@ -317,7 +329,8 @@ async def update_model(model_id: int, data: ModelUpdate, db: DatabaseService = D
 
 
 @router.delete("/models/{model_id}", status_code=204)
-async def delete_model(model_id: int, db: DatabaseService = Depends(get_database_service)):
+@limiter.limit(TIER_WRITE)
+async def delete_model(request: Request, model_id: int, db: DatabaseService = Depends(get_database_service)):
     """Delete a model."""
     db.execute(
         "DELETE FROM agent.models WHERE id = %(id)s",
@@ -330,7 +343,8 @@ async def delete_model(model_id: int, db: DatabaseService = Depends(get_database
 # =============================================================================
 
 @router.get("/personas", response_model=dict)
-async def list_personas(db: DatabaseService = Depends(get_database_service)):
+@limiter.limit(TIER_READ)
+async def list_personas(request: Request, db: DatabaseService = Depends(get_database_service)):
     """List all personas from database."""
     personas = db.get_personas()
     personas = [_serialize_row(p) for p in personas]
@@ -338,7 +352,8 @@ async def list_personas(db: DatabaseService = Depends(get_database_service)):
 
 
 @router.get("/personas/{persona_id}", response_model=dict)
-async def get_persona(persona_id: int, db: DatabaseService = Depends(get_database_service)):
+@limiter.limit(TIER_READ)
+async def get_persona(request: Request, persona_id: int, db: DatabaseService = Depends(get_database_service)):
     """Get a specific persona."""
     persona = db.get_persona(persona_id)
     if not persona:
@@ -347,7 +362,8 @@ async def get_persona(persona_id: int, db: DatabaseService = Depends(get_databas
 
 
 @router.post("/personas", response_model=dict, status_code=201)
-async def create_persona(data: PersonaCreate, db: DatabaseService = Depends(get_database_service)):
+@limiter.limit(TIER_WRITE)
+async def create_persona(request: Request, data: PersonaCreate, db: DatabaseService = Depends(get_database_service)):
     """Create a new persona."""
     result = db.execute_one("""
         INSERT INTO agent.personas (
@@ -377,7 +393,8 @@ async def create_persona(data: PersonaCreate, db: DatabaseService = Depends(get_
 
 
 @router.patch("/personas/{persona_id}", response_model=dict)
-async def update_persona(persona_id: int, data: PersonaUpdate, db: DatabaseService = Depends(get_database_service)):
+@limiter.limit(TIER_WRITE)
+async def update_persona(request: Request, persona_id: int, data: PersonaUpdate, db: DatabaseService = Depends(get_database_service)):
     """Update a persona."""
     updates = []
     params = {'id': persona_id}
@@ -409,7 +426,8 @@ async def update_persona(persona_id: int, data: PersonaUpdate, db: DatabaseServi
 
 
 @router.delete("/personas/{persona_id}", status_code=204)
-async def delete_persona(persona_id: int, db: DatabaseService = Depends(get_database_service)):
+@limiter.limit(TIER_WRITE)
+async def delete_persona(request: Request, persona_id: int, db: DatabaseService = Depends(get_database_service)):
     """Delete a persona."""
     # Check if builtin
     persona = db.get_persona(persona_id)
@@ -427,7 +445,8 @@ async def delete_persona(persona_id: int, db: DatabaseService = Depends(get_data
 # =============================================================================
 
 @router.get("/agents-db", response_model=dict)
-async def list_agents_from_db(db: DatabaseService = Depends(get_database_service)):
+@limiter.limit(TIER_READ)
+async def list_agents_from_db(request: Request, db: DatabaseService = Depends(get_database_service)):
     """List all agents from database (via agent_dashboard view)."""
     agents = db.get_agents()
     agents = [_serialize_row(a) for a in agents]
@@ -435,7 +454,8 @@ async def list_agents_from_db(db: DatabaseService = Depends(get_database_service
 
 
 @router.get("/agents-db/{agent_id}", response_model=dict)
-async def get_agent_from_db(agent_id: int, db: DatabaseService = Depends(get_database_service)):
+@limiter.limit(TIER_READ)
+async def get_agent_from_db(request: Request, agent_id: int, db: DatabaseService = Depends(get_database_service)):
     """Get a specific agent from database."""
     agent = db.get_agent(agent_id)
     if not agent:

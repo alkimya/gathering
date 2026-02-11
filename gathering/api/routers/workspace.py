@@ -6,6 +6,9 @@ git integration, and activity tracking.
 """
 
 from fastapi import APIRouter, HTTPException, Query, Body
+from starlette.requests import Request
+
+from gathering.api.rate_limit import limiter, TIER_READ, TIER_WRITE
 from fastapi.responses import Response
 from pydantic import BaseModel
 from typing import List, Dict, Any, Optional
@@ -177,7 +180,9 @@ class ActivityRequest(BaseModel):
 
 
 @router.get("/{project_id}/info")
+@limiter.limit(TIER_READ)
 async def get_workspace_info(
+    request: Request,
     project_id: int,
 ):
     """
@@ -209,7 +214,9 @@ async def get_workspace_info(
 
 
 @router.get("/{project_id}/files")
+@limiter.limit(TIER_READ)
 async def list_files(
+    request: Request,
     project_id: int,
     include_git_status: bool = Query(default=True),
     max_depth: int = Query(default=10),
@@ -245,7 +252,9 @@ async def list_files(
 
 
 @router.get("/{project_id}/file")
+@limiter.limit(TIER_READ)
 async def read_file(
+    request: Request,
     project_id: int,
     path: str = Query(..., description="Relative path to file"),
 ):
@@ -268,7 +277,9 @@ async def read_file(
 
 
 @router.get("/{project_id}/file/raw")
+@limiter.limit(TIER_READ)
 async def read_file_raw(
+    request: Request,
     project_id: int,
     path: str = Query(..., description="Relative path to file"),
 ):
@@ -320,10 +331,12 @@ async def read_file_raw(
 
 
 @router.put("/{project_id}/file")
+@limiter.limit(TIER_WRITE)
 async def write_file(
+    request: Request,
     project_id: int,
     path: str = Query(..., description="Relative path to file"),
-    request: WriteFileRequest = None,
+    write_request: WriteFileRequest = None,
 ):
     """Write or update a file."""
     project_path = get_project_path(project_id)
@@ -332,8 +345,8 @@ async def write_file(
         result = FileManager.write_file(
             project_path,
             path,
-            request.content,
-            create_backup=request.create_backup,
+            write_request.content,
+            create_backup=write_request.create_backup,
         )
         return result
     except ValueError as e:
@@ -347,7 +360,9 @@ async def write_file(
 
 
 @router.delete("/{project_id}/file")
+@limiter.limit(TIER_WRITE)
 async def delete_file(
+    request: Request,
     project_id: int,
     path: str = Query(..., description="Relative path to file"),
 ):
@@ -375,7 +390,9 @@ async def delete_file(
 
 
 @router.get("/{project_id}/git/status")
+@limiter.limit(TIER_READ)
 async def get_git_status(
+    request: Request,
     project_id: int,
 ):
     """Get git status with Redis caching."""
@@ -408,7 +425,9 @@ async def get_git_status(
 
 
 @router.get("/{project_id}/git/commits")
+@limiter.limit(TIER_READ)
 async def get_commits(
+    request: Request,
     project_id: int,
     limit: int = Query(default=50, le=200),
     branch: Optional[str] = None,
@@ -446,7 +465,9 @@ async def get_commits(
 
 
 @router.get("/{project_id}/git/diff")
+@limiter.limit(TIER_READ)
 async def get_diff(
+    request: Request,
     project_id: int,
     commit: Optional[str] = None,
     file_path: Optional[str] = None,
@@ -465,7 +486,9 @@ async def get_diff(
 
 
 @router.get("/{project_id}/git/branches")
+@limiter.limit(TIER_READ)
 async def get_branches(
+    request: Request,
     project_id: int,
 ):
     """Get list of branches."""
@@ -482,7 +505,9 @@ async def get_branches(
 
 
 @router.get("/{project_id}/git/file-history")
+@limiter.limit(TIER_READ)
 async def get_file_history(
+    request: Request,
     project_id: int,
     file_path: str = Query(...),
     limit: int = Query(default=50),
@@ -501,7 +526,9 @@ async def get_file_history(
 
 
 @router.post("/{project_id}/git/stage")
+@limiter.limit(TIER_WRITE)
 async def stage_files(
+    request: Request,
     project_id: int,
     files: List[str] = Body(..., description="List of file paths to stage"),
 ):
@@ -531,7 +558,9 @@ async def stage_files(
 
 
 @router.post("/{project_id}/git/unstage")
+@limiter.limit(TIER_WRITE)
 async def unstage_files(
+    request: Request,
     project_id: int,
     files: List[str] = Body(..., description="List of file paths to unstage"),
 ):
@@ -561,7 +590,9 @@ async def unstage_files(
 
 
 @router.post("/{project_id}/git/commit")
+@limiter.limit(TIER_WRITE)
 async def create_commit(
+    request: Request,
     project_id: int,
     message: str = Body(..., description="Commit message"),
     author_name: Optional[str] = Body(None, description="Author name"),
@@ -595,7 +626,9 @@ async def create_commit(
 
 
 @router.post("/{project_id}/git/push")
+@limiter.limit(TIER_WRITE)
 async def push_to_remote(
+    request: Request,
     project_id: int,
     remote: str = Body(default="origin", description="Remote name"),
     branch: Optional[str] = Body(None, description="Branch name"),
@@ -629,7 +662,9 @@ async def push_to_remote(
 
 
 @router.post("/{project_id}/git/pull")
+@limiter.limit(TIER_WRITE)
 async def pull_from_remote(
+    request: Request,
     project_id: int,
     remote: str = Body(default="origin", description="Remote name"),
     branch: Optional[str] = Body(None, description="Branch name"),
@@ -665,7 +700,9 @@ async def pull_from_remote(
 
 
 @router.get("/{project_id}/activities")
+@limiter.limit(TIER_READ)
 async def get_activities(
+    request: Request,
     project_id: int,
     limit: int = Query(default=50),
     agent_id: Optional[int] = None,
@@ -695,26 +732,28 @@ async def get_activities(
 
 
 @router.post("/{project_id}/activities")
+@limiter.limit(TIER_WRITE)
 async def track_activity(
+    request: Request,
     project_id: int,
-    request: ActivityRequest,
+    activity_request: ActivityRequest,
 ):
     """Track a new activity."""
     try:
         # Convert activity_type string to enum
         try:
-            activity_type = ActivityType(request.activity_type)
+            activity_type = ActivityType(activity_request.activity_type)
         except ValueError:
             raise HTTPException(
                 status_code=400,
-                detail=f"Invalid activity type: {request.activity_type}",
+                detail=f"Invalid activity type: {activity_request.activity_type}",
             )
 
         activity = activity_tracker.track_activity(
             project_id,
-            request.agent_id,
+            activity_request.agent_id,
             activity_type,
-            request.details,
+            activity_request.details,
         )
 
         return activity
@@ -728,7 +767,8 @@ async def track_activity(
 
 
 @router.get("/{project_id}/activities/stats")
-async def get_activity_stats(project_id: int):
+@limiter.limit(TIER_READ)
+async def get_activity_stats(request: Request, project_id: int):
     """Get activity statistics."""
     try:
         stats = activity_tracker.get_stats(project_id)
@@ -753,9 +793,11 @@ class PythonExecutionRequest(BaseModel):
 
 
 @router.post("/{project_id}/run-python")
+@limiter.limit(TIER_WRITE)
 async def run_python_code(
+    request: Request,
     project_id: int,
-    request: PythonExecutionRequest,
+    exec_request: PythonExecutionRequest,
 ):
     """
     Execute Python code in a sandboxed environment.
@@ -778,7 +820,7 @@ async def run_python_code(
             dir=project_path,
             delete=False,
         ) as tmp_file:
-            tmp_file.write(request.code)
+            tmp_file.write(exec_request.code)
             tmp_path = tmp_file.name
 
         try:
@@ -833,7 +875,9 @@ async def run_python_code(
 
 
 @router.get("/{project_id}/git/graph")
+@limiter.limit(TIER_READ)
 async def get_git_graph(
+    request: Request,
     project_id: int,
     limit: int = Query(default=50, ge=1, le=200),
     all_branches: bool = Query(default=True),

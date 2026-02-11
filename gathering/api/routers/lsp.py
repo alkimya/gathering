@@ -5,6 +5,9 @@ Provides REST API for LSP features like autocomplete, diagnostics, hover, etc.
 """
 
 from fastapi import APIRouter, HTTPException, Query
+from starlette.requests import Request
+
+from gathering.api.rate_limit import limiter, TIER_READ, TIER_WRITE
 from pydantic import BaseModel
 from typing import Optional
 import logging
@@ -63,9 +66,11 @@ class DefinitionRequest(BaseModel):
 
 
 @router.post("/{project_id}/initialize")
+@limiter.limit(TIER_WRITE)
 async def initialize_lsp(
+    request: Request,
     project_id: int,
-    request: InitializeRequest
+    lsp_request: InitializeRequest
 ):
     """
     Initialize an LSP server for a project and language.
@@ -80,13 +85,13 @@ async def initialize_lsp(
     try:
         capabilities = await LSPManager.initialize_server(
             project_id=project_id,
-            language=request.language,
-            workspace_path=request.workspace_path
+            language=lsp_request.language,
+            workspace_path=lsp_request.workspace_path
         )
 
         return {
             "status": "initialized",
-            "language": request.language,
+            "language": lsp_request.language,
             "capabilities": capabilities
         }
 
@@ -98,9 +103,11 @@ async def initialize_lsp(
 
 
 @router.post("/{project_id}/completions")
+@limiter.limit(TIER_WRITE)
 async def get_completions(
+    request: Request,
     project_id: int,
-    request: CompletionRequest,
+    lsp_request: CompletionRequest,
     language: str = Query(default="python")
 ):
     """
@@ -118,10 +125,10 @@ async def get_completions(
         server = LSPManager.get_server(project_id, language)
 
         completions = await server.get_completions(
-            file_path=request.file_path,
-            line=request.line,
-            character=request.character,
-            content=request.content
+            file_path=lsp_lsp_lsp_lsp_request.file_path,
+            line=lsp_lsp_lsp_request.line,
+            character=lsp_lsp_lsp_request.character,
+            content=lsp_lsp_lsp_lsp_request.content
         )
 
         return {
@@ -135,9 +142,11 @@ async def get_completions(
 
 
 @router.post("/{project_id}/diagnostics")
+@limiter.limit(TIER_WRITE)
 async def get_diagnostics(
+    request: Request,
     project_id: int,
-    request: DiagnosticsRequest,
+    lsp_request: DiagnosticsRequest,
     language: str = Query(default="python")
 ):
     """
@@ -155,8 +164,8 @@ async def get_diagnostics(
         server = LSPManager.get_server(project_id, language)
 
         diagnostics = await server.get_diagnostics(
-            file_path=request.file_path,
-            content=request.content
+            file_path=lsp_lsp_lsp_lsp_request.file_path,
+            content=lsp_lsp_lsp_lsp_request.content
         )
 
         return {
@@ -170,9 +179,11 @@ async def get_diagnostics(
 
 
 @router.post("/{project_id}/hover")
+@limiter.limit(TIER_WRITE)
 async def get_hover(
+    request: Request,
     project_id: int,
-    request: HoverRequest,
+    lsp_request: HoverRequest,
     language: str = Query(default="python")
 ):
     """
@@ -190,10 +201,10 @@ async def get_hover(
         server = LSPManager.get_server(project_id, language)
 
         hover = await server.get_hover(
-            file_path=request.file_path,
-            line=request.line,
-            character=request.character,
-            content=request.content
+            file_path=lsp_lsp_lsp_lsp_request.file_path,
+            line=lsp_lsp_lsp_request.line,
+            character=lsp_lsp_lsp_request.character,
+            content=lsp_lsp_lsp_lsp_request.content
         )
 
         return hover if hover else {"contents": None}
@@ -204,9 +215,11 @@ async def get_hover(
 
 
 @router.post("/{project_id}/definition")
+@limiter.limit(TIER_WRITE)
 async def get_definition(
+    request: Request,
     project_id: int,
-    request: DefinitionRequest,
+    lsp_request: DefinitionRequest,
     language: str = Query(default="python")
 ):
     """
@@ -224,10 +237,10 @@ async def get_definition(
         server = LSPManager.get_server(project_id, language)
 
         definition = await server.get_definition(
-            file_path=request.file_path,
-            line=request.line,
-            character=request.character,
-            content=request.content
+            file_path=lsp_lsp_lsp_lsp_request.file_path,
+            line=lsp_lsp_lsp_request.line,
+            character=lsp_lsp_lsp_request.character,
+            content=lsp_lsp_lsp_lsp_request.content
         )
 
         return definition if definition else {"uri": None}
@@ -238,7 +251,9 @@ async def get_definition(
 
 
 @router.delete("/{project_id}/shutdown")
+@limiter.limit(TIER_WRITE)
 async def shutdown_lsp(
+    request: Request,
     project_id: int,
     language: str = Query(default="python")
 ):
@@ -267,7 +282,9 @@ async def shutdown_lsp(
 
 
 @router.get("/{project_id}/status")
+@limiter.limit(TIER_READ)
 async def get_lsp_status(
+    request: Request,
     project_id: int,
     language: str = Query(default="python")
 ):

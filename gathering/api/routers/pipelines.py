@@ -8,6 +8,9 @@ import json
 from typing import Optional, List
 from datetime import datetime
 from fastapi import APIRouter, HTTPException, Depends
+from starlette.requests import Request
+
+from gathering.api.rate_limit import limiter, TIER_READ, TIER_WRITE
 from pydantic import BaseModel, Field
 
 from gathering.api.dependencies import (
@@ -186,7 +189,9 @@ def _ensure_table_exists(db: DatabaseService):
 
 
 @router.get("", response_model=dict)
+@limiter.limit(TIER_READ)
 async def list_pipelines(
+    request: Request,
     status: Optional[str] = None,
     limit: int = 50,
     db: DatabaseService = Depends(get_database_service),
@@ -223,7 +228,9 @@ async def list_pipelines(
 
 
 @router.get("/{pipeline_id}", response_model=dict)
+@limiter.limit(TIER_READ)
 async def get_pipeline(
+    request: Request,
     pipeline_id: int,
     db: DatabaseService = Depends(get_database_service),
 ):
@@ -241,7 +248,9 @@ async def get_pipeline(
 
 
 @router.post("", response_model=dict, status_code=201)
+@limiter.limit(TIER_WRITE)
 async def create_pipeline(
+    request: Request,
     data: PipelineCreate,
     db: DatabaseService = Depends(get_database_service),
 ):
@@ -267,7 +276,9 @@ async def create_pipeline(
 
 
 @router.put("/{pipeline_id}", response_model=dict)
+@limiter.limit(TIER_WRITE)
 async def update_pipeline(
+    request: Request,
     pipeline_id: int,
     data: PipelineUpdate,
     db: DatabaseService = Depends(get_database_service),
@@ -325,7 +336,9 @@ async def update_pipeline(
 
 
 @router.delete("/{pipeline_id}", status_code=204)
+@limiter.limit(TIER_WRITE)
 async def delete_pipeline(
+    request: Request,
     pipeline_id: int,
     db: DatabaseService = Depends(get_database_service),
 ):
@@ -347,7 +360,9 @@ async def delete_pipeline(
 
 
 @router.post("/{pipeline_id}/toggle", response_model=dict)
+@limiter.limit(TIER_WRITE)
 async def toggle_pipeline(
+    request: Request,
     pipeline_id: int,
     db: DatabaseService = Depends(get_database_service),
 ):
@@ -378,7 +393,9 @@ async def toggle_pipeline(
 # =============================================================================
 
 @router.post("/{pipeline_id}/validate", response_model=dict)
+@limiter.limit(TIER_WRITE)
 async def validate_pipeline(
+    request: Request,
     pipeline_id: int,
     db: DatabaseService = Depends(get_database_service),
 ):
@@ -408,7 +425,9 @@ async def validate_pipeline(
 # =============================================================================
 
 @router.post("/{pipeline_id}/run", response_model=dict, status_code=201)
+@limiter.limit(TIER_WRITE)
 async def run_pipeline(
+    request: Request,
     pipeline_id: int,
     data: PipelineRunCreate = None,
     db: DatabaseService = Depends(get_database_service),
@@ -517,7 +536,9 @@ async def run_pipeline(
 
 
 @router.get("/{pipeline_id}/runs", response_model=dict)
+@limiter.limit(TIER_READ)
 async def list_pipeline_runs(
+    request: Request,
     pipeline_id: int,
     status: Optional[str] = None,
     limit: int = 20,
@@ -565,7 +586,9 @@ async def list_pipeline_runs(
 
 
 @router.get("/{pipeline_id}/runs/{run_id}", response_model=dict)
+@limiter.limit(TIER_READ)
 async def get_pipeline_run(
+    request: Request,
     pipeline_id: int,
     run_id: int,
     db: DatabaseService = Depends(get_database_service),
@@ -592,7 +615,9 @@ async def get_pipeline_run(
 
 
 @router.post("/{pipeline_id}/runs/{run_id}/cancel", response_model=dict)
+@limiter.limit(TIER_WRITE)
 async def cancel_pipeline_run(
+    request: Request,
     pipeline_id: int,
     run_id: int,
     db: DatabaseService = Depends(get_database_service),

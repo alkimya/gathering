@@ -5,6 +5,9 @@ Manages skills/tools assigned to agents.
 
 from typing import List, Optional
 from fastapi import APIRouter, HTTPException, Depends
+from starlette.requests import Request
+
+from gathering.api.rate_limit import limiter, TIER_READ, TIER_WRITE
 from pydantic import BaseModel, Field
 
 from gathering.api.dependencies import get_database_service, DatabaseService
@@ -70,7 +73,9 @@ router = APIRouter(prefix="/tools", tags=["tools"])
 
 
 @router.get("/skills", response_model=List[SkillInfo])
+@limiter.limit(TIER_READ)
 async def list_skills(
+    request: Request,
     category: Optional[str] = None,
     db: DatabaseService = Depends(get_database_service),
 ):
@@ -121,7 +126,8 @@ async def list_skills(
 
 
 @router.get("/skills/categories")
-async def list_skill_categories(db: DatabaseService = Depends(get_database_service)):
+@limiter.limit(TIER_READ)
+async def list_skill_categories(request: Request, db: DatabaseService = Depends(get_database_service)):
     """List all skill categories with counts."""
     rows = db.fetch_all("""
         SELECT category, COUNT(*) as count
@@ -135,7 +141,9 @@ async def list_skill_categories(db: DatabaseService = Depends(get_database_servi
 
 
 @router.get("/agents/{agent_id}", response_model=AgentToolsResponse)
+@limiter.limit(TIER_READ)
 async def get_agent_tools(
+    request: Request,
     agent_id: int,
     db: DatabaseService = Depends(get_database_service),
 ):
@@ -195,10 +203,12 @@ async def get_agent_tools(
 
 
 @router.patch("/agents/{agent_id}/skills/{skill_name}")
+@limiter.limit(TIER_WRITE)
 async def toggle_agent_tool(
+    request: Request,
     agent_id: int,
     skill_name: str,
-    request: ToolToggleRequest,
+    toggle_request: ToolToggleRequest,
     db: DatabaseService = Depends(get_database_service),
 ):
     """Enable or disable a tool for an agent."""
@@ -224,20 +234,22 @@ async def toggle_agent_tool(
         VALUES (%(agent_id)s, %(skill_id)s, %(is_enabled)s)
         ON CONFLICT (agent_id, skill_id)
         DO UPDATE SET is_enabled = %(is_enabled)s, updated_at = NOW()
-    """, {'agent_id': agent_id, 'skill_id': skill["id"], 'is_enabled': request.is_enabled})
+    """, {'agent_id': agent_id, 'skill_id': skill["id"], 'is_enabled': toggle_bulk_request.is_enabled})
 
     return {
         "agent_id": agent_id,
         "skill_name": skill_name,
-        "is_enabled": request.is_enabled,
-        "message": f"Tool '{skill_name}' {'enabled' if request.is_enabled else 'disabled'} for agent {agent_id}",
+        "is_enabled": toggle_bulk_request.is_enabled,
+        "message": f"Tool '{skill_name}' {'enabled' if toggle_bulk_request.is_enabled else 'disabled'} for agent {agent_id}",
     }
 
 
 @router.post("/agents/{agent_id}/skills/bulk")
+@limiter.limit(TIER_WRITE)
 async def bulk_toggle_tools(
+    request: Request,
     agent_id: int,
-    request: BulkToolsRequest,
+    bulk_request: BulkToolsRequest,
     db: DatabaseService = Depends(get_database_service),
 ):
     """Bulk enable or disable multiple tools for an agent."""
@@ -250,7 +262,7 @@ async def bulk_toggle_tools(
         raise HTTPException(status_code=404, detail=f"Agent {agent_id} not found")
 
     updated = 0
-    for skill_name in request.skill_names:
+    for skill_name in bulk_request.skill_names:
         skill = db.fetch_one(
             "SELECT id FROM agent.skills WHERE name = %(skill_name)s",
             {'skill_name': skill_name}
@@ -261,19 +273,21 @@ async def bulk_toggle_tools(
                 VALUES (%(agent_id)s, %(skill_id)s, %(is_enabled)s)
                 ON CONFLICT (agent_id, skill_id)
                 DO UPDATE SET is_enabled = %(is_enabled)s, updated_at = NOW()
-            """, {'agent_id': agent_id, 'skill_id': skill["id"], 'is_enabled': request.is_enabled})
+            """, {'agent_id': agent_id, 'skill_id': skill["id"], 'is_enabled': toggle_bulk_request.is_enabled})
             updated += 1
 
     return {
         "agent_id": agent_id,
         "updated_count": updated,
-        "is_enabled": request.is_enabled,
-        "message": f"{updated} tools {'enabled' if request.is_enabled else 'disabled'}",
+        "is_enabled": toggle_bulk_request.is_enabled,
+        "message": f"{updated} tools {'enabled' if toggle_bulk_request.is_enabled else 'disabled'}",
     }
 
 
 @router.post("/agents/{agent_id}/skills/enable-all")
+@limiter.limit(TIER_WRITE)
 async def enable_all_tools(
+    request: Request,
     agent_id: int,
     category: Optional[str] = None,
     db: DatabaseService = Depends(get_database_service),
@@ -313,7 +327,9 @@ async def enable_all_tools(
 
 
 @router.post("/agents/{agent_id}/skills/disable-all")
+@limiter.limit(TIER_WRITE)
 async def disable_all_tools(
+    request: Request,
     agent_id: int,
     category: Optional[str] = None,
     db: DatabaseService = Depends(get_database_service),
@@ -343,7 +359,9 @@ async def disable_all_tools(
 
 
 @router.get("/agents/{agent_id}/enabled")
+@limiter.limit(TIER_READ)
 async def get_enabled_tool_names(
+    request: Request,
     agent_id: int,
     db: DatabaseService = Depends(get_database_service),
 ):

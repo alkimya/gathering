@@ -13,6 +13,9 @@ Provides REST API endpoints for managing GatheRing plugins:
 from typing import List, Optional, Dict, Any
 from pathlib import Path
 from fastapi import APIRouter, HTTPException, status, Body
+from starlette.requests import Request
+
+from gathering.api.rate_limit import limiter, TIER_READ, TIER_WRITE
 from pydantic import BaseModel, Field
 
 from gathering.plugins import plugin_manager
@@ -172,7 +175,9 @@ class PluginStatsResponse(BaseModel):
 
 
 @router.get("", response_model=PluginListResponse)
+@limiter.limit(TIER_READ)
 async def list_plugins(
+    request: Request,
     status_filter: Optional[str] = None,
     include_available: bool = True,
 ):
@@ -212,19 +217,22 @@ async def list_plugins(
 
 
 @router.get("/available", response_model=List[str])
-async def list_available_plugins():
+@limiter.limit(TIER_READ)
+async def list_available_plugins(request: Request):
     """List available plugin IDs that can be loaded."""
     return plugin_manager.list_available_plugins()
 
 
 @router.get("/stats", response_model=PluginStatsResponse)
-async def get_plugin_stats():
+@limiter.limit(TIER_READ)
+async def get_plugin_stats(request: Request):
     """Get plugin manager statistics."""
     return PluginStatsResponse(**plugin_manager.get_stats())
 
 
 @router.get("/{plugin_id}", response_model=PluginInfo)
-async def get_plugin(plugin_id: str):
+@limiter.limit(TIER_READ)
+async def get_plugin(request: Request, plugin_id: str):
     """Get plugin information by ID."""
     plugin = plugin_manager.get_plugin(plugin_id)
     if not plugin:
@@ -237,7 +245,8 @@ async def get_plugin(plugin_id: str):
 
 
 @router.get("/{plugin_id}/health", response_model=PluginHealthResponse)
-async def check_plugin_health(plugin_id: str):
+@limiter.limit(TIER_READ)
+async def check_plugin_health(request: Request, plugin_id: str):
     """Check plugin health."""
     plugin = plugin_manager.get_plugin(plugin_id)
     if not plugin:
@@ -256,7 +265,8 @@ async def check_plugin_health(plugin_id: str):
 
 
 @router.get("/{plugin_id}/tools", response_model=List[ToolInfo])
-async def get_plugin_tools(plugin_id: str):
+@limiter.limit(TIER_READ)
+async def get_plugin_tools(request: Request, plugin_id: str):
     """Get tools provided by a plugin."""
     plugin = plugin_manager.get_plugin(plugin_id)
     if not plugin:
@@ -280,18 +290,19 @@ async def get_plugin_tools(plugin_id: str):
 
 
 @router.post("/load", response_model=PluginActionResponse)
-async def load_plugin(request: PluginLoadRequest):
+@limiter.limit(TIER_WRITE)
+async def load_plugin(request: Request, load_request: PluginLoadRequest):
     """
     Load a plugin.
 
     The plugin must be registered (either manually or via discovery).
     """
     try:
-        plugin_manager.load_plugin(request.plugin_id, config=request.config)
+        plugin_manager.load_plugin(load_create_request.plugin_id, config=load_create_request.config)
         return PluginActionResponse(
             success=True,
-            message=f"Plugin '{request.plugin_id}' loaded successfully",
-            plugin_id=request.plugin_id,
+            message=f"Plugin '{load_create_request.plugin_id}' loaded successfully",
+            plugin_id=load_create_request.plugin_id,
         )
     except ValueError as e:
         raise HTTPException(
@@ -306,7 +317,8 @@ async def load_plugin(request: PluginLoadRequest):
 
 
 @router.post("/{plugin_id}/unload", response_model=PluginActionResponse)
-async def unload_plugin(plugin_id: str):
+@limiter.limit(TIER_WRITE)
+async def unload_plugin(request: Request, plugin_id: str):
     """Unload a plugin."""
     try:
         plugin_manager.unload_plugin(plugin_id)
@@ -323,7 +335,8 @@ async def unload_plugin(plugin_id: str):
 
 
 @router.post("/{plugin_id}/enable", response_model=PluginActionResponse)
-async def enable_plugin(plugin_id: str):
+@limiter.limit(TIER_WRITE)
+async def enable_plugin(request: Request, plugin_id: str):
     """Enable a loaded plugin."""
     try:
         plugin_manager.enable_plugin(plugin_id)
@@ -340,7 +353,8 @@ async def enable_plugin(plugin_id: str):
 
 
 @router.post("/{plugin_id}/disable", response_model=PluginActionResponse)
-async def disable_plugin(plugin_id: str):
+@limiter.limit(TIER_WRITE)
+async def disable_plugin(request: Request, plugin_id: str):
     """Disable a loaded plugin."""
     try:
         plugin_manager.disable_plugin(plugin_id)
@@ -357,7 +371,8 @@ async def disable_plugin(plugin_id: str):
 
 
 @router.post("/discover", response_model=DiscoverPluginsResponse)
-async def discover_plugins(request: DiscoverPluginsRequest):
+@limiter.limit(TIER_WRITE)
+async def discover_plugins(request: Request, discover_request: DiscoverPluginsRequest):
     """
     Discover plugins in a directory.
 
@@ -365,11 +380,11 @@ async def discover_plugins(request: DiscoverPluginsRequest):
     Discovered plugins are registered but not loaded.
     """
     try:
-        path = Path(request.directory)
+        path = Path(discover_request.directory)
         if not path.exists():
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Directory does not exist: {request.directory}",
+                detail=f"Directory does not exist: {discover_request.directory}",
             )
 
         # Add directory and discover
@@ -391,7 +406,8 @@ async def discover_plugins(request: DiscoverPluginsRequest):
 
 
 @router.post("/dynamic", response_model=PluginInfo)
-async def create_dynamic_plugin(request: CreateDynamicPluginRequest):
+@limiter.limit(TIER_WRITE)
+async def create_dynamic_plugin(request: Request, create_request: CreateDynamicPluginRequest):
     """
     Create a dynamic plugin at runtime.
 
@@ -404,7 +420,7 @@ async def create_dynamic_plugin(request: CreateDynamicPluginRequest):
     try:
         # Convert tool configs to the format expected by create_dynamic_plugin
         tools = []
-        for tool_config in request.tools:
+        for tool_config in create_request.tools:
             # Compile the code to create the function
             # WARNING: This executes arbitrary code
             local_vars: Dict[str, Any] = {}
@@ -447,19 +463,19 @@ async def create_dynamic_plugin(request: CreateDynamicPluginRequest):
                 "prerequisites": c.prerequisites,
                 "capabilities": c.capabilities,
             }
-            for c in request.competencies
+            for c in create_request.competencies
         ]
 
         # Create the plugin
         plugin = plugin_manager.create_dynamic_plugin(
-            plugin_id=request.plugin_id,
-            name=request.name,
-            description=request.description,
-            version=request.version,
-            author=request.author,
+            plugin_id=load_create_request.plugin_id,
+            name=create_request.name,
+            description=create_request.description,
+            version=create_request.version,
+            author=create_request.author,
             tools=tools,
             competencies=competencies,
-            config=request.config,
+            config=load_create_request.config,
         )
 
         return PluginInfo(**plugin.get_info())
@@ -477,7 +493,9 @@ async def create_dynamic_plugin(request: CreateDynamicPluginRequest):
 
 
 @router.post("/{plugin_id}/save", response_model=PluginActionResponse)
+@limiter.limit(TIER_WRITE)
 async def save_dynamic_plugin(
+    request: Request,
     plugin_id: str,
     output_path: str = Body(..., embed=True),
 ):
@@ -506,7 +524,8 @@ async def save_dynamic_plugin(
 
 
 @router.get("/health/all", response_model=Dict[str, PluginHealthResponse])
-async def check_all_plugin_health():
+@limiter.limit(TIER_READ)
+async def check_all_plugin_health(request: Request):
     """Check health of all loaded plugins."""
     health_map = plugin_manager.health_check_all()
     return {

@@ -5,6 +5,9 @@ Manages hierarchical goal tracking and decomposition.
 
 from typing import Optional, List, Any, Dict
 from fastapi import APIRouter, HTTPException, Depends
+from starlette.requests import Request
+
+from gathering.api.rate_limit import limiter, TIER_READ, TIER_WRITE
 from pydantic import BaseModel, Field
 
 from gathering.api.dependencies import (
@@ -125,7 +128,9 @@ def _serialize_goal(goal: Goal) -> dict:
 
 
 @router.get("", response_model=dict)
+@limiter.limit(TIER_READ)
 async def list_goals(
+    request: Request,
     agent_id: Optional[int] = None,
     circle_id: Optional[int] = None,
     status: Optional[str] = None,
@@ -170,7 +175,9 @@ async def list_goals(
 
 
 @router.get("/{goal_id}", response_model=dict)
+@limiter.limit(TIER_READ)
 async def get_goal(
+    request: Request,
     goal_id: int,
     db: DatabaseService = Depends(get_database_service),
 ):
@@ -185,7 +192,9 @@ async def get_goal(
 
 
 @router.post("", response_model=dict, status_code=201)
+@limiter.limit(TIER_WRITE)
 async def create_goal(
+    request: Request,
     data: GoalCreate,
     db: DatabaseService = Depends(get_database_service),
 ):
@@ -229,7 +238,9 @@ async def create_goal(
 
 
 @router.patch("/{goal_id}", response_model=dict)
+@limiter.limit(TIER_WRITE)
 async def update_goal(
+    request: Request,
     goal_id: int,
     data: GoalUpdate,
     db: DatabaseService = Depends(get_database_service),
@@ -272,7 +283,9 @@ async def update_goal(
 
 
 @router.delete("/{goal_id}", status_code=204)
+@limiter.limit(TIER_WRITE)
 async def delete_goal(
+    request: Request,
     goal_id: int,
     db: DatabaseService = Depends(get_database_service),
 ):
@@ -300,7 +313,9 @@ async def delete_goal(
 # =============================================================================
 
 @router.post("/{goal_id}/start", response_model=dict)
+@limiter.limit(TIER_WRITE)
 async def start_goal(
+    request: Request,
     goal_id: int,
     db: DatabaseService = Depends(get_database_service),
 ):
@@ -323,7 +338,9 @@ async def start_goal(
 
 
 @router.post("/{goal_id}/complete", response_model=dict)
+@limiter.limit(TIER_WRITE)
 async def complete_goal(
+    request: Request,
     goal_id: int,
     result_summary: Optional[str] = None,
     db: DatabaseService = Depends(get_database_service),
@@ -340,7 +357,9 @@ async def complete_goal(
 
 
 @router.post("/{goal_id}/fail", response_model=dict)
+@limiter.limit(TIER_WRITE)
 async def fail_goal(
+    request: Request,
     goal_id: int,
     reason: str,
     lessons_learned: Optional[str] = None,
@@ -358,7 +377,9 @@ async def fail_goal(
 
 
 @router.post("/{goal_id}/pause", response_model=dict)
+@limiter.limit(TIER_WRITE)
 async def pause_goal(
+    request: Request,
     goal_id: int,
     reason: Optional[str] = None,
     db: DatabaseService = Depends(get_database_service),
@@ -375,7 +396,9 @@ async def pause_goal(
 
 
 @router.post("/{goal_id}/resume", response_model=dict)
+@limiter.limit(TIER_WRITE)
 async def resume_goal(
+    request: Request,
     goal_id: int,
     db: DatabaseService = Depends(get_database_service),
 ):
@@ -391,7 +414,9 @@ async def resume_goal(
 
 
 @router.post("/{goal_id}/progress", response_model=dict)
+@limiter.limit(TIER_WRITE)
 async def update_progress(
+    request: Request,
     goal_id: int,
     percent: int,
     message: Optional[str] = None,
@@ -413,7 +438,9 @@ async def update_progress(
 # =============================================================================
 
 @router.post("/{goal_id}/decompose", response_model=dict)
+@limiter.limit(TIER_WRITE)
 async def decompose_goal(
+    request: Request,
     goal_id: int,
     data: DecomposeRequest,
     db: DatabaseService = Depends(get_database_service),
@@ -459,7 +486,9 @@ async def decompose_goal(
 
 
 @router.get("/{goal_id}/subgoals", response_model=dict)
+@limiter.limit(TIER_READ)
 async def get_subgoals(
+    request: Request,
     goal_id: int,
     db: DatabaseService = Depends(get_database_service),
 ):
@@ -479,7 +508,9 @@ async def get_subgoals(
 
 
 @router.get("/{goal_id}/tree", response_model=dict)
+@limiter.limit(TIER_READ)
 async def get_goal_tree(
+    request: Request,
     goal_id: int,
     db: DatabaseService = Depends(get_database_service),
 ):
@@ -499,7 +530,9 @@ async def get_goal_tree(
 # =============================================================================
 
 @router.post("/{goal_id}/dependencies", response_model=dict)
+@limiter.limit(TIER_WRITE)
 async def add_dependency(
+    request: Request,
     goal_id: int,
     data: DependencyRequest,
     db: DatabaseService = Depends(get_database_service),
@@ -537,7 +570,9 @@ async def add_dependency(
 
 
 @router.delete("/{goal_id}/dependencies/{depends_on_id}", status_code=204)
+@limiter.limit(TIER_WRITE)
 async def remove_dependency(
+    request: Request,
     goal_id: int,
     depends_on_id: int,
     db: DatabaseService = Depends(get_database_service),
@@ -551,7 +586,9 @@ async def remove_dependency(
 
 
 @router.get("/{goal_id}/dependencies", response_model=dict)
+@limiter.limit(TIER_READ)
 async def get_dependencies(
+    request: Request,
     goal_id: int,
     db: DatabaseService = Depends(get_database_service),
 ):
@@ -571,7 +608,9 @@ async def get_dependencies(
 
 
 @router.get("/{goal_id}/dependents", response_model=dict)
+@limiter.limit(TIER_READ)
 async def get_dependents(
+    request: Request,
     goal_id: int,
     db: DatabaseService = Depends(get_database_service),
 ):
@@ -595,7 +634,9 @@ async def get_dependents(
 # =============================================================================
 
 @router.get("/{goal_id}/activities", response_model=dict)
+@limiter.limit(TIER_READ)
 async def get_goal_activities(
+    request: Request,
     goal_id: int,
     limit: int = 50,
     offset: int = 0,
